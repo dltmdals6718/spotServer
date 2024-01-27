@@ -69,6 +69,10 @@ public class MemberService {
         return member;
     }
 
+    public void deleteMemberById(Long memberId) {
+        memberRepository.deleteById(memberId);
+    }
+
     public boolean existLoginId(String loginId) {
         return memberRepository.existsByLoginId(loginId);
     }
