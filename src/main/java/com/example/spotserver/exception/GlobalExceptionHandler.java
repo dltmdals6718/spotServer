@@ -1,6 +1,5 @@
 package com.example.spotserver.exception;
 
-import com.example.spotserver.domain.ApiResponse;
 import com.example.spotserver.domain.ErrorResponse;
 import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;

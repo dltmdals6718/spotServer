@@ -1,6 +1,5 @@
 package com.example.spotserver.controller;
 
-import com.example.spotserver.domain.ApiResponse;
 import com.example.spotserver.domain.LocationImage;
 import com.example.spotserver.domain.PosterImage;
 import com.example.spotserver.domain.ImageStore;

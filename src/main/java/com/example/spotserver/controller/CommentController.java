@@ -1,6 +1,5 @@
 package com.example.spotserver.controller;
 
-import com.example.spotserver.domain.ApiResponse;
 import com.example.spotserver.domain.Comment;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.Poster;

@@ -51,7 +51,6 @@ public class MemberController {
     @PostMapping("/signin")
     public ResponseEntity<Map> signinMember(@Valid @RequestBody SignInMember signInMember) throws LoginFailException {
 
-        ApiResponse apiResponse = new ApiResponse();
 
         String loginId = signInMember.getLoginId();
         String loginPwd = signInMember.getLoginPwd();
