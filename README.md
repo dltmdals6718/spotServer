@@ -477,8 +477,8 @@ Content-Type : multipart/form-data
 </table>
 
 ### 1. 요청
-##### 1.1 전체 게시글 조회
-#### 쿼리 파라미터
+#### 1.1 전체 게시글 조회
+##### 쿼리 파라미터
 
 <table>
     <thead>
@@ -511,8 +511,8 @@ Content-Type : multipart/form-data
     </tbody>
 </table>
 
-##### 1.2 게시글 작성
-#### 헤더
+#### 1.2 게시글 작성
+##### 헤더
 
 <table>
     <thead>
@@ -536,7 +536,7 @@ Content-Type : multipart/form-data
     </tbody>
 </table>
 
-#### 본문
+##### 본문
 
 <table>
     <thead>
@@ -591,7 +591,7 @@ PosterRequest
 
 
 ### 2. 응답
-##### 2.1 전체 게시글 조회
+#### 2.1 전체 게시글 조회
 
 <table>
     <thead>
