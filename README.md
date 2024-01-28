@@ -260,7 +260,7 @@ Authorization : Bearer AaA.bBb.CcC
     <tbody>
         <tr>
             <td>GET</td>
-            <td>/locations?latitude={latitude값}&longitude={longitude값}</td>
+            <td>/locations<br>?latitude={위도값}<br>&longitude={경도값}</td>
             <td></td>
 <td>
 
@@ -298,7 +298,8 @@ Authorization : Bearer AaA.bBb.CcC
 Content-Type : multipart/form-data
 
 이름 : locationRequest <br>
-설명 : 장소 정보
+설명 : 장소 정보 <br>
+필수 : O
 
 ```json
 {
@@ -374,7 +375,8 @@ Content-Type : multipart/form-data
 Content-Type : multipart/form-data
 
 이름 : posterRequest <br>
-설명 : 게시글 내용
+설명 : 게시글 내용 <br>
+필수 : O
 
 ```json
 {
@@ -407,28 +409,44 @@ Content-Type : multipart/form-data
 
   <tr>
     <td>GET</td>
-    <td>/locations/{locationId}/posters</td>
+    <td>/locations/{locationId}/posters<br>?page={페이지번호}<br>&size={페이지크기}<br>&sort={정렬방법}</td>
 <td>
 </td>
 <td>
 
 ```json
-[
-  {
-    "posterId": 10,
-    "writerId": 1,
-    "title": "title3",
-    "content": "content3",
-    "regDate": "2024-01-24T14:24:17"
-  },
-  {
-    "posterId": 11,
-    "writerId": 1,
-    "title": "title4",
-    "content": "content4",
-    "regDate": "2024-01-24T14:25:40"
+{
+  "results": [
+    {
+      "posterId": 43,
+      "writerId": 126,
+      "title": "HAHA",
+      "content": "HOHO",
+      "regDate": "2024-01-28T18:16:28"
+    },
+    {
+      "posterId": 42,
+      "writerId": 126,
+      "title": "HAHA",
+      "content": "HOHO",
+      "regDate": "2024-01-28T16:42:08"
+    },
+    {
+      "posterId": 41,
+      "writerId": 126,
+      "title": "HAHA",
+      "content": "HOHO",
+      "regDate": "2024-01-28T15:57:50"
+    }
+  ],
+  "pageInfo": {
+    "page": 1,
+    "size": 3,
+    "numberOfElements": 3,
+    "totalElements": 13,
+    "totalPage": 5
   }
-]
+}
 ```
 
 </td>
@@ -456,6 +474,221 @@ Content-Type : multipart/form-data
     <td>특정 게시글 조회</td>
   </tr>
 
+</table>
+
+### 1. 요청
+##### 1.1 전체 게시글 조회
+#### 쿼리 파라미터
+
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+            <th>필수</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>page</td>
+            <td>int</td>
+            <td>요청할 페이지 번호<br>(최소:1, 기본값:1)</td>
+            <td>X</td>
+        </tr>
+        <tr>
+            <td>size</td>
+            <td>int</td>
+            <td>한 페이지에 담길 최대 데이터 개수<br>(최소:1, 최대:30, 기본값:10)</td>
+            <td>X</td>
+        </tr>
+        <tr>
+            <td>sort</td>
+            <td>String</td>
+            <td>데이터 정렬 방식으로 다음중 하나를 값으로 갖는다.<br>recent: 최신순<br>(기본값: recent)</td>
+            <td>X</td>
+        </tr>
+    </tbody>
+</table>
+
+##### 1.2 게시글 작성
+#### 헤더
+
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>설명</th>
+            <th>필수</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Authorization</td>
+            <td>사용자 인증 수단으로 토큰 값을 쓴다.<br>Authorization: Bearer {tokenString} </td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>Content-Type</td>
+            <td>Multipart/form-data</td>
+            <td>O</td>
+        </tr>
+    </tbody>
+</table>
+
+#### 본문
+
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+            <th>필수</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>posterRequest</td>
+            <td>PosterRequest(application/json)</td>
+            <td>게시글 작성 정보</td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>files</td>
+            <td>File</td>
+            <td>첨부 이미지 파일<br>multipart 형식으로 전송해야합니다.</td>
+            <td>X</td>
+        </tr>
+    </tbody>
+</table>
+
+PosterRequest
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+            <th>필수</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>title</td>
+            <td>String</td>
+            <td>게시글 제목</td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>content</td>
+            <td>String</td>
+            <td>게시글 내용</td>
+            <td>O</td>
+        </tr>
+    </tbody>
+</table>
+
+
+### 2. 응답
+##### 2.1 전체 게시글 조회
+
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>results</td>
+            <td>List&lt;Results&gt</td>
+            <td>요청한 페이징된 정보</td>
+        </tr>
+        <tr>
+            <td>pageInfo</td>
+            <td>PageInfo</td>
+            <td>페이징 정보</td>
+        </tr>
+    </tbody>
+</table>
+
+Results
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>posterId</td>
+            <td>Long</td>
+            <td>게시글ID 값</td>
+        </tr>
+        <tr>
+            <td>writerId</td>
+            <td>Long</td>
+            <td>작성자ID 값</td>
+        </tr>
+        <tr>
+            <td>title</td>
+            <td>String</td>
+            <td>제목</td>
+        </tr>
+        <tr>
+            <td>content</td>
+            <td>String</td>
+            <td>내용</td>
+        </tr>
+        <tr>
+            <td>regDate</td>
+            <td>String</td>
+            <td>작성일</td>
+        </tr>
+    </tbody>
+</table>
+
+PageInfo
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>page</td>
+            <td>int</td>
+            <td>페이지 번호</td>
+        </tr>
+        <tr>
+            <td>size</td>
+            <td>int</td>
+            <td>페이지 크기</td>
+        </tr>
+        <tr>
+            <td>numberOfElements</td>
+            <td>int</td>
+            <td>현재 페이지의 요소 개수</td>
+        </tr>
+        <tr>
+            <td>totalElements</td>
+            <td>Long</td>
+            <td>전체 요소 개수</td>
+        </tr>
+        <tr>
+            <td>totalPage</td>
+            <td>int</td>
+            <td>전체 페이지 개수</td>
+        </tr>
+    </tbody>
 </table>
 
 

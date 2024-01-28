@@ -1,7 +1,6 @@
 package com.example.spotserver.exception;
 
 import com.example.spotserver.domain.ErrorResponse;
-import org.springframework.data.crossstore.ChangeSetPersister;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.HttpMediaTypeException;
@@ -42,10 +41,5 @@ public class GlobalExceptionHandler {
         return ResponseEntity
                 .status(HttpStatus.NOT_FOUND)
                 .body(errorResponse);
-    }
-
-    @ExceptionHandler({Exception.class})
-    public String unExpectException(Exception e) {
-        return e.getMessage();
     }
 }

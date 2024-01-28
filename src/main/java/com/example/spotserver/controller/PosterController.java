@@ -1,13 +1,16 @@
 package com.example.spotserver.controller;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.PosterPageRequest;
 import com.example.spotserver.dto.request.PosterRequest;
+import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.service.ImageFileService;
 import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.PosterService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -63,19 +66,19 @@ public class PosterController {
     }
 
     @GetMapping("/locations/{locationId}/posters")
-    public ResponseEntity<List<PosterResponse>> getLocationPosters(@PathVariable Long locationId) {
+    public ResponseEntity<PageResponse<List<PosterResponse>>> getLocationPosters(@PathVariable Long locationId,
+                                                                                 @Valid @ModelAttribute PosterPageRequest posterPageRequest) {
+
+        //요청 파라미터로 들어온 이름, 나이를 객체를 생성하여 값을 넣어주는 과정을 거친다.
+        //위의 과정을 스프링 @ModelAttribute로 자동화 할 수 있다.
+        PageRequest pageRequest = posterPageRequest.makePageRequest();
 
         Location location = locationService.getLocation(locationId);
-        List<Poster> posters = posterService.getLocationPosters(location);
-
-        List<PosterResponse> posterResponseList = new ArrayList<>();
-        for (Poster poster : posters) {
-            posterResponseList.add(PosterResponse.toDto(poster));
-        }
+        PageResponse<List<PosterResponse>> posters = posterService.getLocationPosters(location, pageRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(posterResponseList);
+                .body(posters);
     }
 
     @GetMapping("/posters/{posterId}")
