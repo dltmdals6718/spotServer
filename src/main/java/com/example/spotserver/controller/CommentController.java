@@ -3,18 +3,20 @@ package com.example.spotserver.controller;
 import com.example.spotserver.domain.Comment;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.Poster;
+import com.example.spotserver.dto.request.CommentPageRequest;
 import com.example.spotserver.dto.request.CommentRequest;
 import com.example.spotserver.dto.response.CommentResponse;
+import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.service.CommentService;
 import com.example.spotserver.service.PosterService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -36,6 +38,8 @@ public class CommentController {
                                                       @Valid @RequestBody CommentRequest commentRequest,
                                                       @AuthenticationPrincipal(expression = "member") Member member) {
 
+
+        // todo: 서비스단으로 로직 옮기기
         Poster poster = posterService.getPoster(posterId);
 
         Comment comment = CommentRequest.toEntity(commentRequest);
@@ -63,21 +67,17 @@ public class CommentController {
     }
 
     @GetMapping("/posters/{posterId}/comments")
-    public ResponseEntity<List<CommentResponse>> getComments(@PathVariable Long posterId) {
-        List<Comment> comments = commentService.getComments(posterId);
+    public ResponseEntity<PageResponse<List<CommentResponse>>> getComments(@PathVariable Long posterId,
+                                                                           @Valid @ModelAttribute CommentPageRequest commentPageRequest) {
 
-
-        List<CommentResponse> commentResponseList = new ArrayList<>();
-        for (Comment comment : comments) {
-            commentResponseList.add(CommentResponse.toDto(comment));
-        }
+        PageRequest pageRequest = commentPageRequest.makePageRequest();
+        PageResponse<List<CommentResponse>> comments = commentService.getCommentsByPosterId(posterId, pageRequest);
 
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(commentResponseList);
+                .body(comments);
     }
-
 
 
 }

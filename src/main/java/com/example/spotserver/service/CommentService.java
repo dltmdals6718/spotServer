@@ -3,8 +3,12 @@ package com.example.spotserver.service;
 
 import com.example.spotserver.domain.Comment;
 import com.example.spotserver.domain.Poster;
+import com.example.spotserver.dto.response.CommentResponse;
+import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.repository.CommentRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -25,9 +29,12 @@ public class CommentService {
         commentRepository.save(comment);
     }
 
-    public List<Comment> getComments(Long posterId) {
+    public PageResponse<List<CommentResponse>> getCommentsByPosterId(Long posterId, Pageable pageable) {
         Poster poster = posterService.getPoster(posterId);
-        return commentRepository.findCommentsByPoster(poster);
+        Page<Comment> page = commentRepository.findCommentsByPoster(poster, pageable);
+        Page<CommentResponse> dtoPage = page.map((comment) -> CommentResponse.toDto(comment));
+        PageResponse<List<CommentResponse>> pageResponse = new PageResponse<>(dtoPage);
+        return pageResponse;
     }
 
     public Comment getComment(Long commentId) {

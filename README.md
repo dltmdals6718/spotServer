@@ -98,6 +98,49 @@ Authorization : Bearer AaA.bBb.CcC
     </tbody>
 </table>
 
+<hr>
+
+#### 공통 응답 타입
+
+PageInfo
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>page</td>
+            <td>int</td>
+            <td>페이지 번호</td>
+        </tr>
+        <tr>
+            <td>size</td>
+            <td>int</td>
+            <td>페이지 크기</td>
+        </tr>
+        <tr>
+            <td>numberOfElements</td>
+            <td>int</td>
+            <td>현재 페이지의 요소 개수</td>
+        </tr>
+        <tr>
+            <td>totalElements</td>
+            <td>Long</td>
+            <td>전체 요소 개수</td>
+        </tr>
+        <tr>
+            <td>totalPage</td>
+            <td>int</td>
+            <td>전체 페이지 개수</td>
+        </tr>
+    </tbody>
+</table>
+
+
 
 <hr>
 
@@ -653,43 +696,6 @@ Results
     </tbody>
 </table>
 
-PageInfo
-<table>
-    <thead>
-        <tr>
-            <th>이름</th>
-            <th>타입</th>
-            <th>설명</th>
-        </tr>
-    </thead>
-    <tbody>
-        <tr>
-            <td>page</td>
-            <td>int</td>
-            <td>페이지 번호</td>
-        </tr>
-        <tr>
-            <td>size</td>
-            <td>int</td>
-            <td>페이지 크기</td>
-        </tr>
-        <tr>
-            <td>numberOfElements</td>
-            <td>int</td>
-            <td>현재 페이지의 요소 개수</td>
-        </tr>
-        <tr>
-            <td>totalElements</td>
-            <td>Long</td>
-            <td>전체 요소 개수</td>
-        </tr>
-        <tr>
-            <td>totalPage</td>
-            <td>int</td>
-            <td>전체 페이지 개수</td>
-        </tr>
-    </tbody>
-</table>
 
 
 <hr>
@@ -735,25 +741,34 @@ PageInfo
         </tr>
         <tr>
             <td>GET</td>
-            <td>/posters/{posterId}/comments</td>
+            <td>/posters/{posterId}/comments<br>?page={페이지번호}<br>&size={페이지크기}<br>&sort={정렬방법}</td>
             <td></td>
 <td>
 
 ```json
-[
-  {
-    "commentId": 4,
-    "writerId": 1,
-    "content": "댓글내용4",
-    "regDate": "2024-01-25T15:34:41"
-  },
-  {
-    "commentId": 5,
-    "writerId": 1,
-    "content": "테스트입니다.",
-    "regDate": "2024-01-25T15:51:48"
+{
+  "results": [
+    {
+      "commentId": 7,
+      "writerId": 126,
+      "content": "31글의 댓글",
+      "regDate": "2024-01-29T13:22:19"
+    },
+    {
+      "commentId": 6,
+      "writerId": 126,
+      "content": "31글의 댓글",
+      "regDate": "2024-01-29T13:22:18"
+    }
+  ],
+  "pageInfo": {
+    "page": 4,
+    "size": 3,
+    "numberOfElements": 2,
+    "totalElements": 11,
+    "totalPage": 4
   }
-]
+}
 ```
 
 </td>
