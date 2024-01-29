@@ -19,10 +19,13 @@ import java.util.Optional;
 public class PosterService {
 
     private PosterRepository posterRepository;
+    private LocationService locationService;
+
 
     @Autowired
-    public PosterService(PosterRepository posterRepository) {
+    public PosterService(PosterRepository posterRepository, LocationService locationService) {
         this.posterRepository = posterRepository;
+        this.locationService = locationService;
     }
 
     public Long addPoster(Poster poster) {
@@ -30,7 +33,9 @@ public class PosterService {
         return saveInquiry.getId();
     }
 
-    public PageResponse<List<PosterResponse>> getLocationPosters(Location location, Pageable pageable) {
+    public PageResponse<List<PosterResponse>> getLocationPosters(Long locationId, Pageable pageable) {
+
+        Location location = locationService.getLocation(locationId);
         Page<Poster> page = posterRepository.findByLocation(location, pageable);
         Page<PosterResponse> dtoPage = page.map((poster) -> PosterResponse.toDto(poster));
 

@@ -73,8 +73,7 @@ public class PosterController {
         //위의 과정을 스프링 @ModelAttribute로 자동화 할 수 있다.
         PageRequest pageRequest = posterPageRequest.makePageRequest();
 
-        Location location = locationService.getLocation(locationId);
-        PageResponse<List<PosterResponse>> posters = posterService.getLocationPosters(location, pageRequest);
+        PageResponse<List<PosterResponse>> posters = posterService.getLocationPosters(locationId, pageRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
