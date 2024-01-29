@@ -7,6 +7,7 @@ import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.MemberType;
 import com.example.spotserver.domain.Role;
 import com.example.spotserver.dto.request.SignUpMember;
+import com.example.spotserver.dto.response.MemberResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.repository.MemberRepository;
@@ -30,7 +31,7 @@ public class MemberService {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    public Member addMember(SignUpMember signUpMember) throws DuplicateException {
+    public MemberResponse addMember(SignUpMember signUpMember) throws DuplicateException {
 
 
         String loginId = signUpMember.getLoginId();
@@ -51,7 +52,8 @@ public class MemberService {
         member.setType(MemberType.NORMAL);
 
         Member resultMember = memberRepository.save(member);
-        return resultMember;
+        MemberResponse memberResponse = MemberResponse.toDto(resultMember);
+        return memberResponse;
     }
 
     public String createToken(Long memberId) {

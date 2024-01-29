@@ -38,10 +38,8 @@ public class MemberController {
     @PostMapping("/signup")
     public ResponseEntity<MemberResponse> signupMember(@Valid @RequestBody SignUpMember signUpMember) throws DuplicateException {
 
-        Member member = memberService.addMember(signUpMember);
+        MemberResponse memberResponse = memberService.addMember(signUpMember);
 
-        MemberResponse memberResponse = new MemberResponse();
-        memberResponse = memberResponse.toDto(member);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
