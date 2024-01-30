@@ -223,6 +223,23 @@ PageInfo
     <td>특정 회원 정보 조회</td>
 </tr>
 
+<tr>
+    <td>GET</td>
+    <td>/members</td>
+    <td></td>
+<td>
+
+```json
+{
+    "memberId": 126,
+    "name": "namezz",
+    "role": "USER"
+}
+```
+</td>
+    <td>자신 정보 조회</td>
+</tr>
+
 </table>
 
 #### - 로그인
