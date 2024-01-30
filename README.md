@@ -749,14 +749,23 @@ Results
 {
   "results": [
     {
+      "commentId": 8,
+      "writerId": 126,
+      "writerName": "namezz",
+      "content": "31글의 댓글",
+      "regDate": "2024-01-29T13:22:20"
+    },
+    {
       "commentId": 7,
       "writerId": 126,
+      "writerName": "namezz",
       "content": "31글의 댓글",
       "regDate": "2024-01-29T13:22:19"
     },
     {
       "commentId": 6,
       "writerId": 126,
+      "writerName": "namezz",
       "content": "31글의 댓글",
       "regDate": "2024-01-29T13:22:18"
     }
@@ -764,8 +773,8 @@ Results
   "pageInfo": {
     "page": 4,
     "size": 3,
-    "numberOfElements": 2,
-    "totalElements": 11,
+    "numberOfElements": 3,
+    "totalElements": 12,
     "totalPage": 4
   }
 }

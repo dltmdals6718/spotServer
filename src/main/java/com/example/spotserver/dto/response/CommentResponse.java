@@ -10,6 +10,7 @@ public class CommentResponse {
 
     private Long commentId;
     private Long writerId;
+    private String writerName;
     private String content;
     private LocalDateTime regDate;
 
@@ -18,6 +19,7 @@ public class CommentResponse {
         CommentResponse commentResponse = new CommentResponse();
         commentResponse.setCommentId(comment.getId());
         commentResponse.setWriterId(comment.getWriter().getId());
+        commentResponse.setWriterName(comment.getWriter().getName());
         commentResponse.setContent(comment.getContent());
         commentResponse.setRegDate(comment.getRegDate());
         return commentResponse;
