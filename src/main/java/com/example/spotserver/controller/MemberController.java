@@ -53,16 +53,10 @@ public class MemberController {
 
         String loginId = signInMember.getLoginId();
         String loginPwd = signInMember.getLoginPwd();
-
-        Member findMember = memberService.findByLoginId(loginId);
-
-        if (findMember == null)
-            throw new LoginFailException(ErrorCode.FAIL_LOGIN);
-        if (!bCryptPasswordEncoder.matches(loginPwd, findMember.getLoginPwd()))
-            throw new LoginFailException(ErrorCode.FAIL_LOGIN);
+        Member member = memberService.login(loginId, loginPwd);
 
         Map<String, Object> tokenInfo = new HashMap<>();
-        String token = memberService.createToken(findMember.getId());
+        String token = memberService.createToken(member.getId());
         tokenInfo.put("token", token);
         tokenInfo.put("expire_in", JwtProperties.EXPIRE_TIME / 1000);
         return ResponseEntity

@@ -10,6 +10,7 @@ import com.example.spotserver.dto.request.SignUpMember;
 import com.example.spotserver.dto.response.MemberResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
+import com.example.spotserver.exception.LoginFailException;
 import com.example.spotserver.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
@@ -83,8 +84,16 @@ public class MemberService {
         return memberRepository.existsByName(name);
     }
 
-    public Member findByLoginId(String loginId) {
-        return memberRepository.findByLoginId(loginId);
+    public Member login(String loginId, String loginPwd) throws LoginFailException {
+
+
+        Member findMember = memberRepository.findByLoginId(loginId)
+                .orElseThrow(() -> new LoginFailException(ErrorCode.FAIL_LOGIN));
+
+        if (!bCryptPasswordEncoder.matches(loginPwd, findMember.getLoginPwd()))
+            throw new LoginFailException(ErrorCode.FAIL_LOGIN);
+
+        return findMember;
     }
 
     public boolean existKakaoMember(Long snsId) {

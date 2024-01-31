@@ -5,6 +5,8 @@ import com.example.spotserver.domain.MemberType;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
+import java.util.Optional;
+
 @Repository
 public interface MemberRepository extends JpaRepository<Member, Long> {
 
@@ -12,6 +14,6 @@ public interface MemberRepository extends JpaRepository<Member, Long> {
     boolean existsByLoginId(String loginId);
     boolean existsByName(String name);
 
-    Member findByLoginId(String loginId);
+    Optional<Member> findByLoginId(String loginId);
 
 }
