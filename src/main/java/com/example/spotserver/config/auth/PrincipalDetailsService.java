@@ -10,18 +10,18 @@ import org.springframework.stereotype.Service;
 
 
 
-@Service
-public class PrincipalDetailsService implements UserDetailsService {
+//@Service
+public class PrincipalDetailsService {
 
     private MemberRepository memberRepository;
 
 
-    @Autowired
+   // @Autowired
     public PrincipalDetailsService(MemberRepository memberRepository) {
         this.memberRepository = memberRepository;
     }
 
-    @Override
+//    @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         Member member = memberRepository.findByLoginId(username);
         return new PrincipalDetails(member);

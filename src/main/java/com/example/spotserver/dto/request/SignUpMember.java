@@ -2,13 +2,12 @@ package com.example.spotserver.dto.request;
 
 import com.example.spotserver.domain.Member;
 import jakarta.validation.constraints.NotEmpty;
+import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-@ToString
-@Setter
-@Getter
+@Data
 public class SignUpMember {
 
     @NotEmpty(message = "아이디를 비울 수 없습니다.")

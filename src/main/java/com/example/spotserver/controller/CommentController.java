@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
@@ -38,17 +39,7 @@ public class CommentController {
                                                       @Valid @RequestBody CommentRequest commentRequest,
                                                       @AuthenticationPrincipal(expression = "member") Member member) {
 
-
-        // todo: 서비스단으로 로직 옮기기
-        Poster poster = posterService.getPoster(posterId);
-
-        Comment comment = CommentRequest.toEntity(commentRequest);
-        comment.setPoster(poster);
-        comment.setWriter(member);
-
-        commentService.addComment(comment);
-
-        CommentResponse commentResponse = CommentResponse.toDto(comment);
+        CommentResponse commentResponse = commentService.addComment(posterId, commentRequest, member);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -58,8 +49,7 @@ public class CommentController {
     @GetMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponse> getComment(@PathVariable Long commentId) {
 
-        Comment comment = commentService.getComment(commentId);
-        CommentResponse commentResponse = CommentResponse.toDto(comment);
+        CommentResponse commentResponse = commentService.getComment(commentId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
