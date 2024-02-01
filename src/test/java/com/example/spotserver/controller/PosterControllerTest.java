@@ -1,13 +1,11 @@
 package com.example.spotserver.controller;
 
-import com.example.spotserver.TestSecurityConfig;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.TestInstance;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 
-import static org.junit.jupiter.api.Assertions.*;
-@WebMvcTest(value = {PosterController.class, TestSecurityConfig.class})
+@WebMvcTest(value = {PosterController.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class PosterControllerTest {
 

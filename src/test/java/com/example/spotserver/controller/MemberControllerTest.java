@@ -1,6 +1,5 @@
 package com.example.spotserver.controller;
 
-import com.example.spotserver.TestSecurityConfig;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.Role;
 import com.example.spotserver.dto.request.SignInMember;
@@ -18,6 +17,8 @@ import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.test.context.support.WithMockUser;
+import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -32,7 +33,7 @@ import static org.springframework.security.test.web.servlet.setup.SecurityMockMv
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-@WebMvcTest(value = {MemberController.class, TestSecurityConfig.class})
+@WebMvcTest(value = {MemberController.class})
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class MemberControllerTest {
 
@@ -56,7 +57,6 @@ class MemberControllerTest {
         this.mockMvc = MockMvcBuilders
                 .webAppContextSetup(context)
                 .addFilter(new CharacterEncodingFilter("utf-8", true))
-                .apply(springSecurity())
                 .build();
 
     }
@@ -76,7 +76,8 @@ class MemberControllerTest {
         memberResponse.setName(signUpMember.getName());
         memberResponse.setRole(Role.USER);
 
-        given(memberService.addMember(signUpMember)).willReturn(memberResponse);
+        given(memberService.addMember(signUpMember))
+                .willReturn(memberResponse);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String testSignUpBody = objectMapper.writeValueAsString(signUpMember);
@@ -112,14 +113,17 @@ class MemberControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(signInMember);
 
-        given(memberService.login(signInMember.getLoginId(), signInMember.getLoginPwd())).willReturn(member);
-        given(memberService.createToken(member.getId())).willReturn("tokenString");
+        given(memberService.login(signInMember.getLoginId(), signInMember.getLoginPwd()))
+                .willReturn(member);
+        given(memberService.createToken(member.getId()))
+                .willReturn("tokenString");
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .request(HttpMethod.POST, signInUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body)
-                .characterEncoding("utf-8"));
+                .characterEncoding("utf-8")
+                .with(csrf()));
 
         resultActions
                 .andExpectAll(
@@ -151,7 +155,8 @@ class MemberControllerTest {
                 .request(HttpMethod.POST, signUpUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body)
-                .characterEncoding("utf-8"));
+                .characterEncoding("utf-8")
+                .with(csrf()));
 
         resultActions
                 .andExpectAll(
@@ -183,7 +188,8 @@ class MemberControllerTest {
                 .request(HttpMethod.POST, signUpUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body)
-                .characterEncoding("utf-8"));
+                .characterEncoding("utf-8")
+                .with(csrf()));
 
         resultActions
                 .andExpectAll(
@@ -203,7 +209,8 @@ class MemberControllerTest {
         member.setName("name");
         member.setRole(Role.USER);
 
-        given(memberService.getMember(1L)).willReturn(member);
+        given(memberService.getMember(1L))
+                .willReturn(member);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .request(HttpMethod.GET, getMemberUrl + "/" + 1L)
@@ -239,7 +246,8 @@ class MemberControllerTest {
                 .request(HttpMethod.POST, signInUrl)
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body)
-                .characterEncoding("utf-8"));
+                .characterEncoding("utf-8")
+                .with(csrf()));
 
         resultActions
                 .andExpectAll(

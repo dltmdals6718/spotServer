@@ -748,6 +748,7 @@ Results
 {
   "commentId": 5,
   "writerId": 1,
+  "writerName": "namezz",
   "content": "댓글내용",
   "regDate": "2024-01-25T15:51:48.44347"
 }
@@ -810,6 +811,7 @@ Results
 {
   "commentId": 5,
   "writerId": 1,
+  "writerName": "namezz",
   "content": "테스트입니다.",
   "regDate": "2024-01-25T15:51:48"
 }
