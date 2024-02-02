@@ -8,6 +8,7 @@ import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
+import org.springframework.web.client.HttpClientErrorException;
 
 import java.util.NoSuchElementException;
 
@@ -42,4 +43,13 @@ public class GlobalExceptionHandler {
                 .status(HttpStatus.NOT_FOUND)
                 .body(errorResponse);
     }
+
+    @ExceptionHandler({PermissionException.class})
+    public ResponseEntity<ErrorResponse> permissionException(PermissionException e) {
+        ErrorResponse errorResponse = new ErrorResponse(ErrorCode.FORBIDDEN_CLIENT);
+        return ResponseEntity
+                .status(ErrorCode.FORBIDDEN_CLIENT.getHttpStatus())
+                .body(errorResponse);
+    }
+
 }

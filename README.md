@@ -820,6 +820,39 @@ Results
 </td>
             <td>특정 댓글 조회</td>
         </tr>
+        <tr>
+            <td>PUT</td>
+            <td>/comments/{commentId}</td>
+<td>
+
+```json
+{
+  "content":"수정될 내용"
+}
+```
+
+</td>
+<td>
+
+```json
+{
+    "commentId": 21,
+    "writerId": 126,
+    "writerName": "namezz",
+    "content": "수정될 내용",
+    "regDate": "2024-02-01T14:05:03"
+}
+```
+</td>
+            <td>댓글 수정</td>
+        </tr>
+        <tr>
+            <td>DELETE</td>
+            <td>/comments/{commentId}</td>
+            <td></td>
+            <td>삭제 성공시 HTTP 상태 코드는 204를 가지며 responseBody는 갖지 않는다.</td>
+            <td>댓글 삭제</td>
+        </tr>
     </tbody>
 </table>
 

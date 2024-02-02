@@ -167,4 +167,15 @@ class CommentControllerTest {
     void getComments() {
     }
 
+    @Test
+    @DisplayName(value = "댓글 삭제")
+    void deleteComment() {
+    }
+
+    @Test
+    @DisplayName(value = "댓글 수정")
+    void updateComment() {
+    }
+
+
 }

@@ -7,6 +7,8 @@ import com.example.spotserver.dto.request.CommentPageRequest;
 import com.example.spotserver.dto.request.CommentRequest;
 import com.example.spotserver.dto.response.CommentResponse;
 import com.example.spotserver.dto.response.PageResponse;
+import com.example.spotserver.exception.PermissionException;
+import com.example.spotserver.repository.PosterRepository;
 import com.example.spotserver.service.CommentService;
 import com.example.spotserver.service.PosterService;
 import jakarta.validation.Valid;
@@ -25,13 +27,10 @@ import java.util.List;
 public class CommentController {
 
     private CommentService commentService;
-    private PosterService posterService;
-
 
     @Autowired
-    public CommentController(CommentService commentService, PosterService posterService) {
+    public CommentController(CommentService commentService) {
         this.commentService = commentService;
-        this.posterService = posterService;
     }
 
     @PostMapping("/comments/{posterId}")
@@ -69,5 +68,27 @@ public class CommentController {
                 .body(comments);
     }
 
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity deleteComment(@PathVariable Long commentId,
+                                        @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
+
+        commentService.deleteComment(commentId, member);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<CommentResponse> updateComment(@PathVariable Long commentId,
+                                        @Valid @RequestBody CommentRequest commentRequest,
+                                        @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
+
+        CommentResponse commentResponse = commentService.updateComment(commentId, commentRequest, member);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(commentResponse);
+    }
 
 }
