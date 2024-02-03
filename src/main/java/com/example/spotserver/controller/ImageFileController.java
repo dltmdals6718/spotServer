@@ -26,12 +26,11 @@ import java.util.List;
 public class ImageFileController {
 
     private ImageFileService imageFileService;
-    private ImageStore imageStore;
+
 
     @Autowired
-    public ImageFileController(ImageFileService imageFileService, ImageStore imageStore) {
+    public ImageFileController(ImageFileService imageFileService) {
         this.imageFileService = imageFileService;
-        this.imageStore = imageStore;
     }
 
 
@@ -53,14 +52,12 @@ public class ImageFileController {
     @GetMapping("/posters/images/{posterImageId}")
     public ResponseEntity<Resource> getPosterImagefile(@PathVariable Long posterImageId) throws IOException {
 
-        PosterImage posterImage = imageFileService.getPosterImage(posterImageId);
-        String imagefileName = posterImage.getStoreFileName();
+        Resource posterImage = imageFileService.getPosterImage(posterImageId);
 
-        UrlResource resource = new UrlResource("file:" + imageStore.getPosterImgFullPath(imagefileName));
         return ResponseEntity
                 .ok()
-                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(resource.getFile().toPath()))
-                .body(resource);
+                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(posterImage.getFile().toPath()))
+                .body(posterImage);
     }
 
     @GetMapping("/locations/{locationId}/images")
@@ -81,13 +78,11 @@ public class ImageFileController {
     @GetMapping("/locations/images/{locationImageId}")
     public ResponseEntity<Resource> getLocationImagefile(@PathVariable Long locationImageId) throws IOException {
 
-        LocationImage locationImage = imageFileService.getLocationImage(locationImageId);
-        String imagefileName = locationImage.getStoreFileName();
-        UrlResource resource = new UrlResource("file:" + imageStore.getLocationImgFullPath(imagefileName));
+        Resource locationImage = imageFileService.getLocationImage(locationImageId);
         return ResponseEntity
                 .ok()
-                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(resource.getFile().toPath()))
-                .body(resource);
+                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(locationImage.getFile().toPath()))
+                .body(locationImage);
     }
 
 

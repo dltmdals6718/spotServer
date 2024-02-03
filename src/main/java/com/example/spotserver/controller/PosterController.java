@@ -26,16 +26,11 @@ import java.util.List;
 public class PosterController {
 
     private PosterService posterService;
-    private LocationService locationService;
-    private ImageFileService imageFileService;
-    private ImageStore imageStore;
+
 
     @Autowired
-    public PosterController(PosterService posterService, LocationService locationService, ImageFileService imageFileService, ImageStore imageStore) {
+    public PosterController(PosterService posterService) {
         this.posterService = posterService;
-        this.locationService = locationService;
-        this.imageFileService = imageFileService;
-        this.imageStore = imageStore;
     }
 
     @PostMapping(value = "/locations/{locationId}/posters", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -43,22 +38,9 @@ public class PosterController {
                                                     @RequestPart(required = false) List<MultipartFile> files,
                                                     @PathVariable Long locationId,
                                                     @AuthenticationPrincipal(expression = "member") Member member) throws IOException {
-        Location location = locationService.getLocation(locationId);
 
-        Poster poster = PosterRequest.toEntity(posterRequest);
-        poster.setLocation(location);
-        poster.setWriter(member);
-        posterService.addPoster(poster);
+        PosterResponse posterResponse = posterService.addPoster(posterRequest, files, locationId, member);
 
-        if (files != null) {
-            List<PosterImage> imgFiles = imageStore.storePosterImages(files);
-            for (PosterImage imgFile : imgFiles) {
-                imgFile.setPoster(poster);
-            }
-            imageFileService.savePosterImageList(imgFiles);
-        }
-
-        PosterResponse posterResponse = PosterResponse.toDto(poster);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -82,8 +64,7 @@ public class PosterController {
 
     @GetMapping("/posters/{posterId}")
     public ResponseEntity<PosterResponse> getPoster(@PathVariable Long posterId) {
-        Poster poster = posterService.getPoster(posterId);
-        PosterResponse posterResponse = PosterResponse.toDto(poster);
+        PosterResponse posterResponse = posterService.getPoster(posterId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
