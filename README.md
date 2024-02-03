@@ -432,7 +432,7 @@ Content-Type : multipart/form-data
     <td>/locations/{locationId}/posters</td>
   <td>
 
-Content-Type : multipart/form-data
+Content-Type : multipart/form-data <br>
 
 이름 : posterRequest <br>
 설명 : 게시글 내용 <br>
@@ -533,6 +533,53 @@ Content-Type : multipart/form-data
 </td>
     <td>특정 게시글 조회</td>
   </tr>
+
+<tr>
+    <td>PUT</td>
+    <td>/posters/{posterId}</td>
+<td>
+Content-Type : multipart/form-data <br>
+이름 : posterRequest <br>
+설명 : 수정할 게시글 내용 <br>
+필수 : O <br>
+
+```json
+{
+  "title": "수정된 제목2",
+  "content": "수정된 제목2"
+}
+```
+
+<br>
+이름 : addFiles <br>
+설명 : 추가할 파일 <br>
+필수 : X <br>
+
+
+이름 : deleteFilesId <br>
+설명 : 삭제할 파일 ID <br>
+필수 : X <br>
+
+```json
+[48, 49]
+```
+
+</td>
+<td>
+
+```json
+{
+  "posterId": 49,
+  "writerId": 129,
+  "title": "수정된 제목2",
+  "content": "수정된 제목2",
+  "regDate": "2024-02-03T17:13:38"
+}
+```
+
+</td>
+    <td>게시글 수정</td>
+</tr>
 
 </table>
 
@@ -648,6 +695,65 @@ PosterRequest
         </tr>
     </tbody>
 </table>
+
+#### 1.3 게시글 수정
+##### 헤더
+
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>설명</th>
+            <th>필수</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>Authorization</td>
+            <td>사용자 인증 수단으로 토큰 값을 쓴다.<br>Authorization: Bearer {tokenString} </td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>Content-Type</td>
+            <td>Multipart/form-data</td>
+            <td>O</td>
+        </tr>
+    </tbody>
+</table>
+
+##### 본문
+
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+            <th>필수</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>posterRequest</td>
+            <td>PosterRequest(application/json)</td>
+            <td>게시글 수정 정보</td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>addFiles</td>
+            <td>File</td>
+            <td>첨부 이미지 파일<br>multipart 형식으로 전송해야합니다.</td>
+            <td>X</td>
+        </tr>
+        <tr>
+            <td>deleteFilesId</td>
+            <td>List&lt;Long&gt</td>
+            <td>삭제할 파일의 ID 정보</td>
+            <td>X</td>
+        </tr>
+    </tbody>
+</table>
+
 
 
 ### 2. 응답

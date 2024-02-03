@@ -5,6 +5,7 @@ import com.example.spotserver.dto.request.PosterPageRequest;
 import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
+import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.service.ImageFileService;
 import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.PosterService;
@@ -65,6 +66,20 @@ public class PosterController {
     @GetMapping("/posters/{posterId}")
     public ResponseEntity<PosterResponse> getPoster(@PathVariable Long posterId) {
         PosterResponse posterResponse = posterService.getPoster(posterId);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(posterResponse);
+    }
+
+    @PutMapping("/posters/{posterId}")
+    public ResponseEntity<PosterResponse> updatePoster(@PathVariable Long posterId,
+                             @Valid @RequestPart PosterRequest posterRequest,
+                             @RequestPart(required = false) List<MultipartFile> addFiles,
+                             @RequestPart(required = false) List<Long> deleteFilesId,
+                             @AuthenticationPrincipal(expression = "member") Member member) throws IOException, PermissionException {
+
+        PosterResponse posterResponse = posterService.updatePoster(posterId, posterRequest, addFiles, deleteFilesId, member);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

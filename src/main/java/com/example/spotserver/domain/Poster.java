@@ -1,5 +1,6 @@
 package com.example.spotserver.domain;
 
+import com.example.spotserver.dto.request.PosterRequest;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import jakarta.persistence.*;
 import lombok.Data;
@@ -28,4 +29,9 @@ public class Poster {
 
     @CreationTimestamp
     private LocalDateTime regDate;
+
+    public void updatePoster(PosterRequest posterRequest) {
+        this.title = posterRequest.getTitle();
+        this.content = posterRequest.getContent();
+    }
 }
