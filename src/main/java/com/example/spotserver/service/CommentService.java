@@ -90,7 +90,7 @@ public class CommentService {
 
         Member commentWriter = comment.getWriter();
 
-        if(commentWriter.getId() == member.getId()) {
+        if(commentWriter.getId().equals(member.getId())) {
             comment.setContent(commentRequest.getContent());
             return CommentResponse.toDto(comment);
         } else {
