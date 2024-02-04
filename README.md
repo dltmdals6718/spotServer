@@ -747,7 +747,7 @@ PosterRequest
         </tr>
         <tr>
             <td>deleteFilesId</td>
-            <td>List&lt;Long&gt</td>
+            <td>List&lt;Long&gt(application/json)</td>
             <td>삭제할 파일의 ID 정보</td>
             <td>X</td>
         </tr>

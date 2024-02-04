@@ -72,7 +72,7 @@ public class PosterController {
                 .body(posterResponse);
     }
 
-    @PutMapping("/posters/{posterId}")
+    @PutMapping(value = "/posters/{posterId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<PosterResponse> updatePoster(@PathVariable Long posterId,
                              @Valid @RequestPart PosterRequest posterRequest,
                              @RequestPart(required = false) List<MultipartFile> addFiles,
