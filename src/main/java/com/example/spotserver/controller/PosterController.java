@@ -6,8 +6,6 @@ import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.PermissionException;
-import com.example.spotserver.service.ImageFileService;
-import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.PosterService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +18,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -74,16 +71,27 @@ public class PosterController {
 
     @PutMapping(value = "/posters/{posterId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<PosterResponse> updatePoster(@PathVariable Long posterId,
-                             @Valid @RequestPart PosterRequest posterRequest,
-                             @RequestPart(required = false) List<MultipartFile> addFiles,
-                             @RequestPart(required = false) List<Long> deleteFilesId,
-                             @AuthenticationPrincipal(expression = "member") Member member) throws IOException, PermissionException {
+                                                       @Valid @RequestPart PosterRequest posterRequest,
+                                                       @RequestPart(required = false) List<MultipartFile> addFiles,
+                                                       @RequestPart(required = false) List<Long> deleteFilesId,
+                                                       @AuthenticationPrincipal(expression = "member") Member member) throws IOException, PermissionException {
 
         PosterResponse posterResponse = posterService.updatePoster(posterId, posterRequest, addFiles, deleteFilesId, member);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(posterResponse);
+    }
+
+    @DeleteMapping(value = "/posters/{posterId}")
+    public ResponseEntity deletePoster(@PathVariable Long posterId,
+                                       @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
+
+        posterService.deletePoster(posterId, member);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
 }

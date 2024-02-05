@@ -13,7 +13,8 @@ import java.util.List;
 @Data
 public class Poster {
 
-    @Id @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     @ManyToOne
@@ -23,6 +24,13 @@ public class Poster {
     @ManyToOne
     @JoinColumn(name = "location_id")
     private Location location;
+
+
+    @OneToMany(mappedBy = "poster", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
+    private List<PosterImage> posterImages;
+
+    @OneToMany(mappedBy = "poster", cascade = CascadeType.REMOVE)
+    private List<Comment> comments;
 
     private String title;
     private String content;

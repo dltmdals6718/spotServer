@@ -42,6 +42,8 @@ public class PosterService {
         this.imageStore = imageStore;
     }
 
+
+    // todo: 파일 크기, 확장자 제한 해보기, issue: files 키만 있고 value는 없어도 파일이 생성됌.
     public PosterResponse addPoster(PosterRequest posterRequest,
                                     List<MultipartFile> files,
                                     Long locationId,
@@ -52,15 +54,16 @@ public class PosterService {
         poster.setWriter(member);
         poster.setLocation(location);
 
-        posterRepository.save(poster);
 
         if (files != null) {
             List<PosterImage> imgFiles = imageStore.storePosterImages(files);
+            poster.setPosterImages(imgFiles);
             for (PosterImage imgFile : imgFiles) {
                 imgFile.setPoster(poster);
             }
-            posterImageRepository.saveAll(imgFiles);
         }
+
+        posterRepository.save(poster);
 
         PosterResponse posterResponse = PosterResponse.toDto(poster);
         return posterResponse;
@@ -121,14 +124,42 @@ public class PosterService {
 
         if (addFiles != null) {
             List<PosterImage> imgFiles = imageStore.storePosterImages(addFiles);
+
+            if (poster.getPosterImages() == null)
+                poster.setPosterImages(imgFiles);
+            else
+                poster.getPosterImages().addAll(imgFiles);
+
             for (PosterImage imgFile : imgFiles) {
                 imgFile.setPoster(poster);
             }
-            posterImageRepository.saveAll(imgFiles);
         }
 
 
         PosterResponse posterResponse = PosterResponse.toDto(poster);
         return posterResponse;
+    }
+
+    public void deletePoster(Long posterId, Member member) throws PermissionException {
+
+        Poster poster = posterRepository.findById(posterId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        if (!member.getId().equals(poster.getWriter().getId()))
+            throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
+
+        List<PosterImage> posterImages = poster.getPosterImages();
+        if (posterImages != null) {
+            for (PosterImage posterImage : posterImages) {
+                String fullPath = imageStore.getPosterImgFullPath(posterImage.getStoreFileName());
+                File file = new File(fullPath);
+                if (file.exists())
+                    file.delete();
+            }
+
+        }
+
+        posterRepository.delete(poster);
+
     }
 }

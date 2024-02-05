@@ -8,14 +8,12 @@ import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.service.PosterService;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -65,8 +63,6 @@ class PosterControllerTest {
                 .addFilter(new CharacterEncodingFilter("utf-8", true))
                 .build();
 
-        SecurityContext context = SecurityContextHolder.getContext();
-
         member = mock(Member.class);
         principalDetails = mock(PrincipalDetails.class);
 
@@ -78,6 +74,11 @@ class PosterControllerTest {
         when(member.getName())
                 .thenReturn("name");
 
+    }
+
+    @BeforeEach
+    public void beforeEach() {
+        SecurityContext context = SecurityContextHolder.getContext();
         Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
         context.setAuthentication(authentication);
     }
@@ -159,13 +160,34 @@ class PosterControllerTest {
                         jsonPath("$.regDate").value(poster.getRegDate().toString()))
                 .andDo(print());
 
-
     }
 
     @Test
     @DisplayName("게시글 삭제")
-    void deletePoster() {
+    void deletePoster() throws Exception {
 
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        Poster poster = new Poster();
+        poster.setWriter(member);
+        poster.setId(1L);
+
+        doNothing()
+                .when(posterService)
+                .deletePoster(poster.getId(), member);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.DELETE, "/posters/" + poster.getId()));
+
+        verify(posterService, times(1))
+                .deletePoster(poster.getId(), member);
+
+        resultActions
+                .andExpectAll(
+                        status().is(HttpStatus.NO_CONTENT.value())
+                )
+                .andDo(print());
     }
 
 

@@ -581,6 +581,15 @@ Content-Type : multipart/form-data <br>
     <td>게시글 수정</td>
 </tr>
 
+<tr>
+    <td>DELETE</td>
+    <td>/posters/{posterId}</td>
+    <td></td>
+    <td>삭제 성공시 HTTP 상태 코드는 204를 가지며 responseBody는 갖지 않는다.</td>
+    <td>게시글 삭제</td>
+</tr>
+
+
 </table>
 
 ### 1. 요청
