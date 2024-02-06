@@ -11,10 +11,7 @@ import com.example.spotserver.repository.MemberRepository;
 import com.example.spotserver.service.CommentService;
 import com.example.spotserver.service.PosterService;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.BeforeAll;
-import org.junit.jupiter.api.DisplayName;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.TestInstance;
+import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
@@ -87,6 +84,13 @@ class CommentControllerTest {
 
     }
 
+    @BeforeEach
+    public void beforeEach() {
+        SecurityContext context = SecurityContextHolder.getContext();
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
+        context.setAuthentication(authentication);
+    }
+
     @Test
     @DisplayName(value = "댓글 작성")
     void addComment() throws Exception {
@@ -136,22 +140,8 @@ class CommentControllerTest {
     }
 
     @Test
-    @DisplayName(value = "테스트 인증")
-    public void test() {
-
-    }
-
-
-    @Test
-    @DisplayName(value = "공백 댓글 작성")
-    void emptyComment() {
-
-    }
-
-    @Test
     @DisplayName(value = "특정 댓글 조회")
     void getComment() throws Exception {
-
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .request(HttpMethod.GET, "")
