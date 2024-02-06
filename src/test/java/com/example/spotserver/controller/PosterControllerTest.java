@@ -20,6 +20,7 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.parameters.P;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -56,6 +57,8 @@ class PosterControllerTest {
     private Member member;
     private PrincipalDetails principalDetails;
 
+    private ObjectMapper objectMapper;
+
     @BeforeAll
     public void beforeAll() {
         this.mockMvc = MockMvcBuilders
@@ -74,6 +77,8 @@ class PosterControllerTest {
         when(member.getName())
                 .thenReturn("name");
 
+        objectMapper = new ObjectMapper();
+
     }
 
     @BeforeEach
@@ -85,17 +90,96 @@ class PosterControllerTest {
 
     @Test
     @DisplayName("게시글 작성")
-    void addPoster() {
+    void addPoster() throws Exception {
+
+        Long locationId = 2L;
+
+        PosterRequest posterRequestDto = new PosterRequest();
+        posterRequestDto.setTitle("게시글 제목");
+        posterRequestDto.setContent("게시글 내용");
+
+        Poster poster = PosterRequest.toEntity(posterRequestDto);
+        poster.setId(3L);
+        poster.setRegDate(LocalDateTime.now());
+        poster.setWriter(member);
+
+        String posterRequestString = objectMapper.writeValueAsString(posterRequestDto);
+        MockMultipartFile posterRequest = new MockMultipartFile("posterRequest", null, MediaType.APPLICATION_JSON_VALUE, posterRequestString.getBytes(StandardCharsets.UTF_8));
+
+        List<MultipartFile> files = new ArrayList<>();
+        MockMultipartFile file1 = new MockMultipartFile("files", null, MediaType.IMAGE_PNG_VALUE, "".getBytes());
+        MockMultipartFile file2 = new MockMultipartFile("files", null, MediaType.IMAGE_PNG_VALUE, "".getBytes());
+        files.add(file1);
+        files.add(file2);
+
+        PosterResponse posterResponse = PosterResponse.toDto(poster);
+
+        given(posterService.addPoster(posterRequestDto, files, locationId, member))
+                .willReturn(posterResponse);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .multipart(HttpMethod.POST, "/locations/" + locationId + "/posters")
+                .file(posterRequest)
+                .file(file1)
+                .file(file2));
+
+        verify(posterService, times(1))
+                .addPoster(posterRequestDto, files, locationId, member);
+
+        resultActions
+                .andExpectAll(
+                        status().is(HttpStatus.CREATED.value()),
+                        jsonPath("$.posterId").value(poster.getId()),
+                        jsonPath("$.writerId").value(member.getId()),
+                        jsonPath("$.title").value(poster.getTitle()),
+                        jsonPath("$.content").value(poster.getContent()),
+                        jsonPath("$.regDate").value(poster.getRegDate().toString())
+                )
+                .andDo(print());
+
     }
 
     @Test
     @DisplayName("장소 게시글 전체 조회")
     void getLocationPosters() {
+
     }
 
     @Test
     @DisplayName("특정 게시글 조회")
-    void getPoster() {
+    void getPoster() throws Exception {
+
+
+        Poster poster = new Poster();
+        poster.setId(2L);
+        poster.setTitle("제목");
+        poster.setContent("내용");
+        poster.setRegDate(LocalDateTime.now());
+        poster.setWriter(member);
+
+
+        PosterResponse posterResponse = PosterResponse.toDto(poster);
+        given(posterService.getPoster(poster.getId()))
+                .willReturn(posterResponse);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.GET, "/posters/" + poster.getId()));
+
+
+        verify(posterService, times(1))
+                .getPoster(poster.getId());
+
+
+        resultActions
+                .andExpectAll(
+                        status().is(HttpStatus.OK.value()),
+                        jsonPath("$.posterId").value(poster.getId()),
+                        jsonPath("$.writerId").value(poster.getWriter().getId()),
+                        jsonPath("$.title").value(poster.getTitle()),
+                        jsonPath("$.content").value(poster.getContent()),
+                        jsonPath("$.regDate").value(poster.getRegDate().toString()))
+                .andDo(print());
+
     }
 
     @Test
@@ -117,14 +201,13 @@ class PosterControllerTest {
         PosterResponse posterResponse = PosterResponse.toDto(poster);
 
 
-        ObjectMapper objectMapper = new ObjectMapper();
         String posterRequestString = objectMapper.writeValueAsString(posterRequestDto);
 
         MockMultipartFile posterRequest = new MockMultipartFile("posterRequest", null, MediaType.APPLICATION_JSON_VALUE, posterRequestString.getBytes(StandardCharsets.UTF_8));
 
         List<MultipartFile> addFiles = new ArrayList<>();
-        MockMultipartFile addFiles1 = new MockMultipartFile("addFiles", null, MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream("/Users/lsm/Desktop/testImg/1.png"));
-        MockMultipartFile addFiles2 = new MockMultipartFile("addFiles", null, MediaType.MULTIPART_FORM_DATA_VALUE, new FileInputStream("/Users/lsm/Desktop/testImg/2.png"));
+        MockMultipartFile addFiles1 = new MockMultipartFile("addFiles", null, MediaType.IMAGE_PNG_VALUE, "".getBytes());
+        MockMultipartFile addFiles2 = new MockMultipartFile("addFiles", null, MediaType.IMAGE_PNG_VALUE, "".getBytes());
         addFiles.add(addFiles1);
         addFiles.add(addFiles2);
 
@@ -185,8 +268,7 @@ class PosterControllerTest {
 
         resultActions
                 .andExpectAll(
-                        status().is(HttpStatus.NO_CONTENT.value())
-                )
+                        status().is(HttpStatus.NO_CONTENT.value()))
                 .andDo(print());
     }
 
