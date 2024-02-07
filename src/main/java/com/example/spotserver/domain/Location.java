@@ -17,4 +17,8 @@ public class Location {
     private String title;
     private String address;
     private String description;
+
+    @OneToMany(cascade = CascadeType.REMOVE)
+    private List<LocationLike> locationLikes;
+
 }

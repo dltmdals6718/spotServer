@@ -83,14 +83,6 @@ public class MemberController {
                 .body(MemberResponse.toDto(member));
     }
 
-    @ExceptionHandler(value = DuplicateException.class)
-    public ResponseEntity<ErrorResponse> duplicateException(DuplicateException e) {
-        ErrorCode errorCode = e.getErrorCode();
-        ErrorResponse errorResponse = new ErrorResponse(errorCode);
-        return ResponseEntity
-                .status(errorCode.getHttpStatus())
-                .body(errorResponse);
-    }
 
     @ExceptionHandler(value = LoginFailException.class)
     public ResponseEntity<ErrorResponse> loginFailException(LoginFailException e) {

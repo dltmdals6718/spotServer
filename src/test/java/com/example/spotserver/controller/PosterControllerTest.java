@@ -272,5 +272,53 @@ class PosterControllerTest {
                 .andDo(print());
     }
 
+    @Test
+    @DisplayName("좋아요 등록")
+    void addLike() throws Exception {
+
+        Poster poster = new Poster();
+        poster.setId(1L);
+
+
+        doNothing()
+                .when(posterService)
+                .addLike(poster.getId(), member);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.POST, "/posters/" + poster.getId() + "/likes"));
+
+        verify(posterService, times(1))
+                .addLike(poster.getId(), member);
+
+        resultActions
+                .andExpectAll(
+                        status().is(HttpStatus.CREATED.value()))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("좋아요 삭제")
+    void deleteLike() throws Exception {
+
+        Poster poster = new Poster();
+        poster.setId(1L);
+
+        doNothing()
+                .when(posterService)
+                .deleteLike(poster.getId(), member);
+
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.DELETE, "/posters/" + poster.getId() + "/likes"));
+
+        verify(posterService, times(1))
+                .deleteLike(poster.getId(), member);
+
+        resultActions
+                .andExpectAll(
+                        status().is(HttpStatus.NO_CONTENT.value()))
+                .andDo(print());
+
+    }
+
 
 }

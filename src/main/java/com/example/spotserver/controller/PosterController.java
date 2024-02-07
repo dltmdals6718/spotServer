@@ -5,6 +5,7 @@ import com.example.spotserver.dto.request.PosterPageRequest;
 import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
+import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.service.PosterService;
 import jakarta.validation.Valid;
@@ -88,6 +89,28 @@ public class PosterController {
                                        @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
 
         posterService.deletePoster(posterId, member);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+    @PostMapping(value = "/posters/{posterId}/likes")
+    public ResponseEntity addLike(@PathVariable Long posterId,
+                                  @AuthenticationPrincipal(expression = "member") Member member) throws DuplicateException {
+
+        posterService.addLike(posterId, member);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .build();
+    }
+
+    @DeleteMapping(value = "/posters/{posterId}/likes")
+    public ResponseEntity deleteLike(@PathVariable Long posterId,
+                                     @AuthenticationPrincipal(expression = "member") Member member) {
+
+        posterService.deleteLike(posterId, member);
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)

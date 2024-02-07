@@ -3,12 +3,14 @@ package com.example.spotserver.controller;
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.LocationRequest;
 import com.example.spotserver.dto.response.LocationResponse;
+import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.service.ImageFileService;
 import com.example.spotserver.service.LocationService;
 import jakarta.validation.Valid;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -31,7 +33,8 @@ public class LocationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<LocationResponse>> getLocations(@RequestParam("latitude") Double latitude, @RequestParam("longitude") Double longitude) {
+    public ResponseEntity<List<LocationResponse>> getLocations(@RequestParam("latitude") Double latitude,
+                                                               @RequestParam("longitude") Double longitude) {
         List<Location> locations = locationService.getLocations(latitude, longitude);
 
         List<LocationResponse> locationResponseList = new ArrayList<>();
@@ -80,5 +83,29 @@ public class LocationController {
                 .status(HttpStatus.OK)
                 .body(locationResponse);
     }
+
+    @PostMapping("/{locationId}/likes")
+    public ResponseEntity addLike(@PathVariable Long locationId,
+                                  @AuthenticationPrincipal(expression = "member") Member member) throws DuplicateException {
+
+        locationService.addLike(locationId, member);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .build();
+    }
+
+    @DeleteMapping("/{locationId}/likes")
+    public ResponseEntity deleteLike(@PathVariable Long locationId,
+                                     @AuthenticationPrincipal(expression = "member") Member member) {
+
+        locationService.deleteLike(locationId, member);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+
+    }
+
 
 }

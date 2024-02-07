@@ -55,5 +55,23 @@ CREATE TABLE member (
     sns_id BIGINT
 );
 
+CREATE TABLE poster_like (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    member_id BIGINT,
+    poster_id BIGINT,
+    reg_date DATETIME DEFAULT NOW(),
+    FOREIGN KEY (member_id) REFERENCES member(id),
+    FOREIGN KEY (poster_id) REFERENCES poster(id)
+);
+
+CREATE TABLE location_like (
+    id BIGINT AUTO_INCREMENT PRIMARY KEY,
+    member_id BIGINT,
+    location_id BIGINT,
+    reg_date DATETIME DEFAULT NOW(),
+    FOREIGN KEY (member_id) REFERENCES member(id),
+    FOREIGN KEY (location_id) REFERENCES location(id)
+);
+
 INSERT INTO location(latitude, longitude, title, address, description) VALUES(35.24308, 128.6934, '창원대학교 운동장', '의창구 창원대학로 20 창원시 경상 남도', '낭만 가득 운동장');
 INSERT INTO location(latitude, longitude, title, address, description) VALUES(35.23296, 128.6805, '용지호수공원', '경상남도 창원시 의창구 용지동 551-4', '용지호수는 경상남도 창원시 성산구 용지동에 있는 호수이다. 창원시를 대표하는 호수이며, 용지공원 안에 있다.');

@@ -38,6 +38,10 @@ public class Poster {
     @CreationTimestamp
     private LocalDateTime regDate;
 
+
+    @OneToMany(mappedBy = "poster", cascade = CascadeType.REMOVE)
+    private List<PosterLike> posterLikes;
+
     public void updatePoster(PosterRequest posterRequest) {
         this.title = posterRequest.getTitle();
         this.content = posterRequest.getContent();

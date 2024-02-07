@@ -52,4 +52,13 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
+    @ExceptionHandler(value = DuplicateException.class)
+    public ResponseEntity<ErrorResponse> duplicateException(DuplicateException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        ErrorResponse errorResponse = new ErrorResponse(errorCode);
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(errorResponse);
+    }
+
 }

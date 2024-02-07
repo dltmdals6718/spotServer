@@ -411,6 +411,20 @@ Content-Type : multipart/form-data
 </td>
             <td>장소ID로 조회</td>
         </tr>
+        <tr>
+            <td>POST</td>
+            <td>/locations/{locationId}/likes</td>
+            <td></td>
+            <td></td>
+            <td>좋아요 등록</td>
+        </tr>
+        <tr>
+            <td>DELETE</td>
+            <td>/locations/{locationId}/likes</td>
+            <td></td>
+            <td>취소 성공시 HTTP 상태 코드는 204를 가지며 responseBody는 갖지 않는다.</td>
+            <td>좋아요 취소</td>
+        </tr>
     </tbody>
 </table>
 
@@ -588,6 +602,20 @@ Content-Type : multipart/form-data <br>
     <td>삭제 성공시 HTTP 상태 코드는 204를 가지며 responseBody는 갖지 않는다.</td>
     <td>게시글 삭제</td>
 </tr>
+        <tr>
+            <td>POST</td>
+            <td>/posters/{posterId}/likes</td>
+            <td></td>
+            <td></td>
+            <td>좋아요 등록</td>
+        </tr>
+        <tr>
+            <td>DELETE</td>
+            <td>/posters/{posterId}/likes</td>
+            <td></td>
+            <td>취소 성공시 HTTP 상태 코드는 204를 가지며 responseBody는 갖지 않는다.</td>
+            <td>좋아요 취소</td>
+        </tr>
 
 
 </table>
