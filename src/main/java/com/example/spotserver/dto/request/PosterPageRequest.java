@@ -18,25 +18,9 @@ public class PosterPageRequest {
     @Min(value = 1, message = "페이지 크기는 1이상이여야 합니다.")
     private int size = 10;
 
-    private String sort = "regDate";
-
-    public void setSort(String sort) {
-
-        if(sort.equals("recent")) {
-            this.sort = "regDate";
-        } else {
-            this.sort = "regDate";
-        }
-
-    }
+    private String sort = "recent";
 
     public org.springframework.data.domain.PageRequest makePageRequest() {
-
-        PageRequest pageRequest = null;
-        if(sort.equals("regDate")) {
-            pageRequest = org.springframework.data.domain.PageRequest.of(page-1,size, Sort.by(sort).descending());
-        }
-
-        return pageRequest;
+        return org.springframework.data.domain.PageRequest.of(page-1,size);
     }
 }

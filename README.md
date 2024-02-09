@@ -490,36 +490,33 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "results": [
-    {
-      "posterId": 43,
-      "writerId": 126,
-      "title": "HAHA",
-      "content": "HOHO",
-      "regDate": "2024-01-28T18:16:28"
-    },
-    {
-      "posterId": 42,
-      "writerId": 126,
-      "title": "HAHA",
-      "content": "HOHO",
-      "regDate": "2024-01-28T16:42:08"
-    },
-    {
-      "posterId": 41,
-      "writerId": 126,
-      "title": "HAHA",
-      "content": "HOHO",
-      "regDate": "2024-01-28T15:57:50"
+    "results": [
+        {
+            "posterId": 60,
+            "writerId": 129,
+            "title": "title",
+            "content": "content",
+            "regDate": "2024-02-05T16:49:47",
+            "likeCnt": 1,
+            "commentCnt": 0
+        },
+        {
+            "posterId": 61,
+            "writerId": 129,
+            "title": "새글",
+            "content": "content",
+            "regDate": "2024-02-06T15:40:47",
+            "likeCnt": 1,
+            "commentCnt": 1
+        }
+    ],
+    "pageInfo": {
+        "page": 1,
+        "size": 2,
+        "numberOfElements": 2,
+        "totalElements": 4,
+        "totalPage": 2
     }
-  ],
-  "pageInfo": {
-    "page": 1,
-    "size": 3,
-    "numberOfElements": 3,
-    "totalElements": 13,
-    "totalPage": 5
-  }
 }
 ```
 
@@ -649,7 +646,7 @@ Content-Type : multipart/form-data <br>
         <tr>
             <td>sort</td>
             <td>String</td>
-            <td>데이터 정렬 방식으로 다음중 하나를 값으로 갖는다.<br>recent: 최신순<br>(기본값: recent)</td>
+            <td>데이터 정렬 방식으로 다음중 하나를 값으로 갖는다.<br>recent: 최신순, like: 좋아요순<br>(기본값: recent)</td>
             <td>X</td>
         </tr>
     </tbody>

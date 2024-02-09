@@ -1,6 +1,7 @@
 package com.example.spotserver.service;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.PosterPageRequest;
 import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
@@ -14,7 +15,7 @@ import com.example.spotserver.repository.PosterRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -69,16 +70,22 @@ public class PosterService {
         return posterResponse;
     }
 
-    public PageResponse<List<PosterResponse>> getLocationPosters(Long locationId, Pageable pageable) {
+    public PageResponse<List<PosterResponse>> getLocationPosters(Long locationId, PosterPageRequest posterPageRequest) {
 
-        Location location = locationRepository.findById(locationId)
-                .orElseThrow(() -> new NoSuchElementException());
 
-        Page<Poster> page = posterRepository.findByLocation(location, pageable);
-        Page<PosterResponse> dtoPage = page
-                .map((poster) -> PosterResponse.toDto(poster));
+        PageRequest pageRequest = posterPageRequest.makePageRequest();
 
-        PageResponse<List<PosterResponse>> pageResponse = new PageResponse<>(dtoPage);
+        String sort = posterPageRequest.getSort();
+        Page<PosterResponse> posters = null;
+        if (sort.equals("recent")) {
+            posters = posterRepository.searchPostersByRecent(locationId, pageRequest);
+        } else if (sort.equals("like")) {
+            posters = posterRepository.searchPostersByLike(locationId, pageRequest);
+        } else {
+            posters = posterRepository.searchPostersByRecent(locationId, pageRequest);
+        }
+
+        PageResponse<List<PosterResponse>> pageResponse = new PageResponse<>(posters);
         return pageResponse;
     }
 
@@ -168,7 +175,7 @@ public class PosterService {
         Poster poster = posterRepository.findById(posterId)
                 .orElseThrow(() -> new NoSuchElementException());
 
-        if(posterLikeRepository.existsPosterLikeByPosterAndMember(poster, member)) {
+        if (posterLikeRepository.existsPosterLikeByPosterAndMember(poster, member)) {
             throw new DuplicateException(ErrorCode.DUPLICATE_LIKE);
         }
 

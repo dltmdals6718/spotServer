@@ -50,11 +50,8 @@ public class PosterController {
     public ResponseEntity<PageResponse<List<PosterResponse>>> getLocationPosters(@PathVariable Long locationId,
                                                                                  @Valid @ModelAttribute PosterPageRequest posterPageRequest) {
 
-        //요청 파라미터로 들어온 이름, 나이를 객체를 생성하여 값을 넣어주는 과정을 거친다.
-        //위의 과정을 스프링 @ModelAttribute로 자동화 할 수 있다.
-        PageRequest pageRequest = posterPageRequest.makePageRequest();
 
-        PageResponse<List<PosterResponse>> posters = posterService.getLocationPosters(locationId, pageRequest);
+        PageResponse<List<PosterResponse>> posters = posterService.getLocationPosters(locationId, posterPageRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
