@@ -48,9 +48,9 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                         comment.count()
                 ))
                 .from(poster)
-                .innerJoin(location).on(location.id.eq(locationId))
                 .leftJoin(comment).on(comment.poster.id.eq(poster.id))
                 .leftJoin(posterLike).on(posterLike.poster.id.eq(poster.id))
+                .where(poster.location.id.eq(locationId))
                 .groupBy(poster.id)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
@@ -71,7 +71,6 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
     public Page<PosterResponse> searchPostersByLike(Long locationId, Pageable pageable) {
 
         QPoster poster = QPoster.poster;
-        QLocation location = QLocation.location;
         QComment comment = QComment.comment;
         QPosterLike posterLike = QPosterLike.posterLike;
 
@@ -86,9 +85,9 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                         comment.count()
                 ))
                 .from(poster)
-                .innerJoin(location).on(location.id.eq(locationId))
                 .leftJoin(comment).on(comment.poster.id.eq(poster.id))
                 .leftJoin(posterLike).on(posterLike.poster.id.eq(poster.id))
+                .where(poster.location.id.eq(locationId))
                 .groupBy(poster.id)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
