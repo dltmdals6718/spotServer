@@ -4,6 +4,7 @@ import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.repository.PosterRepositoryCustom;
 import com.querydsl.core.types.Projections;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -15,6 +16,7 @@ import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -102,4 +104,34 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
         return PageableExecutionUtils.getPage(posters, pageable, countQuery::fetchOne);
     }
 
+    @Override
+    public Optional<PosterResponse> getPosterById(Long posterId) {
+
+        QPoster poster = QPoster.poster;
+        QComment comment = QComment.comment;
+        QPosterLike posterLike = QPosterLike.posterLike;
+
+        PosterResponse posterResponse = jpaQueryFactory
+                .select(Projections.constructor(PosterResponse.class,
+                        poster.id,
+                        poster.writer.id,
+                        poster.title,
+                        poster.content,
+                        poster.regDate,
+                        JPAExpressions
+                                .select(posterLike.count())
+                                .from(posterLike)
+                                .where(posterLike.poster.id.eq(posterId)),
+                        JPAExpressions
+                                .select(comment.count())
+                                .from(comment)
+                                .where(comment.poster.id.eq(posterId))
+                ))
+                .from(poster)
+                .where(poster.id.eq(posterId))
+                .fetchOne();
+
+        return Optional
+                .ofNullable(posterResponse);
+    }
 }

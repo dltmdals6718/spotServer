@@ -90,9 +90,8 @@ public class PosterService {
     }
 
     public PosterResponse getPoster(Long posterId) {
-        Poster poster = posterRepository.findById(posterId)
+        PosterResponse posterResponse = posterRepository.getPosterById(posterId)
                 .orElseThrow(() -> new NoSuchElementException());
-        PosterResponse posterResponse = PosterResponse.toDto(poster);
         return posterResponse;
     }
 

@@ -10,5 +10,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface PosterRepository extends JpaRepository<Poster, Long>, PosterRepositoryCustom {
 
-    Page<Poster> findByLocation(Location location, Pageable pageable);
 }
