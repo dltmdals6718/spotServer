@@ -611,6 +611,7 @@ Content-Type : multipart/form-data <br>
 필수 : X <br>
 
 
+<br>
 이름 : deleteFilesId <br>
 설명 : 삭제할 파일 ID <br>
 필수 : X <br>
@@ -646,6 +647,21 @@ Content-Type : multipart/form-data <br>
     <td>삭제 성공시 HTTP 상태 코드는 204를 가지며 responseBody는 갖지 않는다.</td>
     <td>게시글 삭제</td>
 </tr>
+        <tr>
+            <td>GET</td>
+            <td>/posters/{posterId}/likes</td>
+            <td></td>
+<td>
+
+```json
+{
+    "likeCnt": 1
+}
+```
+
+</td>
+            <td>좋아요 개수 조회</td>
+        </tr>
         <tr>
             <td>POST</td>
             <td>/posters/{posterId}/likes</td>

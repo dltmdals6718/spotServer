@@ -11,4 +11,6 @@ public interface PosterLikeRepository extends JpaRepository<PosterLike, Long> {
 
     boolean existsPosterLikeByPosterAndMember(Poster poster, Member member);
     Optional<PosterLike> findByPosterAndMember(Poster poster, Member member);
+
+    Long countByPoster(Poster poster);
 }

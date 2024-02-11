@@ -20,6 +20,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 public class PosterController {
@@ -90,6 +91,15 @@ public class PosterController {
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
                 .build();
+    }
+
+    @GetMapping(value = "/posters/{posterId}/likes")
+    public ResponseEntity getLike(@PathVariable Long posterId) {
+
+        Map response = posterService.getLike(posterId);
+
+        return ResponseEntity
+                .ok(response);
     }
 
     @PostMapping(value = "/posters/{posterId}/likes")

@@ -21,7 +21,9 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
@@ -166,6 +168,19 @@ public class PosterService {
 
         posterRepository.delete(poster);
 
+    }
+
+    public Map getLike(Long posterId) {
+
+        Map<String, Object> response = new HashMap();
+
+        Poster poster = posterRepository.findById(posterId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Long likeCnt = posterLikeRepository.countByPoster(poster);
+        response.put("likeCnt", likeCnt);
+
+        return response;
     }
 
     public void addLike(Long posterId, Member member) throws DuplicateException {
