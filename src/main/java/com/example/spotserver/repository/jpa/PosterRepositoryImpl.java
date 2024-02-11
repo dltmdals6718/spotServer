@@ -3,7 +3,10 @@ package com.example.spotserver.repository.jpa;
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.repository.PosterRepositoryCustom;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
+import com.querydsl.core.types.dsl.Expressions;
+import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
@@ -35,7 +38,6 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
     @Override
     public Page<PosterResponse> searchPostersByRecent(Long locationId, Pageable pageable) {
         QPoster poster = QPoster.poster;
-        QLocation location = QLocation.location;
         QComment comment = QComment.comment;
         QPosterLike posterLike = QPosterLike.posterLike;
 
@@ -46,14 +48,17 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                         poster.title,
                         poster.content,
                         poster.regDate,
-                        posterLike.count(),
-                        comment.count()
+                        JPAExpressions
+                                .select(posterLike.count())
+                                .from(posterLike)
+                                .where(posterLike.poster.id.eq(poster.id)),
+                        JPAExpressions
+                                .select(comment.count())
+                                .from(comment)
+                                .where(comment.poster.id.eq(poster.id))
                 ))
                 .from(poster)
-                .leftJoin(comment).on(comment.poster.id.eq(poster.id))
-                .leftJoin(posterLike).on(posterLike.poster.id.eq(poster.id))
                 .where(poster.location.id.eq(locationId))
-                .groupBy(poster.id)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
                 .orderBy(poster.regDate.desc())
@@ -76,6 +81,8 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
         QComment comment = QComment.comment;
         QPosterLike posterLike = QPosterLike.posterLike;
 
+        StringPath likeCount = Expressions.stringPath("like_count");
+
         List<PosterResponse> posters = jpaQueryFactory
                 .select(Projections.constructor(PosterResponse.class,
                         poster.id,
@@ -83,17 +90,22 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                         poster.title,
                         poster.content,
                         poster.regDate,
-                        posterLike.count(),
-                        comment.count()
-                ))
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(posterLike.count())
+                                        .from(posterLike)
+                                        .where(posterLike.poster.id.eq(poster.id)), "like_count"),
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(comment.count())
+                                        .from(comment)
+                                        .where(comment.poster.id.eq(poster.id)), "comment_count"))
+                )
                 .from(poster)
-                .leftJoin(comment).on(comment.poster.id.eq(poster.id))
-                .leftJoin(posterLike).on(posterLike.poster.id.eq(poster.id))
                 .where(poster.location.id.eq(locationId))
-                .groupBy(poster.id)
                 .offset(pageable.getOffset())
                 .limit(pageable.getPageSize())
-                .orderBy(posterLike.count().desc())
+                .orderBy(likeCount.desc())
                 .fetch();
 
         JPAQuery<Long> countQuery = jpaQueryFactory
