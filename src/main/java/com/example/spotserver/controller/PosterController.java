@@ -114,4 +114,13 @@ public class PosterController {
                 .build();
     }
 
+    @GetMapping(value = "/posters/best")
+    public ResponseEntity getBestPosters() {
+
+        List<PosterResponse> bestPosters = posterService.getBestPosters();
+
+        return ResponseEntity
+                .ok(bestPosters);
+    }
+
 }

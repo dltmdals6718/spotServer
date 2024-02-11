@@ -44,7 +44,6 @@ public class PosterService {
         this.imageStore = imageStore;
     }
 
-    // todo: 파일 크기, 확장자 제한 해보기, issue: files 키만 있고 value는 없어도 파일이 생성됌.
     public PosterResponse addPoster(PosterRequest posterRequest,
                                     List<MultipartFile> files,
                                     Long locationId,
@@ -195,6 +194,11 @@ public class PosterService {
 
         posterLikeRepository.delete(posterLike);
 
+    }
+
+    public List<PosterResponse> getBestPosters() {
+        List<PosterResponse> bestPosters = posterRepository.getBestPosters();
+        return bestPosters;
     }
 
 }

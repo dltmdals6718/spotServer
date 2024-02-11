@@ -45,6 +45,7 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                 .select(Projections.constructor(PosterResponse.class,
                         poster.id,
                         poster.writer.id,
+                        poster.writer.name,
                         poster.title,
                         poster.content,
                         poster.regDate,
@@ -87,6 +88,7 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                 .select(Projections.constructor(PosterResponse.class,
                         poster.id,
                         poster.writer.id,
+                        poster.writer.name,
                         poster.title,
                         poster.content,
                         poster.regDate,
@@ -127,6 +129,7 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                 .select(Projections.constructor(PosterResponse.class,
                         poster.id,
                         poster.writer.id,
+                        poster.writer.name,
                         poster.title,
                         poster.content,
                         poster.regDate,
@@ -145,5 +148,40 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
 
         return Optional
                 .ofNullable(posterResponse);
+    }
+
+    @Override
+    public List<PosterResponse> getBestPosters() {
+        QPoster poster = QPoster.poster;
+        QComment comment = QComment.comment;
+        QPosterLike posterLike = QPosterLike.posterLike;
+
+        StringPath likeCount = Expressions.stringPath("like_count");
+
+        List<PosterResponse> bestPosters = jpaQueryFactory
+                .select(Projections.constructor(PosterResponse.class,
+                        poster.id,
+                        poster.writer.id,
+                        poster.writer.name,
+                        poster.title,
+                        poster.content,
+                        poster.regDate,
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(posterLike.count())
+                                        .from(posterLike)
+                                        .where(posterLike.poster.id.eq(poster.id)), "like_count"),
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(comment.count())
+                                        .from(comment)
+                                        .where(comment.poster.id.eq(poster.id)), "comment_count"))
+                )
+                .from(poster)
+                .orderBy(likeCount.desc())
+                .limit(5)
+                .fetch();
+
+        return bestPosters;
     }
 }

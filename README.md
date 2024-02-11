@@ -469,11 +469,14 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "posterId": 9,
-  "writerId": 1,
-  "title": "title3",
-  "content": "content3",
-  "regDate": "2024-01-24T14:20:48.901509"
+  "posterId": 65,
+  "writerId": 129,
+  "writerName": "testName",
+  "title": "허허",
+  "content": "하하",
+  "regDate": "2024-02-11T17:19:34.902445",
+  "likeCnt": null,
+  "commentCnt": null
 }
 ```
 
@@ -490,33 +493,35 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-    "results": [
-        {
-            "posterId": 60,
-            "writerId": 129,
-            "title": "title",
-            "content": "content",
-            "regDate": "2024-02-05T16:49:47",
-            "likeCnt": 1,
-            "commentCnt": 0
-        },
-        {
-            "posterId": 61,
-            "writerId": 129,
-            "title": "새글",
-            "content": "content",
-            "regDate": "2024-02-06T15:40:47",
-            "likeCnt": 1,
-            "commentCnt": 1
-        }
-    ],
-    "pageInfo": {
-        "page": 1,
-        "size": 2,
-        "numberOfElements": 2,
-        "totalElements": 4,
-        "totalPage": 2
+  "results": [
+    {
+      "posterId": 61,
+      "writerId": 129,
+      "writerName": "testName",
+      "title": "새글",
+      "content": "content",
+      "regDate": "2024-02-06T15:40:47",
+      "likeCnt": 1,
+      "commentCnt": 2
+    },
+    {
+      "posterId": 60,
+      "writerId": 129,
+      "writerName": "testName",
+      "title": "title",
+      "content": "content",
+      "regDate": "2024-02-05T16:49:47",
+      "likeCnt": 1,
+      "commentCnt": 0
     }
+  ],
+  "pageInfo": {
+    "page": 1,
+    "size": 2,
+    "numberOfElements": 2,
+    "totalElements": 4,
+    "totalPage": 2
+  }
 }
 ```
 
@@ -535,6 +540,7 @@ Content-Type : multipart/form-data <br>
 {
   "posterId": 61,
   "writerId": 129,
+  "writerName": "testName",
   "title": "새글",
   "content": "content",
   "regDate": "2024-02-06T15:40:47",
