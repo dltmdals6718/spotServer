@@ -554,6 +554,42 @@ Content-Type : multipart/form-data <br>
   </tr>
 
 <tr>
+    <td>GET</td>
+    <td>/posters/best</td>
+    <td></td>
+<td>
+
+```json
+[
+    {
+        "posterId": 61,
+        "writerId": 129,
+        "writerName": "testName",
+        "title": "새글",
+        "content": "content",
+        "regDate": "2024-02-06T15:40:47",
+        "likeCnt": 1,
+        "commentCnt": 2
+    },
+    {
+      "..." : "..."
+    },
+    {
+      "..." : "..."
+    },
+    {
+      "..." : "..."
+    },
+    {
+      "..." : "..."
+    }
+]
+```
+</td>
+    <td>좋아요 상위 5개 포스터</td>
+</tr>
+
+<tr>
     <td>PUT</td>
     <td>/posters/{posterId}</td>
 <td>
@@ -588,11 +624,14 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "posterId": 49,
+  "posterId": 65,
   "writerId": 129,
+  "writerName": "testName",
   "title": "수정된 제목2",
   "content": "수정된 제목2",
-  "regDate": "2024-02-03T17:13:38"
+  "regDate": "2024-02-11T17:19:35",
+  "likeCnt": null,
+  "commentCnt": null
 }
 ```
 
