@@ -533,11 +533,13 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "posterId": 10,
-  "writerId": 1,
-  "title": "title3",
-  "content": "content3",
-  "regDate": "2024-01-24T14:24:17"
+  "posterId": 61,
+  "writerId": 129,
+  "title": "새글",
+  "content": "content",
+  "regDate": "2024-02-06T15:40:47",
+  "likeCnt": 1,
+  "commentCnt": 2
 }
 ```
 
