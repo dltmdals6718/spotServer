@@ -17,6 +17,7 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping("/locations")
@@ -82,6 +83,24 @@ public class LocationController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(locationResponse);
+    }
+
+    @GetMapping("/best")
+    public ResponseEntity getBestLocation() {
+
+        List<LocationResponse> bestLocations = locationService.getBestLocations();
+        
+        return ResponseEntity
+                .ok(bestLocations);
+    }
+
+    @GetMapping("/{locationId}/likes")
+    public ResponseEntity getLikes(@PathVariable Long locationId) {
+
+        Map response = locationService.getLikes(locationId);
+
+        return ResponseEntity
+                .ok(response);
     }
 
     @PostMapping("/{locationId}/likes")

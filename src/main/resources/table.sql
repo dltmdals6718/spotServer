@@ -1,3 +1,23 @@
+CREATE TABLE member (
+                        id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                        login_id VARCHAR(255),
+                        login_pwd VARCHAR(255),
+                        role VARCHAR(255),
+                        name VARCHAR(255),
+                        reg_date DATETIME DEFAULT NOW(),
+                        type VARCHAR(10),
+                        sns_id BIGINT
+);
+
+CREATE TABLE location (
+                          id BIGINT AUTO_INCREMENT PRIMARY KEY,
+                          latitude DOUBLE,
+                          longitude DOUBLE,
+                          title VARCHAR(255),
+                          address VARCHAR(255),
+                          description TEXT
+);
+
 CREATE TABLE poster (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
     member_id BIGINT,
@@ -19,14 +39,6 @@ CREATE TABLE comment (
     FOREIGN KEY (member_id) REFERENCES member(id)
 );
 
-CREATE TABLE location (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    latitude DOUBLE,
-    longitude DOUBLE,
-    title VARCHAR(255),
-    address VARCHAR(255),
-    description TEXT
-)
 
 CREATE TABLE poster_image (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,
@@ -44,16 +56,6 @@ CREATE TABLE location_image (
     FOREIGN KEY (location_id) REFERENCES location(id)
 );
 
-CREATE TABLE member (
-    id BIGINT AUTO_INCREMENT PRIMARY KEY,
-    login_id VARCHAR(255),
-    login_pwd VARCHAR(255),
-    role VARCHAR(255),
-    name VARCHAR(255),
-    reg_date DATETIME DEFAULT NOW(),
-    type VARCHAR(10),
-    sns_id BIGINT
-);
 
 CREATE TABLE poster_like (
     id BIGINT AUTO_INCREMENT PRIMARY KEY,

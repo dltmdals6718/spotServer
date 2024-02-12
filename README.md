@@ -412,6 +412,46 @@ Content-Type : multipart/form-data
             <td>장소ID로 조회</td>
         </tr>
         <tr>
+            <td>GET</td>
+            <td>/locations/best</td>
+            <td></td>
+<td>
+
+```json
+[
+  {
+    "locationId": 1,
+    "latitude": 35.24308,
+    "longitude": 128.6934,
+    "title": "운동장",
+    "address": "주소",
+    "description": "낭만 가득 운동장",
+    "likeCnt": 2
+  },
+  {
+    "..." : "..."
+  }
+]
+```
+
+</td>
+            <td>좋아요 상위 5개 장소</td>
+        </tr>
+        <tr>
+            <td>GET</td>
+            <td>/locations/{locationId}/likes</td>
+            <td></td>
+<td>
+
+```json
+{
+    "likeCnt": 2
+}
+```
+</td>
+            <td>좋아요 개수 조회</td>
+        </tr>
+        <tr>
             <td>POST</td>
             <td>/locations/{locationId}/likes</td>
             <td></td>
@@ -570,15 +610,6 @@ Content-Type : multipart/form-data <br>
         "regDate": "2024-02-06T15:40:47",
         "likeCnt": 1,
         "commentCnt": 2
-    },
-    {
-      "..." : "..."
-    },
-    {
-      "..." : "..."
-    },
-    {
-      "..." : "..."
     },
     {
       "..." : "..."

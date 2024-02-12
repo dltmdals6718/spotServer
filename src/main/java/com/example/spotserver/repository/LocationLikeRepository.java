@@ -11,5 +11,6 @@ public interface LocationLikeRepository extends JpaRepository<LocationLike, Long
 
     boolean existsLocationLikeByLocationAndMember(Location location, Member member);
     Optional<LocationLike> findByLocationAndMember(Location location, Member member);
+    Long countByLocation(Location location);
 
 }

@@ -1,9 +1,13 @@
 package com.example.spotserver.dto.response;
 
 import com.example.spotserver.domain.Location;
+import lombok.AllArgsConstructor;
 import lombok.Data;
+import lombok.NoArgsConstructor;
 
 @Data
+@AllArgsConstructor
+@NoArgsConstructor
 public class LocationResponse {
 
     private Long locationId;
@@ -12,6 +16,7 @@ public class LocationResponse {
     private String title;
     private String address;
     private String description;
+    private Long likeCnt;
 
 
     public static LocationResponse toDto(Location location) {

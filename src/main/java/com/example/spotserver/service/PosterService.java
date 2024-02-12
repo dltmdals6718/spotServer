@@ -170,7 +170,7 @@ public class PosterService {
 
     }
 
-    public Map getLike(Long posterId) {
+    public Map getLikes(Long posterId) {
 
         Map<String, Object> response = new HashMap();
 

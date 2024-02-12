@@ -1,14 +1,18 @@
 package com.example.spotserver.service;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.response.LocationResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.repository.LocationLikeRepository;
 import com.example.spotserver.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
@@ -39,6 +43,26 @@ public class LocationService {
                 .orElseThrow(() -> new NoSuchElementException());
 
         return location;
+    }
+
+    public List<LocationResponse> getBestLocations() {
+
+        List<LocationResponse> bestLocations = locationRepository.getBestLocations();
+
+        return bestLocations;
+    }
+
+    public Map getLikes(Long locationId) {
+
+        Map<String, Object> response = new HashMap();
+
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Long likeCnt = locationLikeRepository.countByLocation(location);
+        response.put("likeCnt", likeCnt);
+
+        return response;
     }
 
     public void addLike(Long locationId,

@@ -94,9 +94,9 @@ public class PosterController {
     }
 
     @GetMapping(value = "/posters/{posterId}/likes")
-    public ResponseEntity getLike(@PathVariable Long posterId) {
+    public ResponseEntity getLikes(@PathVariable Long posterId) {
 
-        Map response = posterService.getLike(posterId);
+        Map response = posterService.getLikes(posterId);
 
         return ResponseEntity
                 .ok(response);
