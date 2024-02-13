@@ -1,12 +1,16 @@
 package com.example.spotserver.service;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.LocationConditionRequest;
 import com.example.spotserver.dto.response.LocationResponse;
+import com.example.spotserver.dto.response.PageResponse;
+import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.repository.LocationLikeRepository;
 import com.example.spotserver.repository.LocationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -28,9 +32,13 @@ public class LocationService {
         this.locationLikeRepository = locationLikeRepository;
     }
 
-    public List<Location> getLocations(Double latitude,
-                                       Double longitude) {
-        return locationRepository.findByLatitudeBetweenAndLongitudeBetween(latitude-0.01, latitude+0.01, longitude-0.01, longitude+0.01);
+    public PageResponse<List<LocationResponse>> searchLocations(Double latitude,
+                                       Double longitude,
+                                       LocationConditionRequest conditionRequest) {
+
+        Page<LocationResponse> locationResponses = locationRepository.searchLocations(latitude, longitude, conditionRequest);
+        PageResponse<List<LocationResponse>> pageResponse = new PageResponse<>(locationResponses);
+        return pageResponse;
     }
 
     public Location addLocation(Location location) {
@@ -38,11 +46,11 @@ public class LocationService {
         return saveLocation;
     }
 
-    public Location getLocation(Long locationId) {
-        Location location = locationRepository.findById(locationId)
+    public LocationResponse getLocation(Long locationId) {
+        LocationResponse locationResponse = locationRepository.getLocationById(locationId)
                 .orElseThrow(() -> new NoSuchElementException());
 
-        return location;
+        return locationResponse;
     }
 
     public List<LocationResponse> getBestLocations() {

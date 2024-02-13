@@ -1,12 +1,16 @@
 package com.example.spotserver.controller;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.LocationConditionRequest;
 import com.example.spotserver.dto.request.LocationRequest;
 import com.example.spotserver.dto.response.LocationResponse;
+import com.example.spotserver.dto.response.PageResponse;
+import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.service.ImageFileService;
 import com.example.spotserver.service.LocationService;
 import jakarta.validation.Valid;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,18 +38,15 @@ public class LocationController {
     }
 
     @GetMapping
-    public ResponseEntity<List<LocationResponse>> getLocations(@RequestParam("latitude") Double latitude,
-                                                               @RequestParam("longitude") Double longitude) {
-        List<Location> locations = locationService.getLocations(latitude, longitude);
+    public ResponseEntity<PageResponse<List<LocationResponse>>> getLocations(@RequestParam("latitude") Double latitude,
+                                                                           @RequestParam("longitude") Double longitude,
+                                                                           @Valid @ModelAttribute LocationConditionRequest conditionRequest) {
 
-        List<LocationResponse> locationResponseList = new ArrayList<>();
-        for (Location location : locations) {
-            locationResponseList.add(LocationResponse.toDto(location));
-        }
+        PageResponse<List<LocationResponse>> pageResponse = locationService.searchLocations(latitude, longitude, conditionRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(locationResponseList);
+                .body(pageResponse);
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
@@ -76,9 +77,7 @@ public class LocationController {
     @GetMapping("/{locationId}")
     public ResponseEntity<LocationResponse> getLocation(@PathVariable Long locationId) {
 
-        Location location = locationService.getLocation(locationId);
-
-        LocationResponse locationResponse = LocationResponse.toDto(location);
+        LocationResponse locationResponse = locationService.getLocation(locationId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

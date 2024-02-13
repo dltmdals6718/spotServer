@@ -214,11 +214,12 @@ PageInfo
 
 ```json
 {
-    "memberId": 1,
-    "name": "TESTNAME",
-    "role": "USER"
+  "memberId": 1,
+  "name": "TESTNAME",
+  "role": "USER"
 }
 ```
+
 </td>
     <td>특정 회원 정보 조회</td>
 </tr>
@@ -231,11 +232,12 @@ PageInfo
 
 ```json
 {
-    "memberId": 126,
-    "name": "namezz",
-    "role": "USER"
+  "memberId": 126,
+  "name": "namezz",
+  "role": "USER"
 }
 ```
+
 </td>
     <td>자신 정보 조회</td>
 </tr>
@@ -320,30 +322,50 @@ PageInfo
     <tbody>
         <tr>
             <td>GET</td>
-            <td>/locations<br>?latitude={위도값}<br>&longitude={경도값}</td>
+            <td>/locations<br>?latitude={위도값}<br>&longitude={경도값}<br>&size={페이지크기}<br>&page={페이지번호}<br>&sort={정렬방법}<br>&search={제목 또는 내용}</td>
             <td></td>
 <td>
 
 ```json
 
-[
-  {
-    "locationId": 1,
-    "latitude": 11.24308,
-    "longitude": 11.6934,
-    "title": "AAA",
-    "address": "BBB",
-    "description": "낭만 가득 운동장"
-  },
-  {
-    "locationId": 3,
-    "latitude": 11.24666,
-    "longitude": 11.6909,
-    "title": "CCC",
-    "address": "DDD",
-    "description": "공부하자 아냐 그건 너무 교과서야"
+{
+  "results": [
+    {
+      "locationId": 4,
+      "latitude": 12.123,
+      "longitude": 123.1234,
+      "title": "제목",
+      "address": "주소",
+      "description": "설명",
+      "likeCnt": 0
+    },
+    {
+      "locationId": 3,
+      "latitude": 12.12345,
+      "longitude": 123.1234,
+      "title": "제목",
+      "address": "주소",
+      "description": "설명",
+      "likeCnt": 0
+    },
+    {
+      "locationId": 1,
+      "latitude": 12.12345,
+      "longitude": 123.1234,
+      "title": "장소",
+      "address": "주소",
+      "description": "설명",
+      "likeCnt": 2
+    }
+  ],
+  "pageInfo": {
+    "page": 1,
+    "size": 3,
+    "numberOfElements": 3,
+    "totalElements": 3,
+    "totalPage": 1
   }
-]
+}
 
 ```
 
@@ -399,12 +421,13 @@ Content-Type : multipart/form-data
 
 ```json
 {
-  "locationId": 1,
-  "latitude": 1.1,
-  "longitude": 2.2,
-  "title": "장소명",
-  "address": "주소",
-  "description": "부가 설명"
+  "locationId": 2,
+  "latitude": 35.23296,
+  "longitude": 128.6805,
+  "title": "용지호수공원",
+  "address": "경상남도 창원시 의창구 용지동 551-4",
+  "description": "용지호수는 경상남도 창원시 성산구 용지동에 있는 호수이다. 창원시를 대표하는 호수이며, 용지공원 안에 있다.",
+  "likeCnt": 1
 }
 ```
 
@@ -429,7 +452,7 @@ Content-Type : multipart/form-data
     "likeCnt": 2
   },
   {
-    "..." : "..."
+    "...": "..."
   }
 ]
 ```
@@ -445,9 +468,10 @@ Content-Type : multipart/form-data
 
 ```json
 {
-    "likeCnt": 2
+  "likeCnt": 2
 }
 ```
+
 </td>
             <td>좋아요 개수 조회</td>
         </tr>
@@ -468,10 +492,80 @@ Content-Type : multipart/form-data
     </tbody>
 </table>
 
+### 1. 요청
 
+#### 1.1 주위 장소 조회
+
+##### 쿼리 파라미터
+
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+            <th>필수</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>latitude</td>
+            <td>Double</td>
+            <td>위도값</td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>longitude</td>
+            <td>Double</td>
+            <td>경도값</td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>page</td>
+            <td>Integer</td>
+            <td>요청할 페이지 번호<br>(기본값:1)</td>
+            <td>X</td>
+        </tr>
+        <tr>
+            <td>size</td>
+            <td>Integer</td>
+            <td>한 페이지에 담길 최대 데이터 개수<br>(최대:30, 기본값:10)</td>
+            <td>X</td>
+        </tr>
+        <tr>
+            <td>sort</td>
+            <td>String</td>
+            <td>데이터 정렬 방식으로 다음중 하나를 값으로 갖는다.<br>recent: *추가중, like: 좋아요순<br>(기본값: *추가중)</td>
+            <td>X</td>
+        </tr>
+        <tr>
+            <td>search</td>
+            <td>String</td>
+            <td>제목, 내용에 포함된 키워드를 검색</td>
+            <td>X</td>
+        </tr>
+    </tbody>
+</table>
 <br>
-<hr>
-<br>
+요청 예
+<table>
+    <thead>
+        <tr>
+            <th>요청 경로</th>
+            <th>설명</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>/locations?latitude=위도&longitude=경도</td>
+            <td>지도에 장소 표시를 위한 API이다. 한 페이지에 주위 모든 장소들을 응답으로 받습니다.</td>
+        </tr>
+        <tr>
+            <td>위도, 경도 외 추가적인 파라미터 적용</td>
+            <td>게시글 형태로 장소들을 조회하기 위한 API이다. 검색, 정렬과 같은 조건들을 넣을 수 있다.</td>
+        </tr>
+    </tbody>
+</table>
 
 ### POSTER
 
@@ -601,21 +695,22 @@ Content-Type : multipart/form-data <br>
 
 ```json
 [
-    {
-        "posterId": 61,
-        "writerId": 129,
-        "writerName": "testName",
-        "title": "새글",
-        "content": "content",
-        "regDate": "2024-02-06T15:40:47",
-        "likeCnt": 1,
-        "commentCnt": 2
-    },
-    {
-      "..." : "..."
-    }
+  {
+    "posterId": 61,
+    "writerId": 129,
+    "writerName": "testName",
+    "title": "새글",
+    "content": "content",
+    "regDate": "2024-02-06T15:40:47",
+    "likeCnt": 1,
+    "commentCnt": 2
+  },
+  {
+    "...": "..."
+  }
 ]
 ```
+
 </td>
     <td>좋아요 상위 5개 포스터</td>
 </tr>
@@ -686,7 +781,7 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-    "likeCnt": 1
+  "likeCnt": 1
 }
 ```
 
@@ -712,7 +807,9 @@ Content-Type : multipart/form-data <br>
 </table>
 
 ### 1. 요청
+
 #### 1.1 전체 게시글 조회
+
 ##### 쿼리 파라미터
 
 <table>
@@ -747,6 +844,7 @@ Content-Type : multipart/form-data <br>
 </table>
 
 #### 1.2 게시글 작성
+
 ##### 헤더
 
 <table>
@@ -825,6 +923,7 @@ PosterRequest
 </table>
 
 #### 1.3 게시글 수정
+
 ##### 헤더
 
 <table>
@@ -882,9 +981,8 @@ PosterRequest
     </tbody>
 </table>
 
-
-
 ### 2. 응답
+
 #### 2.1 전체 게시글 조회
 
 <table>
@@ -1061,7 +1159,7 @@ Results
 
 ```json
 {
-  "content":"수정될 내용"
+  "content": "수정될 내용"
 }
 ```
 
@@ -1070,13 +1168,14 @@ Results
 
 ```json
 {
-    "commentId": 21,
-    "writerId": 126,
-    "writerName": "namezz",
-    "content": "수정될 내용",
-    "regDate": "2024-02-01T14:05:03"
+  "commentId": 21,
+  "writerId": 126,
+  "writerName": "namezz",
+  "content": "수정될 내용",
+  "regDate": "2024-02-01T14:05:03"
 }
 ```
+
 </td>
             <td>댓글 수정</td>
         </tr>

@@ -2,5 +2,6 @@
 = 게시글 작성과 같은 API 호출시 회원 종류별로 어떻게 처리하지? 우리 서비스만의 토큰을?
 - MERGE, REBASE, PULL, FETCH 알기
 - Body 없이 POST 요청 에러 처리
-- title 및 content 검색과 동시에 정렬기준 + 페이징
 - 파일 크기, 확장자 제한 해보기, issue: files 키만 있고 value는 없어도 파일이 생성됌.
+- Loation, Poster의 Response에 toDto 쓰는 코드들 추천, 댓글 수 null로 나옴
+- Location 등록일 추가

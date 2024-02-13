@@ -2,18 +2,27 @@ package com.example.spotserver.repository.jpa;
 
 import com.example.spotserver.domain.QLocation;
 import com.example.spotserver.domain.QLocationLike;
+import com.example.spotserver.dto.request.LocationConditionRequest;
 import com.example.spotserver.dto.response.LocationResponse;
+import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.repository.LocationRepositoryCustom;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 
 
 @Repository
@@ -22,6 +31,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
     private EntityManager entityManager;
     private JPAQueryFactory jpaQueryFactory;
+    private Double scale = 0.01;
 
     @Autowired
     public LocationRepositoryImpl(EntityManager entityManager) {
@@ -55,4 +65,111 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
         return bestLocations;
     }
+
+    @Override
+    public Page<LocationResponse> searchLocations(Double latitude,
+                                                  Double longitude,
+                                                  LocationConditionRequest conditionRequest) {
+
+        int defaultSize = 10;
+        int defaultPage = 1;
+
+        QLocation location = QLocation.location;
+        QLocationLike locationLike = QLocationLike.locationLike;
+
+        StringPath likeCount = Expressions.stringPath("like_count");
+
+        Pageable pageable = null;
+
+        Integer page = conditionRequest.getPage();
+        Integer size = conditionRequest.getSize();
+        String sort = conditionRequest.getSort();
+        String search = conditionRequest.getSearch();
+
+        JPAQuery<LocationResponse> searchQuery = jpaQueryFactory
+                .select(Projections.constructor(LocationResponse.class,
+                        location.id,
+                        location.latitude,
+                        location.longitude,
+                        location.title,
+                        location.address,
+                        location.description,
+                        locationLike.count().as("like_count")))
+                .from(location)
+                .leftJoin(locationLike).on(locationLike.location.id.eq(location.id))
+                .where(location.latitude.between(latitude - scale, latitude + scale)
+                        .and(location.longitude.between(longitude - scale, longitude + scale)))
+                .groupBy(location.id);
+
+        JPAQuery<Long> countQuery = jpaQueryFactory
+                .select(location.count())
+                .from(location)
+                .where(location.latitude.between(latitude - scale, latitude + scale)
+                        .and(location.longitude.between(longitude - scale, longitude + scale)));
+
+        if (page != null || size != null || sort != null || search != null) {
+
+            if (page == null)
+                page = defaultPage;
+            if (size == null)
+                size = defaultSize;
+
+            pageable = PageRequest.of(page - 1, size);
+            searchQuery
+                    .limit(pageable.getPageSize())
+                    .offset(pageable.getOffset());
+
+        }
+
+        if (sort != null) { // sort 존재
+            if (sort.equals("like"))
+                searchQuery.orderBy(likeCount.desc());
+        } else { // sort 미존재 기본값 (날짜순)
+            // todo: 날짜 칼럼 추가하고 orderBy 수정
+            searchQuery.orderBy(location.id.desc());
+        }
+
+        if (search != null) {
+            searchQuery
+                    .where(location.title.contains(search)
+                            .or(location.description.contains(search)));
+            countQuery
+                    .where(location.title.contains(search)
+                            .or(location.description.contains(search)));
+        }
+
+        List<LocationResponse> locations = searchQuery.fetch();
+
+        return pageable != null ?
+                PageableExecutionUtils.getPage(locations, pageable, countQuery::fetchOne) :
+                new PageImpl<>(locations);
+    }
+
+    @Override
+    public Optional<LocationResponse> getLocationById(Long locationId) {
+
+        QLocation location = QLocation.location;
+        QLocationLike locationLike = QLocationLike.locationLike;
+
+        LocationResponse locationResponse = jpaQueryFactory
+                .select(Projections.constructor(LocationResponse.class,
+                        location.id,
+                        location.latitude,
+                        location.longitude,
+                        location.title,
+                        location.address,
+                        location.description,
+                        locationLike.count()
+                ))
+                .from(location)
+                .leftJoin(locationLike).on(locationLike.location.id.eq(location.id))
+                .groupBy(location.id)
+                .where(location.id.eq(locationId))
+                .fetchOne();
+
+        return Optional
+                .ofNullable(locationResponse);
+    }
+
+
 }
