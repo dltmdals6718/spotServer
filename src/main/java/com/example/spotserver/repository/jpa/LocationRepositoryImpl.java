@@ -121,15 +121,14 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
         }
 
-        if (sort != null) {
-            if (sort.equals("like"))
-                searchQuery.orderBy(likeCount.desc());
-            else // 날짜 컬럼 추가하고 수정 필요
-                searchQuery.orderBy(location.id.desc());
-        } else { // sort 미존재 기본값 (날짜순)
-            // todo: 날짜 칼럼 추가하고 orderBy 수정
+        if (sort == null)
             searchQuery.orderBy(location.id.desc());
-        }
+        else if (sort.equals("like"))
+            searchQuery.orderBy(likeCount.desc());
+        else if(sort.equals("recent"))
+            searchQuery.orderBy(location.id.desc());
+        else
+            searchQuery.orderBy(location.id.desc());
 
         if (search != null) {
             searchQuery
