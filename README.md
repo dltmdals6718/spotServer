@@ -332,37 +332,29 @@ PageInfo
   "results": [
     {
       "locationId": 4,
-      "latitude": 12.123,
-      "longitude": 123.1234,
+      "latitude": 35.24154,
+      "longitude": 128.6957,
       "title": "제목",
       "address": "주소",
       "description": "설명",
+      "regDate": "2024-02-15T14:08:41",
       "likeCnt": 0
     },
     {
-      "locationId": 3,
-      "latitude": 12.12345,
-      "longitude": 123.1234,
-      "title": "제목",
-      "address": "주소",
-      "description": "설명",
-      "likeCnt": 0
+      "..." : "..."
     },
     {
-      "locationId": 1,
-      "latitude": 12.12345,
-      "longitude": 123.1234,
-      "title": "장소",
-      "address": "주소",
-      "description": "설명",
-      "likeCnt": 2
+      "..." : "..."
+    },
+    {
+      "..." : "..."
     }
   ],
   "pageInfo": {
     "page": 1,
-    "size": 3,
-    "numberOfElements": 3,
-    "totalElements": 3,
+    "size": 4,
+    "numberOfElements": 4,
+    "totalElements": 4,
     "totalPage": 1
   }
 }
@@ -427,6 +419,7 @@ Content-Type : multipart/form-data
   "title": "용지호수공원",
   "address": "경상남도 창원시 의창구 용지동 551-4",
   "description": "용지호수는 경상남도 창원시 성산구 용지동에 있는 호수이다. 창원시를 대표하는 호수이며, 용지공원 안에 있다.",
+  "regDate": "2024-02-15T14:08:30",
   "likeCnt": 1
 }
 ```
@@ -443,13 +436,14 @@ Content-Type : multipart/form-data
 ```json
 [
   {
-    "locationId": 1,
-    "latitude": 35.24308,
-    "longitude": 128.6934,
-    "title": "운동장",
+    "locationId": 8,
+    "latitude": 35.24594,
+    "longitude": 128.6939,
+    "title": "제목",
     "address": "주소",
-    "description": "낭만 가득 운동장",
-    "likeCnt": 2
+    "description": "설명",
+    "regDate": "2024-02-15T13:40:58",
+    "likeCnt": 0
   },
   {
     "...": "..."
@@ -458,7 +452,7 @@ Content-Type : multipart/form-data
 ```
 
 </td>
-            <td>좋아요 상위 5개 장소</td>
+            <td>전국 좋아요 상위 5개 장소</td>
         </tr>
         <tr>
             <td>GET</td>
@@ -535,7 +529,7 @@ Content-Type : multipart/form-data
         <tr>
             <td>sort</td>
             <td>String</td>
-            <td>데이터 정렬 방식으로 다음중 하나를 값으로 갖는다.<br>recent: *추가중, like: 좋아요순<br>(기본값: *추가중)</td>
+            <td>데이터 정렬 방식으로 다음중 하나를 값으로 갖는다.<br>recent: 최신순, like: 좋아요순<br>(기본값: recent)</td>
             <td>X</td>
         </tr>
         <tr>

@@ -2,7 +2,9 @@ package com.example.spotserver.domain;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.hibernate.annotations.CreationTimestamp;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 @Entity
@@ -17,6 +19,9 @@ public class Location {
     private String title;
     private String address;
     private String description;
+
+    @CreationTimestamp
+    private LocalDateTime regDate;
 
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<LocationLike> locationLikes;

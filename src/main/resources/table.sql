@@ -15,7 +15,8 @@ CREATE TABLE location (
                           longitude DOUBLE,
                           title VARCHAR(255),
                           address VARCHAR(255),
-                          description TEXT
+                          description TEXT,
+                          reg_date DATETIME
 );
 
 CREATE TABLE poster (

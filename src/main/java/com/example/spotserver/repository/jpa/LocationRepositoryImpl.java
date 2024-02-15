@@ -5,6 +5,7 @@ import com.example.spotserver.domain.QLocationLike;
 import com.example.spotserver.dto.request.LocationConditionRequest;
 import com.example.spotserver.dto.response.LocationResponse;
 import com.example.spotserver.dto.response.PosterResponse;
+import com.example.spotserver.dto.response.QLocationResponse;
 import com.example.spotserver.repository.LocationRepositoryCustom;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
@@ -48,14 +49,16 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         QLocationLike locationLike = QLocationLike.locationLike;
 
         List<LocationResponse> bestLocations = jpaQueryFactory
-                .select(Projections.constructor(LocationResponse.class,
+                .select(new QLocationResponse(
                         location.id,
                         location.latitude,
                         location.longitude,
                         location.title,
                         location.address,
                         location.description,
-                        locationLike.count().as("like_count")))
+                        location.regDate,
+                        locationLike.count().as("like_count")
+                ))
                 .from(location)
                 .leftJoin(locationLike).on(locationLike.location.id.eq(location.id))
                 .groupBy(location.id)
@@ -87,14 +90,16 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         String search = conditionRequest.getSearch();
 
         JPAQuery<LocationResponse> searchQuery = jpaQueryFactory
-                .select(Projections.constructor(LocationResponse.class,
+                .select(new QLocationResponse(
                         location.id,
                         location.latitude,
                         location.longitude,
                         location.title,
                         location.address,
                         location.description,
-                        locationLike.count().as("like_count")))
+                        location.regDate,
+                        locationLike.count().as("like_count")
+                ))
                 .from(location)
                 .leftJoin(locationLike).on(locationLike.location.id.eq(location.id))
                 .where(location.latitude.between(latitude - scale, latitude + scale)
@@ -122,13 +127,13 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         }
 
         if (sort == null)
-            searchQuery.orderBy(location.id.desc());
+            searchQuery.orderBy(location.regDate.desc());
         else if (sort.equals("like"))
             searchQuery.orderBy(likeCount.desc());
         else if(sort.equals("recent"))
-            searchQuery.orderBy(location.id.desc());
+            searchQuery.orderBy(location.regDate.desc());
         else
-            searchQuery.orderBy(location.id.desc());
+            searchQuery.orderBy(location.regDate.desc());
 
         if (search != null) {
             searchQuery
@@ -153,14 +158,15 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         QLocationLike locationLike = QLocationLike.locationLike;
 
         LocationResponse locationResponse = jpaQueryFactory
-                .select(Projections.constructor(LocationResponse.class,
+                .select(new QLocationResponse(
                         location.id,
                         location.latitude,
                         location.longitude,
                         location.title,
                         location.address,
                         location.description,
-                        locationLike.count()
+                        location.regDate,
+                        locationLike.count().as("like_count")
                 ))
                 .from(location)
                 .leftJoin(locationLike).on(locationLike.location.id.eq(location.id))
