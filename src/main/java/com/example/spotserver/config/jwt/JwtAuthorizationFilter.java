@@ -66,7 +66,6 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             if (id != null) {
                 System.out.println("서명 통과");
                 Member member = memberRepository.findById(id).get();
-                System.out.println("member = " + member);
 
                 PrincipalDetails principalDetails = new PrincipalDetails(member);
                 Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());

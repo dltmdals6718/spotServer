@@ -9,16 +9,26 @@ import com.example.spotserver.dto.response.MemberResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.LoginFailException;
+import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.service.MemberService;
 import com.example.spotserver.snsLogin.KakaoApi;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.net.MalformedURLException;
+import java.nio.file.Files;
+import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -37,9 +47,10 @@ public class MemberController {
     }
 
     @PostMapping("/signup")
-    public ResponseEntity<MemberResponse> signupMember(@Valid @RequestBody SignUpMember signUpMember) throws DuplicateException {
+    public ResponseEntity<MemberResponse> signupMember(@Valid @RequestPart SignUpMember signUpMember,
+                                                       @RequestPart(required = false) MultipartFile memberImg) throws DuplicateException, IOException {
 
-        MemberResponse memberResponse = memberService.addMember(signUpMember);
+        MemberResponse memberResponse = memberService.addMember(signUpMember, memberImg);
 
 
         return ResponseEntity
@@ -66,9 +77,7 @@ public class MemberController {
 
     @GetMapping("/{memberId}")
     public ResponseEntity<MemberResponse> getMember(@PathVariable Long memberId) {
-        Member member = memberService.getMember(memberId);
-
-        MemberResponse memberResponse = MemberResponse.toDto(member);
+        MemberResponse memberResponse = memberService.getMemberInfo(memberId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -77,10 +86,38 @@ public class MemberController {
 
     @GetMapping
     public ResponseEntity<MemberResponse> getMyInfo(@AuthenticationPrincipal(expression = "member") Member member) {
+        MemberResponse memberResponse = memberService.getMemberInfo(member.getId());
 
         return ResponseEntity
                 .ok()
-                .body(MemberResponse.toDto(member));
+                .body(memberResponse);
+    }
+
+    @GetMapping("/{memberId}/images/{storeFileName}")
+    public ResponseEntity<Resource> getMemberImg(@PathVariable Long memberId, @PathVariable String storeFileName) throws PermissionException, IOException {
+        Resource memberImage = memberService.getMemberImage(memberId, storeFileName);
+
+        String fileName = memberImage.getFilename();
+        String extension = fileName.substring(fileName.indexOf('.')+1).toLowerCase();
+
+        String contentType;
+        if(extension.equals("jpeg") || extension.equals("jpg"))
+            contentType = MediaType.IMAGE_JPEG_VALUE;
+        else if(extension.equals("png"))
+            contentType = MediaType.IMAGE_PNG_VALUE;
+        else
+            contentType = MediaType.IMAGE_JPEG_VALUE;
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .header(HttpHeaders.CONTENT_TYPE, contentType)
+                .body(memberImage);
+    }
+
+    @DeleteMapping("/{memberId}")
+    public String test(@PathVariable Long memberId) {
+        memberService.testDeleteMemberById(memberId);
+        return "ok";
     }
 
 

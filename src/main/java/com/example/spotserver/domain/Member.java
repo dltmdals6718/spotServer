@@ -27,6 +27,9 @@ public class Member {
     @CreationTimestamp
     private LocalDateTime regDate;
 
+    @OneToOne(mappedBy = "member", cascade = {CascadeType.PERSIST, CascadeType.REMOVE})
+    private MemberImage memberImg;
+
     @Enumerated(EnumType.STRING)
     private MemberType type;
 

@@ -13,12 +13,14 @@ import java.util.UUID;
 @Component
 public class ImageStore {
 
-    @Value("${inquiryImg.dir}")
+    @Value("${posterImg.dir}")
     private String posterImgDir;
 
     @Value("${locationImg.dir}")
     private String locationImgDir;
 
+    @Value("${memberImg.dir}")
+    private String memberImgDir;
 
 
     public List<PosterImage> storePosterImages(List<MultipartFile> images) throws IOException {
@@ -57,13 +59,34 @@ public class ImageStore {
         return result;
     }
 
+    public MemberImage storeMemberImage(MultipartFile image) throws IOException {
 
+        String uploadFileName = image.getOriginalFilename();;
+        String uuid = UUID.randomUUID().toString();
 
-    public String getLocationImgFullPath(String imageFilName) {
-        return locationImgDir+imageFilName;
+        String ext = getFileExtension(uploadFileName);
+
+        String storeFileName = uuid + "." + ext;
+
+        image.transferTo(new File(getMemberImgFullPath(storeFileName)));
+
+        MemberImage memberImage = new MemberImage(uploadFileName, storeFileName);
+        return memberImage;
+    }
+
+    public String getLocationImgFullPath(String imageFileName) {
+        return locationImgDir+imageFileName;
     }
 
     public String getPosterImgFullPath(String imageFileName) {
         return posterImgDir+imageFileName;
+    }
+
+    public String getMemberImgFullPath(String imageFileName) {
+        return memberImgDir+imageFileName;
+    }
+
+    public String getFileExtension(String fileName) {
+        return fileName.substring(fileName.lastIndexOf('.')+1);
     }
 }

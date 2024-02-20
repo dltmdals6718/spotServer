@@ -156,7 +156,10 @@ PageInfo
     <td>POST</td>
     <td>/members/signup</td>
   <td>
+Content-Type : multipart/form-data <br>
 
+이름: signUpMember <br>
+설명: 회원 가입 정보
 ```json
 {
   "name": "닉네임",
@@ -164,15 +167,19 @@ PageInfo
   "loginPwd": "비밀번호"
 }
 ```
-
+<br>
+이름: memberImg <br>
+설명: 프로필 이미지 <br>
+필수 : X
   </td>
 <td>
 
 ```json
 {
-  "memberId": 4,
-  "name": "TESTNAME",
-  "role": "USER"
+  "memberId": 150,
+  "name": "닉네임",
+  "role": "USER",
+  "memberImg": "http://localhost:8080/members/150/images/805a1742-6e12-4dac-81c3-c2e424e91ac3.png"
 }
 ```
 
@@ -214,9 +221,10 @@ PageInfo
 
 ```json
 {
-  "memberId": 1,
-  "name": "TESTNAME",
-  "role": "USER"
+  "memberId": 150,
+  "name": "닉네임",
+  "role": "USER",
+  "memberImg": "http://localhost:8080/members/150/images/805a1742-6e12-4dac-81c3-c2e424e91ac3.png"
 }
 ```
 

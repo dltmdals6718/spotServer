@@ -3,19 +3,25 @@ package com.example.spotserver.service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.spotserver.config.jwt.JwtProperties;
-import com.example.spotserver.domain.Member;
-import com.example.spotserver.domain.MemberType;
-import com.example.spotserver.domain.Role;
+import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.SignUpMember;
 import com.example.spotserver.dto.response.MemberResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.LoginFailException;
+import com.example.spotserver.exception.PermissionException;
+import com.example.spotserver.repository.MemberImageRepository;
 import com.example.spotserver.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.File;
+import java.io.IOException;
+import java.net.MalformedURLException;
 import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -24,25 +30,29 @@ import java.util.Optional;
 public class MemberService {
 
     private MemberRepository memberRepository;
+    private MemberImageRepository memberImageRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private ImageStore imageStore;
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public MemberService(MemberRepository memberRepository, MemberImageRepository memberImageRepository, BCryptPasswordEncoder bCryptPasswordEncoder, ImageStore imageStore) {
         this.memberRepository = memberRepository;
+        this.memberImageRepository = memberImageRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.imageStore = imageStore;
     }
 
-    public MemberResponse addMember(SignUpMember signUpMember) throws DuplicateException {
+    public MemberResponse addMember(SignUpMember signUpMember, MultipartFile memberImg) throws DuplicateException, IOException {
 
 
         String loginId = signUpMember.getLoginId();
         String name = signUpMember.getName();
 
-        if (existLoginId(loginId)) {
+        if (memberRepository.existsByLoginId(loginId)) {
             throw new DuplicateException(ErrorCode.DUPLICATE_LOGINID);
         }
 
-        if (existName(name)) {
+        if (memberRepository.existsByName(name)) {
             throw new DuplicateException(ErrorCode.DUPLICATE_NAME);
         }
 
@@ -52,7 +62,14 @@ public class MemberService {
         member.setLoginPwd(bCryptPasswordEncoder.encode(member.getLoginPwd()));
         member.setType(MemberType.NORMAL);
 
+        if(memberImg != null) {
+            MemberImage memberImage = imageStore.storeMemberImage(memberImg);
+            memberImage.setMember(member);
+            member.setMemberImg(memberImage);
+        }
+
         Member resultMember = memberRepository.save(member);
+
         MemberResponse memberResponse = MemberResponse.toDto(resultMember);
         return memberResponse;
     }
@@ -66,22 +83,40 @@ public class MemberService {
         return jwtToken;
     }
 
-    public Member getMember(Long memberId) {
+    public MemberResponse getMemberInfo(Long memberId) {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
-        return member;
+
+        MemberResponse memberResponse = MemberResponse.toDto(member);
+        return memberResponse;
     }
 
-    public void deleteMemberById(Long memberId) {
+    public Resource getMemberImage(Long memberId, String storeFileName) throws PermissionException, MalformedURLException {
+
+        MemberImage memberImage = memberImageRepository.findByStoreFileName(storeFileName)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        if(!memberId.equals(memberImage.getMember().getId()))
+            throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
+
+        UrlResource resource = new UrlResource("file:" + imageStore.getMemberImgFullPath(storeFileName));
+        if(!resource.exists())
+            throw new NoSuchElementException();
+
+        return resource;
+    }
+
+    public void testDeleteMemberById(Long memberId) {
+
+        Member member = memberRepository.findById(memberId).get();
+        if(member.getMemberImg() != null) {
+            String fullPath = imageStore.getMemberImgFullPath(member.getMemberImg().getStoreFileName());
+            File file = new File(fullPath);
+            if(file.exists())
+                file.delete();
+        }
+
         memberRepository.deleteById(memberId);
-    }
-
-    public boolean existLoginId(String loginId) {
-        return memberRepository.existsByLoginId(loginId);
-    }
-
-    public boolean existName(String name) {
-        return memberRepository.existsByName(name);
     }
 
     public Member login(String loginId, String loginPwd) throws LoginFailException {
