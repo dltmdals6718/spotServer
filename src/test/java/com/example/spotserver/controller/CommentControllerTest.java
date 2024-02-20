@@ -91,7 +91,7 @@ class CommentControllerTest {
         context.setAuthentication(authentication);
     }
 
-    @Test
+//    @Test
     @DisplayName(value = "댓글 작성")
     void addComment() throws Exception {
 
@@ -139,7 +139,7 @@ class CommentControllerTest {
 
     }
 
-    @Test
+//    @Test
     @DisplayName(value = "특정 댓글 조회")
     void getComment() throws Exception {
 

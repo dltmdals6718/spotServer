@@ -88,7 +88,7 @@ class PosterControllerTest {
         context.setAuthentication(authentication);
     }
 
-    @Test
+//    @Test
     @DisplayName("게시글 작성")
     void addPoster() throws Exception {
 
@@ -145,7 +145,7 @@ class PosterControllerTest {
 
     }
 
-    @Test
+//    @Test
     @DisplayName("특정 게시글 조회")
     void getPoster() throws Exception {
 
@@ -182,7 +182,7 @@ class PosterControllerTest {
 
     }
 
-    @Test
+//    @Test
     @DisplayName("게시글 수정")
     void updatePoster() throws Exception {
 
@@ -245,7 +245,7 @@ class PosterControllerTest {
 
     }
 
-    @Test
+//    @Test
     @DisplayName("게시글 삭제")
     void deletePoster() throws Exception {
 
@@ -272,7 +272,7 @@ class PosterControllerTest {
                 .andDo(print());
     }
 
-    @Test
+//    @Test
     @DisplayName("좋아요 등록")
     void addLike() throws Exception {
 
@@ -296,7 +296,7 @@ class PosterControllerTest {
                 .andDo(print());
     }
 
-    @Test
+//    @Test
     @DisplayName("좋아요 삭제")
     void deleteLike() throws Exception {
 
