@@ -4,6 +4,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.spotserver.config.jwt.JwtProperties;
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.SignUpMember;
 import com.example.spotserver.dto.response.MemberResponse;
 import com.example.spotserver.exception.DuplicateException;
@@ -12,6 +13,7 @@ import com.example.spotserver.exception.LoginFailException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.repository.MemberImageRepository;
 import com.example.spotserver.repository.MemberRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -62,7 +64,7 @@ public class MemberService {
         member.setLoginPwd(bCryptPasswordEncoder.encode(member.getLoginPwd()));
         member.setType(MemberType.NORMAL);
 
-        if(memberImg != null) {
+        if (memberImg != null) {
             MemberImage memberImage = imageStore.storeMemberImage(memberImg);
             memberImage.setMember(member);
             member.setMemberImg(memberImage);
@@ -96,23 +98,59 @@ public class MemberService {
         MemberImage memberImage = memberImageRepository.findByStoreFileName(storeFileName)
                 .orElseThrow(() -> new NoSuchElementException());
 
-        if(!memberId.equals(memberImage.getMember().getId()))
+        if (!memberId.equals(memberImage.getMember().getId()))
             throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
 
         UrlResource resource = new UrlResource("file:" + imageStore.getMemberImgFullPath(storeFileName));
-        if(!resource.exists())
+        if (!resource.exists())
             throw new NoSuchElementException();
 
         return resource;
     }
 
+    @Transactional
+    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest, MultipartFile memberImg, Member member) throws DuplicateException, IOException {
+        member = memberRepository.findById(member.getId())
+                .orElseThrow(() -> new NoSuchElementException());
+
+        if (memberUpdateRequest != null) {
+            String name = memberUpdateRequest.getName();
+            if (!name.equals(member.getName())) {
+                if (memberRepository.existsByName(name))
+                    throw new DuplicateException(ErrorCode.DUPLICATE_NAME);
+                else {
+                    member.setName(name);
+                }
+            }
+        }
+
+        if (memberImg != null) {
+            MemberImage beforeImg = member.getMemberImg();
+            if (beforeImg != null) {
+                member.setMemberImg(null);
+                memberImageRepository.deleteById(beforeImg.getId());
+                String fullPath = imageStore.getMemberImgFullPath(beforeImg.getStoreFileName());
+                File file = new File(fullPath);
+                if (file.exists())
+                    file.delete();
+            }
+
+            MemberImage memberImage = imageStore.storeMemberImage(memberImg);
+            memberImage.setMember(member);
+            member.setMemberImg(memberImage);
+            memberImageRepository.save(memberImage);
+        }
+
+        return MemberResponse.toDto(member);
+    }
+
     public void testDeleteMemberById(Long memberId) {
 
         Member member = memberRepository.findById(memberId).get();
-        if(member.getMemberImg() != null) {
+        if (member.getMemberImg() != null) {
             String fullPath = imageStore.getMemberImgFullPath(member.getMemberImg().getStoreFileName());
             File file = new File(fullPath);
-            if(file.exists())
+            if (file.exists())
                 file.delete();
         }
 

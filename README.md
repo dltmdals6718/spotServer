@@ -214,6 +214,40 @@ Content-Type : multipart/form-data <br>
   </tr>
 
 <tr>
+    <td>PUT</td>
+    <td>/members/{memberId}</td>
+<td>
+
+Content-Type : multipart/form-data <br>
+
+이름: memberUpdateRequest <br>
+설명: 하나의 필드라도 변경을 원한다면, 변경하지 않을 회원 필드도 현재 값으로 넣어서 요청 필요.
+
+```json
+{
+  "name" : "a b"
+}
+```
+<br>
+이름: memberImg <br>
+설명: 변경할 프로필 이미지 <br>
+필수: X
+</td>
+<td>
+
+```json
+{
+    "memberId": 189,
+    "name": "a b",
+    "role": "USER",
+    "memberImg": "http://localhost:8080/members/189/images/exmaple.jpeg"
+}
+```
+</td>
+    <td>회원 정보 수정</td>
+</tr>
+
+<tr>
     <td>GET</td>
     <td>/members/{memberId}</td>
     <td></td>

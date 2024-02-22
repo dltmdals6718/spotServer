@@ -1,6 +1,7 @@
 package com.example.spotserver.dto.request;
 
 import com.example.spotserver.domain.Member;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import lombok.Data;
 import lombok.Getter;
@@ -16,9 +17,13 @@ public class SignUpMember {
     @NotEmpty(message = "비밀번호를 비울 수 없습니다.")
     private String loginPwd;
 
-    @NotEmpty(message = "닉네임을 비울 수 없습니다.")
+    @NotBlank(message = "올바른 닉네임을 입력해주세요.")
     private String name;
 
+
+    public void setName(String name) {
+        this.name = name.trim();
+    }
 
     public Member toEntity(SignUpMember memberRequest) {
         Member member = new Member();

@@ -3,6 +3,7 @@ package com.example.spotserver.controller;
 
 import com.example.spotserver.config.jwt.JwtProperties;
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.SignInMember;
 import com.example.spotserver.dto.request.SignUpMember;
 import com.example.spotserver.dto.response.MemberResponse;
@@ -11,7 +12,6 @@ import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.LoginFailException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.service.MemberService;
-import com.example.spotserver.snsLogin.KakaoApi;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -21,14 +21,10 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.web.bind.ServletRequestBindingException;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -98,12 +94,12 @@ public class MemberController {
         Resource memberImage = memberService.getMemberImage(memberId, storeFileName);
 
         String fileName = memberImage.getFilename();
-        String extension = fileName.substring(fileName.indexOf('.')+1).toLowerCase();
+        String extension = fileName.substring(fileName.indexOf('.') + 1).toLowerCase();
 
         String contentType;
-        if(extension.equals("jpeg") || extension.equals("jpg"))
+        if (extension.equals("jpeg") || extension.equals("jpg"))
             contentType = MediaType.IMAGE_JPEG_VALUE;
-        else if(extension.equals("png"))
+        else if (extension.equals("png"))
             contentType = MediaType.IMAGE_PNG_VALUE;
         else
             contentType = MediaType.IMAGE_JPEG_VALUE;
@@ -112,6 +108,21 @@ public class MemberController {
                 .status(HttpStatus.OK)
                 .header(HttpHeaders.CONTENT_TYPE, contentType)
                 .body(memberImage);
+    }
+
+    @PutMapping("/{memberId}")
+    public ResponseEntity<MemberResponse> updateMember(@PathVariable Long memberId,
+                                                       @Valid @RequestPart(required = false) MemberUpdateRequest memberUpdateRequest,
+                                                       @RequestPart(required = false) MultipartFile memberImg,
+                                                       @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException, DuplicateException, IOException {
+
+        if (!member.getId().equals(memberId))
+            throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
+
+        MemberResponse memberResponse = memberService.updateMember(memberUpdateRequest, memberImg, member);
+
+        return ResponseEntity
+                .ok(memberResponse);
     }
 
     @DeleteMapping("/{memberId}")

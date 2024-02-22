@@ -85,6 +85,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                 errorResponse = new ErrorResponse(ErrorCode.JWT_DECODE_FAIL);
             } else if (e instanceof SignatureVerificationException) {
                 errorResponse = new ErrorResponse(ErrorCode.JWT_SIGNATURE_FAIL);
+            } else {
+                throw e;
             }
             ObjectMapper objectMapper = new ObjectMapper();
             String jsonErrorResponse = objectMapper.writeValueAsString(errorResponse);
