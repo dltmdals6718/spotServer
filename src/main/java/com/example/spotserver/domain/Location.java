@@ -23,6 +23,9 @@ public class Location {
     @CreationTimestamp
     private LocalDateTime regDate;
 
+    @Column(columnDefinition = "TINYINT(1) DEFAULT false")
+    private Boolean approve = false;
+
     @OneToMany(cascade = CascadeType.REMOVE)
     private List<LocationLike> locationLikes;
 

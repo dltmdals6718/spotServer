@@ -496,10 +496,56 @@ Content-Type : multipart/form-data
 </td>
             <td>전국 좋아요 상위 5개 장소</td>
         </tr>
-        <tr>
-            <td>GET</td>
-            <td>/locations/{locationId}/likes</td>
-            <td></td>
+
+
+<tr>
+    <td>GET</td>
+    <td>/locations<br>?latitude={위도값}<br>&longitude={경도값}<br>&approve={0,1}</td>
+    <td></td>
+    <td></td>
+    <td>승인, 미승인 장소 조회</td>
+</tr>
+
+<tr>
+    <td>PUT</td>
+    <td>/locations/{locationId}/approve</td>
+<td>
+
+```json
+{
+    "approve": true
+}
+```
+
+*approve : 승인 여부 <br>
+true - 승인으로 변경 <br>
+false - 미승인으로 변경
+</td>
+<td>
+
+```json
+{
+    "locationId": 1,
+    "approve": true
+}
+```
+</td>
+    <td>장소 승인 상태 변경</td>
+</tr>
+
+<tr>
+    <td>DELETE</td>
+    <td>*예정</td>
+    <td></td>
+    <td></td>
+    <td>장소 삭제</td>
+</tr>
+
+
+<tr>
+    <td>GET</td>
+    <td>/locations/{locationId}/likes</td>
+    <td></td>
 <td>
 
 ```json

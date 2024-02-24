@@ -61,6 +61,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                 ))
                 .from(location)
                 .leftJoin(locationLike).on(locationLike.location.id.eq(location.id))
+                .where(location.approve.isTrue())
                 .groupBy(location.id)
                 .orderBy(likeCount.desc())
                 .limit(5)
@@ -103,14 +104,16 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                 .from(location)
                 .leftJoin(locationLike).on(locationLike.location.id.eq(location.id))
                 .where(location.latitude.between(latitude - scale, latitude + scale)
-                        .and(location.longitude.between(longitude - scale, longitude + scale)))
+                        .and(location.longitude.between(longitude - scale, longitude + scale))
+                        .and(location.approve.isTrue()))
                 .groupBy(location.id);
 
         JPAQuery<Long> countQuery = jpaQueryFactory
                 .select(location.count())
                 .from(location)
                 .where(location.latitude.between(latitude - scale, latitude + scale)
-                        .and(location.longitude.between(longitude - scale, longitude + scale)));
+                        .and(location.longitude.between(longitude - scale, longitude + scale))
+                        .and(location.approve.isTrue()));
 
         if (page != null || size != null || sort != null || search != null) {
 

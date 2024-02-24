@@ -1,16 +1,16 @@
 package com.example.spotserver.controller;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.ApproveRequest;
 import com.example.spotserver.dto.request.LocationConditionRequest;
 import com.example.spotserver.dto.request.LocationRequest;
+import com.example.spotserver.dto.response.ApproveResponse;
 import com.example.spotserver.dto.response.LocationResponse;
 import com.example.spotserver.dto.response.PageResponse;
-import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.service.ImageFileService;
 import com.example.spotserver.service.LocationService;
 import jakarta.validation.Valid;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
@@ -72,6 +71,15 @@ public class LocationController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(locationResponse);
+    }
+
+    @PutMapping("/{locationId}/approve")
+    public ResponseEntity<ApproveResponse> updateLocationApprove(@PathVariable Long locationId, @RequestBody ApproveRequest approveRequest) {
+
+        ApproveResponse approveResponse = locationService.updateApprove(locationId, approveRequest);
+
+        return ResponseEntity
+                .ok(approveResponse);
     }
 
     @GetMapping("/{locationId}")

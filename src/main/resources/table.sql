@@ -27,7 +27,8 @@ CREATE TABLE location
     title       VARCHAR(255),
     address     VARCHAR(255),
     description TEXT,
-    reg_date    DATETIME
+    reg_date    DATETIME,
+    approve     TINYINT(1) DEFAULT false
 );
 
 CREATE TABLE poster

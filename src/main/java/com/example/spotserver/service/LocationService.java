@@ -1,7 +1,9 @@
 package com.example.spotserver.service;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.ApproveRequest;
 import com.example.spotserver.dto.request.LocationConditionRequest;
+import com.example.spotserver.dto.response.ApproveResponse;
 import com.example.spotserver.dto.response.LocationResponse;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
@@ -9,6 +11,7 @@ import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.repository.LocationLikeRepository;
 import com.example.spotserver.repository.LocationRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
@@ -44,6 +47,20 @@ public class LocationService {
     public Location addLocation(Location location) {
         Location saveLocation = locationRepository.save(location);
         return saveLocation;
+    }
+
+    @Transactional
+    public ApproveResponse updateApprove(Long locationId, ApproveRequest approveRequest) {
+
+        Boolean approve = approveRequest.getApprove();
+
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        location.setApprove(approve);
+
+        ApproveResponse approveResponse = new ApproveResponse(locationId, approve);
+        return approveResponse;
     }
 
     public LocationResponse getLocation(Long locationId) {
