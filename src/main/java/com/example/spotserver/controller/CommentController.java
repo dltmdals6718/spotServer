@@ -3,10 +3,12 @@ package com.example.spotserver.controller;
 import com.example.spotserver.domain.Comment;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.Poster;
+import com.example.spotserver.dto.request.CommentConditionRequest;
 import com.example.spotserver.dto.request.CommentPageRequest;
 import com.example.spotserver.dto.request.CommentRequest;
 import com.example.spotserver.dto.response.CommentResponse;
 import com.example.spotserver.dto.response.PageResponse;
+import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.repository.PosterRepository;
 import com.example.spotserver.service.CommentService;
@@ -57,11 +59,9 @@ public class CommentController {
 
     @GetMapping("/posters/{posterId}/comments")
     public ResponseEntity<PageResponse<List<CommentResponse>>> getComments(@PathVariable Long posterId,
-                                                                           @Valid @ModelAttribute CommentPageRequest commentPageRequest) {
+                                                                           @Valid CommentConditionRequest commentConditionRequest) {
 
-        PageRequest pageRequest = commentPageRequest.makePageRequest();
-        PageResponse<List<CommentResponse>> comments = commentService.getCommentsByPosterId(posterId, pageRequest);
-
+        PageResponse<List<CommentResponse>> comments = commentService.getComments(posterId, commentConditionRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -81,8 +81,8 @@ public class CommentController {
 
     @PutMapping("/comments/{commentId}")
     public ResponseEntity<CommentResponse> updateComment(@PathVariable Long commentId,
-                                        @Valid @RequestBody CommentRequest commentRequest,
-                                        @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
+                                                         @Valid @RequestBody CommentRequest commentRequest,
+                                                         @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
 
         CommentResponse commentResponse = commentService.updateComment(commentId, commentRequest, member);
 
@@ -90,5 +90,28 @@ public class CommentController {
                 .status(HttpStatus.OK)
                 .body(commentResponse);
     }
+
+    @PostMapping(value = "/comments/{commentId}/likes")
+    public ResponseEntity addLike(@PathVariable Long commentId,
+                                  @AuthenticationPrincipal(expression = "member") Member member) throws DuplicateException {
+
+        commentService.addLike(commentId, member);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .build();
+    }
+
+    @DeleteMapping(value = "/comments/{commentId}/likes")
+    public ResponseEntity deleteLike(@PathVariable Long commentId,
+                                     @AuthenticationPrincipal(expression = "member") Member member) {
+
+        commentService.deleteLike(commentId, member);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
 
 }

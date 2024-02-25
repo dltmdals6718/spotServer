@@ -94,6 +94,16 @@ CREATE TABLE location_like
     FOREIGN KEY (location_id) REFERENCES location (id)
 );
 
+CREATE TABLE comment_like
+(
+    id         BIGINT AUTO_INCREMENT PRIMARY KEY,
+    member_id  BIGINT,
+    comment_id BIGINT,
+    reg_date   DATETIME DEFAULT NOW(),
+    FOREIGN KEY (member_id) REFERENCES member (id),
+    FOREIGN KEY (comment_id) REFERENCES comment (id)
+);
+
 INSERT INTO location(latitude, longitude, title, address, description)
 VALUES (35.24308, 128.6934, '창원대학교 운동장', '의창구 창원대학로 20 창원시 경상 남도', '낭만 가득 운동장');
 INSERT INTO location(latitude, longitude, title, address, description)
