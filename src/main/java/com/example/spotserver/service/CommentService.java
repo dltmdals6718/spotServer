@@ -17,6 +17,7 @@ import com.example.spotserver.repository.CommentRepository;
 import com.example.spotserver.repository.PosterRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
@@ -52,8 +53,9 @@ public class CommentService {
     }
 
     public PageResponse<List<CommentResponse>> getComments(Long posterId, CommentConditionRequest commentConditionRequest) {
-
-        return null;
+        Page<CommentResponse> comments = commentRepository.getComments(posterId, commentConditionRequest);
+        PageResponse<List<CommentResponse>> pageResponse = new PageResponse<>(comments);
+        return pageResponse;
     }
 
     public CommentResponse getComment(Long commentId) {

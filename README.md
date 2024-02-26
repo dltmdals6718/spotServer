@@ -1173,7 +1173,11 @@ Results
         </tr>
         <tr>
             <td>GET</td>
-            <td>/posters/{posterId}/comments<br>?page={페이지번호}<br>&size={페이지크기}<br>&sort={정렬방법}</td>
+            <td>
+            /posters/{posterId}/comments<br>?page={페이지번호}<br>&size={페이지크기}<br>&sort={정렬방법}<br><br>
+            *정렬방법 <br>
+            recent(기본값), like(좋아요순)
+            </td>
             <td></td>
 <td>
 
@@ -1181,33 +1185,39 @@ Results
 {
   "results": [
     {
-      "commentId": 8,
-      "writerId": 126,
-      "writerName": "namezz",
-      "content": "31글의 댓글",
-      "regDate": "2024-01-29T13:22:20"
+      "commentId": 34,
+      "writerId": 191,
+      "writerName": "닉네임",
+      "memberImg": "http://localhost:8080/members/191/images/d9b22089-0d9a-49ca-aa8f-bd7b1f898bc6.jpeg",
+      "content": "히히",
+      "regDate": "2024-02-25T21:53:44",
+      "likeCnt": 2
     },
     {
-      "commentId": 7,
-      "writerId": 126,
-      "writerName": "namezz",
-      "content": "31글의 댓글",
-      "regDate": "2024-01-29T13:22:19"
+      "commentId": 26,
+      "writerId": 129,
+      "writerName": "testName",
+      "memberImg": "",
+      "content": "댓글내용",
+      "regDate": "2024-02-09T22:42:54",
+      "likeCnt": 0
     },
     {
-      "commentId": 6,
-      "writerId": 126,
-      "writerName": "namezz",
-      "content": "31글의 댓글",
-      "regDate": "2024-01-29T13:22:18"
+      "commentId": 25,
+      "writerId": 129,
+      "writerName": "testName",
+      "memberImg": "",
+      "content": "댓글내용",
+      "regDate": "2024-02-06T15:43:49",
+      "likeCnt": 3
     }
   ],
   "pageInfo": {
-    "page": 4,
+    "page": 1,
     "size": 3,
     "numberOfElements": 3,
-    "totalElements": 12,
-    "totalPage": 4
+    "totalElements": 3,
+    "totalPage": 1
   }
 }
 ```
