@@ -129,12 +129,10 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
         }
 
-        if (sort == null)
+        if (sort == null || sort.equals("recent"))
             searchQuery.orderBy(location.regDate.desc());
         else if (sort.equals("like"))
             searchQuery.orderBy(likeCount.desc());
-        else if(sort.equals("recent"))
-            searchQuery.orderBy(location.regDate.desc());
         else
             searchQuery.orderBy(location.regDate.desc());
 
