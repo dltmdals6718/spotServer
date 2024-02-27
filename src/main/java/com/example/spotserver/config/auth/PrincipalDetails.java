@@ -2,6 +2,7 @@ package com.example.spotserver.config.auth;
 
 import com.example.spotserver.domain.Member;
 import org.springframework.security.core.GrantedAuthority;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.ArrayList;
@@ -19,12 +20,7 @@ public class PrincipalDetails implements UserDetails {
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         Collection<GrantedAuthority> collection = new ArrayList<>();
-        collection.add(new GrantedAuthority() {
-            @Override
-            public String getAuthority() {
-                return member.getRole().toString();
-            }
-        });
+        collection.add(new SimpleGrantedAuthority(member.getRole().toString()));
         return collection;
     }
 

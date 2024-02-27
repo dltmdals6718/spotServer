@@ -364,7 +364,7 @@ Content-Type : multipart/form-data <br>
     <tbody>
         <tr>
             <td>GET</td>
-            <td>/locations<br>?latitude={위도값}<br>&longitude={경도값}<br>&size={페이지크기}<br>&page={페이지번호}<br>&sort={정렬방법}<br>&search={제목 또는 내용}</td>
+            <td>/locations<br>?latitude={위도값}<br>&longitude={경도값}<br>&size={페이지크기}<br>&page={페이지번호}<br>&sort={정렬방법}<br>&search={제목 또는 내용}<br>&approve={승인여부}</td>
             <td></td>
 <td>
 
@@ -496,16 +496,6 @@ Content-Type : multipart/form-data
 </td>
             <td>전국 좋아요 상위 5개 장소</td>
         </tr>
-
-
-<tr>
-    <td>GET</td>
-    <td>/locations<br>?latitude={위도값}<br>&longitude={경도값}<br>&approve={0,1}</td>
-    <td></td>
-    <td></td>
-    <td>승인, 미승인 장소 조회</td>
-</tr>
-
 <tr>
     <td>PUT</td>
     <td>/locations/{locationId}/approve</td>
@@ -624,6 +614,15 @@ false - 미승인으로 변경
             <td>search</td>
             <td>String</td>
             <td>제목, 내용에 포함된 키워드를 검색</td>
+            <td>X</td>
+        </tr>
+        <tr>
+            <td>approve</td>
+            <td>Boolean</td>
+            <td>
+                승인, 미승인 장소 구분 (미승인 장소 조회는 ADMIN만 가능)<br>
+                (0: 미승인, 1: 승인, 기본값: 1)
+            </td>
             <td>X</td>
         </tr>
     </tbody>
