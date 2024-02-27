@@ -14,5 +14,5 @@ public class LocationConditionRequest {
     private Integer page;
     private String sort;
     private String search;
-
+    private Boolean approve = true;
 }

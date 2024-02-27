@@ -89,6 +89,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
         Integer size = conditionRequest.getSize();
         String sort = conditionRequest.getSort();
         String search = conditionRequest.getSearch();
+        Boolean approve = conditionRequest.getApprove();
 
         JPAQuery<LocationResponse> searchQuery = jpaQueryFactory
                 .select(new QLocationResponse(
@@ -105,7 +106,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                 .leftJoin(locationLike).on(locationLike.location.id.eq(location.id))
                 .where(location.latitude.between(latitude - scale, latitude + scale)
                         .and(location.longitude.between(longitude - scale, longitude + scale))
-                        .and(location.approve.isTrue()))
+                        .and(location.approve.eq(approve)))
                 .groupBy(location.id);
 
         JPAQuery<Long> countQuery = jpaQueryFactory
@@ -113,7 +114,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                 .from(location)
                 .where(location.latitude.between(latitude - scale, latitude + scale)
                         .and(location.longitude.between(longitude - scale, longitude + scale))
-                        .and(location.approve.isTrue()));
+                        .and(location.approve.eq(approve)));
 
         if (page != null || size != null || sort != null || search != null) {
 
