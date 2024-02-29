@@ -22,20 +22,6 @@ public class LocationResponse {
     private Long likeCnt;
 
 
-    public static LocationResponse toDto(Location location) {
-
-        LocationResponse locationResponse = new LocationResponse();
-
-        locationResponse.setLocationId(location.getId());
-        locationResponse.setLatitude(location.getLatitude());
-        locationResponse.setLongitude(location.getLongitude());
-        locationResponse.setTitle(location.getTitle());
-        locationResponse.setAddress(location.getAddress());
-        locationResponse.setDescription(location.getDescription());
-
-        return locationResponse;
-    }
-
     @QueryProjection
     public LocationResponse(Long locationId, Double latitude, Double longitude, String title, String address, String description, LocalDateTime regDate, Long likeCnt) {
         this.locationId = locationId;

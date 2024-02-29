@@ -437,10 +437,7 @@ Content-Type : multipart/form-data
 
 ```json
 {
-  "locationId": 13,
-  "title": "title4",
-  "content": "content4",
-  "regDate": "2024-01-24T15:13:17.118866"
+  "locationId": 9
 }
 ```
 
@@ -684,14 +681,7 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "posterId": 65,
-  "writerId": 129,
-  "writerName": "testName",
-  "title": "허허",
-  "content": "하하",
-  "regDate": "2024-02-11T17:19:34.902445",
-  "likeCnt": null,
-  "commentCnt": null
+  "posterId": 66
 }
 ```
 
@@ -832,14 +822,7 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "posterId": 65,
-  "writerId": 129,
-  "writerName": "testName",
-  "title": "수정된 제목2",
-  "content": "수정된 제목2",
-  "regDate": "2024-02-11T17:19:35",
-  "likeCnt": null,
-  "commentCnt": null
+  "posterId": 66
 }
 ```
 

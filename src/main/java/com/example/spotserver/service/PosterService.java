@@ -46,11 +46,10 @@ public class PosterService {
         this.imageStore = imageStore;
     }
 
-    public PosterResponse addPoster(PosterRequest posterRequest,
-                                    List<MultipartFile> files,
-                                    Long locationId,
-                                    Member member) throws IOException {
-        Poster poster = PosterRequest.toEntity(posterRequest);
+    public void addPoster(Poster poster,
+                          List<MultipartFile> files,
+                          Long locationId,
+                          Member member) throws IOException {
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new NoSuchElementException());
         poster.setWriter(member);
@@ -67,8 +66,6 @@ public class PosterService {
 
         posterRepository.save(poster);
 
-        PosterResponse posterResponse = PosterResponse.toDto(poster);
-        return posterResponse;
     }
 
     public PageResponse<List<PosterResponse>> getLocationPosters(Long locationId, PosterPageRequest posterPageRequest) {
@@ -96,11 +93,11 @@ public class PosterService {
         return posterResponse;
     }
 
-    public PosterResponse updatePoster(Long posterId,
-                                       PosterRequest posterRequest,
-                                       List<MultipartFile> addFiles,
-                                       List<Long> deleteFilesId,
-                                       Member member) throws IOException, PermissionException {
+    public void updatePoster(Long posterId,
+                             PosterRequest posterRequest,
+                             List<MultipartFile> addFiles,
+                             List<Long> deleteFilesId,
+                             Member member) throws IOException, PermissionException {
 
         Poster poster = posterRepository.findById(posterId)
                 .orElseThrow(() -> new NoSuchElementException());
@@ -142,9 +139,6 @@ public class PosterService {
             }
         }
 
-
-        PosterResponse posterResponse = PosterResponse.toDto(poster);
-        return posterResponse;
     }
 
     public void deletePoster(Long posterId, Member member) throws PermissionException {

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -34,17 +35,20 @@ public class PosterController {
     }
 
     @PostMapping(value = "/locations/{locationId}/posters", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<PosterResponse> addPoster(@Valid @RequestPart PosterRequest posterRequest,
-                                                    @RequestPart(required = false) List<MultipartFile> files,
-                                                    @PathVariable Long locationId,
-                                                    @AuthenticationPrincipal(expression = "member") Member member) throws IOException {
+    public ResponseEntity<Map> addPoster(@Valid @RequestPart PosterRequest posterRequest,
+                                         @RequestPart(required = false) List<MultipartFile> files,
+                                         @PathVariable Long locationId,
+                                         @AuthenticationPrincipal(expression = "member") Member member) throws IOException {
 
-        PosterResponse posterResponse = posterService.addPoster(posterRequest, files, locationId, member);
+        Poster poster = PosterRequest.toEntity(posterRequest);
+        posterService.addPoster(poster, files, locationId, member);
 
+        Map<String, Object> response = new HashMap<>();
+        response.put("posterId", poster.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(posterResponse);
+                .body(response);
     }
 
     @GetMapping("/locations/{locationId}/posters")
@@ -69,17 +73,20 @@ public class PosterController {
     }
 
     @PutMapping(value = "/posters/{posterId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<PosterResponse> updatePoster(@PathVariable Long posterId,
-                                                       @Valid @RequestPart PosterRequest posterRequest,
-                                                       @RequestPart(required = false) List<MultipartFile> addFiles,
-                                                       @RequestPart(required = false) List<Long> deleteFilesId,
-                                                       @AuthenticationPrincipal(expression = "member") Member member) throws IOException, PermissionException {
+    public ResponseEntity<Map> updatePoster(@PathVariable Long posterId,
+                                            @Valid @RequestPart PosterRequest posterRequest,
+                                            @RequestPart(required = false) List<MultipartFile> addFiles,
+                                            @RequestPart(required = false) List<Long> deleteFilesId,
+                                            @AuthenticationPrincipal(expression = "member") Member member) throws IOException, PermissionException {
 
-        PosterResponse posterResponse = posterService.updatePoster(posterId, posterRequest, addFiles, deleteFilesId, member);
+        posterService.updatePoster(posterId, posterRequest, addFiles, deleteFilesId, member);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("posterId", posterId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(posterResponse);
+                .body(response);
     }
 
     @DeleteMapping(value = "/posters/{posterId}")

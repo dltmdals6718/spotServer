@@ -27,10 +27,7 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.Collection;
-import java.util.Iterator;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @RestController
 @RequestMapping("/locations")
@@ -72,7 +69,7 @@ public class LocationController {
     }
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
-    public ResponseEntity<LocationResponse> addLocation(@Valid @RequestPart LocationRequest locationRequest,
+    public ResponseEntity<Map> addLocation(@Valid @RequestPart LocationRequest locationRequest,
                                                         @RequestPart(required = false) List<MultipartFile> files) throws IOException {
 
         Location location = LocationRequest.toEntity(locationRequest);
@@ -89,11 +86,12 @@ public class LocationController {
             imageFileService.saveLocationImageList(imgFiles);
         }
 
-        LocationResponse locationResponse = LocationResponse.toDto(location);
+        Map<String, Object> response = new HashMap<>();
+        response.put("locationId", location.getId());
 
         return ResponseEntity
-                .status(HttpStatus.OK)
-                .body(locationResponse);
+                .status(HttpStatus.CREATED)
+                .body(response);
     }
 
     @PutMapping("/{locationId}/approve")
