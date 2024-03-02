@@ -7,3 +7,4 @@
 - 미승인 장소에 대한 좋아요 댓글 등등 API 호출 방지
 - 400 에러 처리 (RequestBody가 필수이나 존재하지 않음)
 - PosterResponse에 @QueryProjection 쓰기
+- s3
