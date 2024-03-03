@@ -33,6 +33,8 @@ public class Member {
     @Enumerated(EnumType.STRING)
     private MemberType type;
 
+    private String mail;
+
     private Long snsId;
 
 }

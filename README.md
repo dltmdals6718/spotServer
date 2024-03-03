@@ -147,11 +147,23 @@ PageInfo
 ### MEMBER
 
 <table>
-  <td>Method</td>
-  <td>URL</td>
-  <td>Request Body</td>
-  <td>Response Body</td>
-  <td>Description</td>
+    <thead>
+        <tr>
+            <td>Method</td>
+            <td>URL</td>
+            <td>Request Body</td>
+            <td>Response Body</td>
+            <td>Description</td>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>POST</td>
+            <td>/mails/certification<br>?mail={이메일 주소}</td>
+            <td></td>
+            <td></td>
+            <td>이메일로 인증 번호 전송</td>
+        </tr>
   <tr>
     <td>POST</td>
     <td>/members/signup</td>
@@ -160,13 +172,17 @@ Content-Type : multipart/form-data <br>
 
 이름: signUpMember <br>
 설명: 회원 가입 정보
+
 ```json
 {
   "name": "닉네임",
   "loginId": "아이디",
-  "loginPwd": "비밀번호"
+  "loginPwd": "비밀번호",
+  "mail" : "test@abc.com",
+  "code" : 1234
 }
 ```
+
 <br>
 이름: memberImg <br>
 설명: 프로필 이미지 <br>
@@ -225,9 +241,10 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "name" : "a b"
+  "name": "a b"
 }
 ```
+
 <br>
 이름: memberImg <br>
 설명: 변경할 프로필 이미지 <br>
@@ -237,12 +254,13 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-    "memberId": 189,
-    "name": "a b",
-    "role": "USER",
-    "memberImg": "http://localhost:8080/members/189/images/exmaple.jpeg"
+  "memberId": 189,
+  "name": "a b",
+  "role": "USER",
+  "memberImg": "http://localhost:8080/members/189/images/exmaple.jpeg"
 }
 ```
+
 </td>
     <td>회원 정보 수정</td>
 </tr>
@@ -283,7 +301,7 @@ Content-Type : multipart/form-data <br>
 </td>
     <td>자신 정보 조회</td>
 </tr>
-
+    </tbody>
 </table>
 
 #### - 로그인
@@ -383,13 +401,13 @@ Content-Type : multipart/form-data <br>
       "likeCnt": 0
     },
     {
-      "..." : "..."
+      "...": "..."
     },
     {
-      "..." : "..."
+      "...": "..."
     },
     {
-      "..." : "..."
+      "...": "..."
     }
   ],
   "pageInfo": {
@@ -500,7 +518,7 @@ Content-Type : multipart/form-data
 
 ```json
 {
-    "approve": true
+  "approve": true
 }
 ```
 
@@ -512,10 +530,11 @@ false - 미승인으로 변경
 
 ```json
 {
-    "locationId": 1,
-    "approve": true
+  "locationId": 1,
+  "approve": true
 }
 ```
+
 </td>
     <td>장소 승인 상태 변경</td>
 </tr>
@@ -814,7 +833,10 @@ Content-Type : multipart/form-data <br>
 필수 : X <br>
 
 ```json
-[48, 49]
+[
+  48,
+  49
+]
 ```
 
 </td>

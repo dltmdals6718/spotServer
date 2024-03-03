@@ -1,12 +1,12 @@
 package com.example.spotserver.dto.request;
 
 import com.example.spotserver.domain.Member;
+import com.example.spotserver.domain.MemberType;
+import com.example.spotserver.domain.Role;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
 
 @Data
 public class SignUpMember {
@@ -20,6 +20,12 @@ public class SignUpMember {
     @NotBlank(message = "올바른 닉네임을 입력해주세요.")
     private String name;
 
+    @NotEmpty(message = "이메일을 입력해주세요.")
+    private String mail;
+
+    @NotNull(message = "인증 번호를 입력해주세요.")
+    private Integer code;
+
 
     public void setName(String name) {
         this.name = name.trim();
@@ -30,6 +36,9 @@ public class SignUpMember {
         member.setLoginId(memberRequest.loginId);
         member.setLoginPwd(memberRequest.loginPwd);
         member.setName(memberRequest.name);
+        member.setMail(memberRequest.getMail());
+        member.setRole(Role.USER);
+        member.setType(MemberType.NORMAL);
         return member;
     }
 }

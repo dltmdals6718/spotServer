@@ -7,7 +7,15 @@ CREATE TABLE member
     name      VARCHAR(255),
     reg_date  DATETIME DEFAULT NOW(),
     type      VARCHAR(10),
+    mail      VARCHAR(50),
     sns_id    BIGINT
+);
+
+CREATE TABLE mail_certification
+(
+    mail VARCHAR(50),
+    code INT,
+    reg_date DATETIME DEFAULT NOW()
 );
 
 CREATE TABLE member_image

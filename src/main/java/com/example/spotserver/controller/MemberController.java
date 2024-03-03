@@ -7,10 +7,7 @@ import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.SignInMember;
 import com.example.spotserver.dto.request.SignUpMember;
 import com.example.spotserver.dto.response.MemberResponse;
-import com.example.spotserver.exception.DuplicateException;
-import com.example.spotserver.exception.ErrorCode;
-import com.example.spotserver.exception.LoginFailException;
-import com.example.spotserver.exception.PermissionException;
+import com.example.spotserver.exception.*;
 import com.example.spotserver.service.MemberService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +41,7 @@ public class MemberController {
 
     @PostMapping("/signup")
     public ResponseEntity<MemberResponse> signupMember(@Valid @RequestPart SignUpMember signUpMember,
-                                                       @RequestPart(required = false) MultipartFile memberImg) throws DuplicateException, IOException {
+                                                       @RequestPart(required = false) MultipartFile memberImg) throws DuplicateException, IOException, MailException {
 
         MemberResponse memberResponse = memberService.addMember(signUpMember, memberImg);
 

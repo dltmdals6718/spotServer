@@ -7,23 +7,25 @@ import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.SignUpMember;
 import com.example.spotserver.dto.response.MemberResponse;
-import com.example.spotserver.exception.DuplicateException;
-import com.example.spotserver.exception.ErrorCode;
-import com.example.spotserver.exception.LoginFailException;
-import com.example.spotserver.exception.PermissionException;
+import com.example.spotserver.exception.*;
+import com.example.spotserver.repository.MailCertificationRepository;
 import com.example.spotserver.repository.MemberImageRepository;
 import com.example.spotserver.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
+import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Date;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -33,22 +35,26 @@ public class MemberService {
 
     private MemberRepository memberRepository;
     private MemberImageRepository memberImageRepository;
+    private MailCertificationRepository mailCertificationRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private ImageStore imageStore;
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, MemberImageRepository memberImageRepository, BCryptPasswordEncoder bCryptPasswordEncoder, ImageStore imageStore) {
+    public MemberService(MemberRepository memberRepository, MemberImageRepository memberImageRepository, BCryptPasswordEncoder bCryptPasswordEncoder, ImageStore imageStore, MailCertificationRepository mailCertificationRepository) {
         this.memberRepository = memberRepository;
         this.memberImageRepository = memberImageRepository;
+        this.mailCertificationRepository = mailCertificationRepository;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.imageStore = imageStore;
     }
 
-    public MemberResponse addMember(SignUpMember signUpMember, MultipartFile memberImg) throws DuplicateException, IOException {
+    public MemberResponse addMember(SignUpMember signUpMember, MultipartFile memberImg) throws DuplicateException, IOException, MailException {
 
 
         String loginId = signUpMember.getLoginId();
         String name = signUpMember.getName();
+        String mail = signUpMember.getMail();
+        Integer code = signUpMember.getCode();
 
         if (memberRepository.existsByLoginId(loginId)) {
             throw new DuplicateException(ErrorCode.DUPLICATE_LOGINID);
@@ -58,11 +64,31 @@ public class MemberService {
             throw new DuplicateException(ErrorCode.DUPLICATE_NAME);
         }
 
+        if (memberRepository.existsByMail(mail)) {
+            throw new DuplicateException(ErrorCode.DUPLICATE_MAIL);
+        }
+
+        MailCertification mailCertification = mailCertificationRepository.findByMail(mail)
+                .orElseThrow(() -> new MailException(ErrorCode.NOT_MAIL_CERTIFICATION));
+
+        if (!mailCertification.getCode().equals(code)) {
+            throw new MailException(ErrorCode.FAIL_MAIL_CERTIFICATION);
+        } else {
+
+            LocalDateTime regDate = mailCertification.getRegDate();
+            LocalDateTime now = LocalDateTime.now();
+
+            if(now.isAfter(regDate.plusMinutes(5))) {
+                mailCertificationRepository.delete(mailCertification);
+                throw new MailException(ErrorCode.FAIL_MAIL_TIMEOUT);
+            }
+
+            mailCertificationRepository.delete(mailCertification);
+        }
+
 
         Member member = signUpMember.toEntity(signUpMember);
-        member.setRole(Role.USER);
         member.setLoginPwd(bCryptPasswordEncoder.encode(member.getLoginPwd()));
-        member.setType(MemberType.NORMAL);
 
         if (memberImg != null) {
             MemberImage memberImage = imageStore.storeMemberImage(memberImg);
