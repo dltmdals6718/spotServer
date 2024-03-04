@@ -304,7 +304,59 @@ Content-Type : multipart/form-data <br>
     </tbody>
 </table>
 
-#### - 로그인
+### 1. 요청
+
+#### 1.1 회원가입
+
+##### 쿼리 파라미터
+
+<table>
+    <thead>
+        <tr>
+            <th>이름</th>
+            <th>타입</th>
+            <th>설명</th>
+            <th>필수</th>
+        </tr>
+    </thead>
+    <tbody>
+        <tr>
+            <td>name</td>
+            <td>String</td>
+            <td>닉네임</td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>loginId</td>
+            <td>String</td>
+            <td>아이디</td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>loginPwd</td>
+            <td>String</td>
+            <td>비밀번호</td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>mail</td>
+            <td>String</td>
+            <td>이메일</td>
+            <td>O</td>
+        </tr>
+        <tr>
+            <td>code</td>
+            <td>Integer</td>
+            <td>이메일 인증 번호</td>
+            <td>O</td>
+        </tr>
+    </tbody>
+</table>
+
+
+### 2. 응답
+
+#### 2.1 로그인
 
 ##### 응답
 
@@ -332,7 +384,7 @@ Content-Type : multipart/form-data <br>
 
 <br>
 
-#### 에러 코드
+### 3.  에러 코드
 
 <table>
     <thead>
