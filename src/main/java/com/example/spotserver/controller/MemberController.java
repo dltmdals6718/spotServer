@@ -122,10 +122,17 @@ public class MemberController {
                 .ok(memberResponse);
     }
 
-    @DeleteMapping("/{memberId}")
-    public String test(@PathVariable Long memberId) {
-        memberService.testDeleteMemberById(memberId);
-        return "ok";
+    @GetMapping("/kakao")
+    public ResponseEntity<Map> kakaoLogin(@RequestParam(name = "code") String code) {
+        Member member = memberService.kakaoLogin(code);
+
+        Map<String, Object> tokenInfo = new HashMap<>();
+        String token = memberService.createToken(member.getId());
+        tokenInfo.put("token", token);
+        tokenInfo.put("expire_in", JwtProperties.EXPIRE_TIME / 1000);
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(tokenInfo);
     }
 
 

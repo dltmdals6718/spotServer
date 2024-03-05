@@ -3,6 +3,8 @@ package com.example.spotserver.service;
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.example.spotserver.config.jwt.JwtProperties;
+import com.example.spotserver.config.kakao.KakaoConfig;
+import com.example.spotserver.config.kakao.KakaoToken;
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.SignUpMember;
@@ -12,23 +14,26 @@ import com.example.spotserver.repository.MailCertificationRepository;
 import com.example.spotserver.repository.MemberImageRepository;
 import com.example.spotserver.repository.MemberRepository;
 import jakarta.transaction.Transactional;
+import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpEntity;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
-import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.net.MalformedURLException;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
-import java.util.Date;
-import java.util.NoSuchElementException;
-import java.util.Optional;
+import java.util.*;
 
 @Service
 public class MemberService {
@@ -170,18 +175,6 @@ public class MemberService {
         return MemberResponse.toDto(member);
     }
 
-    public void testDeleteMemberById(Long memberId) {
-
-        Member member = memberRepository.findById(memberId).get();
-        if (member.getMemberImg() != null) {
-            String fullPath = imageStore.getMemberImgFullPath(member.getMemberImg().getStoreFileName());
-            File file = new File(fullPath);
-            if (file.exists())
-                file.delete();
-        }
-
-        memberRepository.deleteById(memberId);
-    }
 
     public Member login(String loginId, String loginPwd) throws LoginFailException {
 
@@ -195,7 +188,62 @@ public class MemberService {
         return findMember;
     }
 
-    public boolean existKakaoMember(Long snsId) {
-        return memberRepository.existsByTypeIsAndSnsId(MemberType.KAKAO, snsId);
+    public Member kakaoLogin(String code) {
+
+        RestTemplate restTemplate = new RestTemplate();
+
+        HttpHeaders httpHeaders = new HttpHeaders();
+        httpHeaders.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+
+        MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
+        multiValueMap.add("grant_type", "authorization_code");
+        multiValueMap.add("client_id", KakaoConfig.CLIENT_ID);
+        multiValueMap.add("redirect_uri", KakaoConfig.REDIRECT_URI);
+        multiValueMap.add("code", code);
+
+        HttpEntity httpEntity = new HttpEntity(multiValueMap, httpHeaders);
+        ResponseEntity<KakaoToken> code_response = restTemplate.postForEntity(
+                "https://kauth.kakao.com/oauth/token",
+                httpEntity,
+                KakaoToken.class);
+
+        KakaoToken kakaoToken = code_response.getBody();
+        String accessToken = kakaoToken.getAccess_token();
+
+        httpHeaders = new HttpHeaders();
+        httpHeaders.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+        httpHeaders.add("Authorization", "Bearer " + accessToken);
+
+        Map<String, String> params = new HashMap<>();
+        httpEntity = new HttpEntity(multiValueMap, httpHeaders);
+
+        ResponseEntity<String> token_response = restTemplate.exchange(
+                "https://kapi.kakao.com/v2/user/me",
+                HttpMethod.GET,
+                httpEntity,
+                String.class,
+                params
+        );
+
+        JSONObject jsonObject = new JSONObject(token_response.getBody());
+        JSONObject properties = jsonObject.getJSONObject("properties");
+        long snsId = jsonObject.getLong("id");
+        String name = properties.getString("nickname");
+
+        Optional<Member> oldMember = memberRepository.findByTypeAndSnsId(MemberType.KAKAO, snsId);
+        if(oldMember.isPresent()) {
+            System.out.println("이미 존재하는 카카오 회원");
+            return oldMember.get();
+        } else {
+            System.out.println("새로운 카카오 회원");
+            Member newMember = new Member();
+            newMember.setType(MemberType.KAKAO);
+            newMember.setName(name);
+            newMember.setSnsId(snsId);
+            newMember.setRole(Role.USER);
+            memberRepository.save(newMember);
+            return newMember;
+        }
+
     }
 }
