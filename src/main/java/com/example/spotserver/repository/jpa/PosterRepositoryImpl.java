@@ -2,9 +2,9 @@ package com.example.spotserver.repository.jpa;
 
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.response.PosterResponse;
+import com.example.spotserver.dto.response.QPosterResponse;
 import com.example.spotserver.repository.PosterRepositoryCustom;
 import com.querydsl.core.types.ExpressionUtils;
-import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
 import com.querydsl.jpa.JPAExpressions;
@@ -42,7 +42,7 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
         QPosterLike posterLike = QPosterLike.posterLike;
 
         List<PosterResponse> posters = jpaQueryFactory
-                .select(Projections.constructor(PosterResponse.class,
+                .select(new QPosterResponse(
                         poster.id,
                         poster.writer.id,
                         poster.writer.name,
@@ -85,7 +85,7 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
         StringPath likeCount = Expressions.stringPath("like_count");
 
         List<PosterResponse> posters = jpaQueryFactory
-                .select(Projections.constructor(PosterResponse.class,
+                .select(new QPosterResponse(
                         poster.id,
                         poster.writer.id,
                         poster.writer.name,
@@ -101,8 +101,8 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                                 JPAExpressions
                                         .select(comment.count())
                                         .from(comment)
-                                        .where(comment.poster.id.eq(poster.id)), "comment_count"))
-                )
+                                        .where(comment.poster.id.eq(poster.id)), "comment_count")
+                ))
                 .from(poster)
                 .where(poster.location.id.eq(locationId))
                 .offset(pageable.getOffset())
@@ -126,7 +126,7 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
         QPosterLike posterLike = QPosterLike.posterLike;
 
         PosterResponse posterResponse = jpaQueryFactory
-                .select(Projections.constructor(PosterResponse.class,
+                .select(new QPosterResponse(
                         poster.id,
                         poster.writer.id,
                         poster.writer.name,
@@ -159,7 +159,7 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
         StringPath likeCount = Expressions.stringPath("like_count");
 
         List<PosterResponse> bestPosters = jpaQueryFactory
-                .select(Projections.constructor(PosterResponse.class,
+                .select(new QPosterResponse(
                         poster.id,
                         poster.writer.id,
                         poster.writer.name,
@@ -175,8 +175,8 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                                 JPAExpressions
                                         .select(comment.count())
                                         .from(comment)
-                                        .where(comment.poster.id.eq(poster.id)), "comment_count"))
-                )
+                                        .where(comment.poster.id.eq(poster.id)), "comment_count")
+                ))
                 .from(poster)
                 .orderBy(likeCount.desc())
                 .limit(5)
