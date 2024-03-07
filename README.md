@@ -1216,11 +1216,7 @@ Results
 
 ```json
 {
-  "commentId": 5,
-  "writerId": 1,
-  "writerName": "namezz",
-  "content": "댓글내용",
-  "regDate": "2024-01-25T15:51:48.44347"
+  "commentId": 36
 }
 ```
 
@@ -1316,11 +1312,7 @@ Results
 
 ```json
 {
-  "commentId": 21,
-  "writerId": 126,
-  "writerName": "namezz",
-  "content": "수정될 내용",
-  "regDate": "2024-02-01T14:05:03"
+  "commentId": 36
 }
 ```
 

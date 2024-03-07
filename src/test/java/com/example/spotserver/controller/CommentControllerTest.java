@@ -94,47 +94,47 @@ class CommentControllerTest {
 //    @Test
     @DisplayName(value = "댓글 작성")
     void addComment() throws Exception {
-
-        Long posterId = 2L;
-        Long commentId = 3L;
-
-        String writeCommnetUrl = "/comments/" + posterId;
-        CommentRequest commentRequest = new CommentRequest();
-        commentRequest.setContent("테스트 댓글 내용");
-
-        CommentResponse commentResponse = new CommentResponse();
-        commentResponse.setCommentId(commentId);
-        commentResponse.setWriterId(member.getId());
-        commentResponse.setWriterName(member.getName());
-        commentResponse.setContent(commentRequest.getContent());
-        commentResponse.setRegDate(LocalDateTime.now());
-
-        given(commentService.addComment(posterId, commentRequest, member))
-                .willReturn(commentResponse);
-
-
-        ObjectMapper objectMapper = new ObjectMapper();
-        String body = objectMapper.writeValueAsString(commentRequest);
-
-        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.POST, writeCommnetUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
-                .characterEncoding("utf-8")
-                .with(csrf()));
-
-        verify(commentService, times(1))
-                .addComment(posterId, commentRequest, member);
-
-
-        resultActions
-                .andExpectAll(
-                        status().is(HttpStatus.CREATED.value()),
-                        jsonPath("$.commentId").value(commentId),
-                        jsonPath("$.writerId").value(member.getId()),
-                        jsonPath("$.content").value(commentRequest.getContent()),
-                        jsonPath("$.regDate").value(commentResponse.getRegDate().toString()))
-                .andDo(print());
+//
+//        Long posterId = 2L;
+//        Long commentId = 3L;
+//
+//        String writeCommnetUrl = "/comments/" + posterId;
+//        CommentRequest commentRequest = new CommentRequest();
+//        commentRequest.setContent("테스트 댓글 내용");
+//
+//        CommentResponse commentResponse = new CommentResponse();
+//        commentResponse.setCommentId(commentId);
+//        commentResponse.setWriterId(member.getId());
+//        commentResponse.setWriterName(member.getName());
+//        commentResponse.setContent(commentRequest.getContent());
+//        commentResponse.setRegDate(LocalDateTime.now());
+//
+//        given(commentService.addComment(posterId, commentRequest, member))
+//                .willReturn(commentResponse);
+//
+//
+//        ObjectMapper objectMapper = new ObjectMapper();
+//        String body = objectMapper.writeValueAsString(commentRequest);
+//
+//        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+//                .request(HttpMethod.POST, writeCommnetUrl)
+//                .contentType(MediaType.APPLICATION_JSON)
+//                .content(body)
+//                .characterEncoding("utf-8")
+//                .with(csrf()));
+//
+//        verify(commentService, times(1))
+//                .addComment(posterId, commentRequest, member);
+//
+//
+//        resultActions
+//                .andExpectAll(
+//                        status().is(HttpStatus.CREATED.value()),
+//                        jsonPath("$.commentId").value(commentId),
+//                        jsonPath("$.writerId").value(member.getId()),
+//                        jsonPath("$.content").value(commentRequest.getContent()),
+//                        jsonPath("$.regDate").value(commentResponse.getRegDate().toString()))
+//                .andDo(print());
 
 
     }

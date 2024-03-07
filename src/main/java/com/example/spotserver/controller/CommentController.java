@@ -22,7 +22,9 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @RestController
 @RequestMapping
@@ -36,15 +38,19 @@ public class CommentController {
     }
 
     @PostMapping("/comments/{posterId}")
-    public ResponseEntity<CommentResponse> addComment(@PathVariable Long posterId,
-                                                      @Valid @RequestBody CommentRequest commentRequest,
-                                                      @AuthenticationPrincipal(expression = "member") Member member) {
+    public ResponseEntity<Map> addComment(@PathVariable Long posterId,
+                                          @Valid @RequestBody CommentRequest commentRequest,
+                                          @AuthenticationPrincipal(expression = "member") Member member) {
 
-        CommentResponse commentResponse = commentService.addComment(posterId, commentRequest, member);
 
+        Comment comment = CommentRequest.toEntity(commentRequest);
+        commentService.addComment(posterId, comment, member);
+
+        Map<String, Object> response = new HashMap<>();
+        response.put("commentId", comment.getId());
         return ResponseEntity
                 .status(HttpStatus.CREATED)
-                .body(commentResponse);
+                .body(response);
     }
 
     @GetMapping("/comments/{commentId}")
@@ -80,15 +86,16 @@ public class CommentController {
     }
 
     @PutMapping("/comments/{commentId}")
-    public ResponseEntity<CommentResponse> updateComment(@PathVariable Long commentId,
+    public ResponseEntity<Map> updateComment(@PathVariable Long commentId,
                                                          @Valid @RequestBody CommentRequest commentRequest,
                                                          @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
 
-        CommentResponse commentResponse = commentService.updateComment(commentId, commentRequest, member);
-
+        commentService.updateComment(commentId, commentRequest, member);
+        Map<String, Object> response = new HashMap<>();
+        response.put("commentId", commentId);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(commentResponse);
+                .body(response);
     }
 
     @PostMapping(value = "/comments/{commentId}/likes")

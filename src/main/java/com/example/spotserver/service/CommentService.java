@@ -37,19 +37,16 @@ public class CommentService {
         this.commentLikeRepository = commentLikeRepository;
     }
 
-    public CommentResponse addComment(Long posterId, CommentRequest commentRequest, Member member) {
+    public void addComment(Long posterId, Comment comment, Member member) {
 
         Poster poster = posterRepository.findById(posterId)
                 .orElseThrow(() -> new NoSuchElementException());
 
-        Comment comment = CommentRequest.toEntity(commentRequest);
         comment.setPoster(poster);
         comment.setWriter(member);
 
-        Comment saveComment = commentRepository.save(comment);
-        CommentResponse commentResponse = CommentResponse.toDto(saveComment);
+        commentRepository.save(comment);
 
-        return commentResponse;
     }
 
     public PageResponse<List<CommentResponse>> getComments(Long posterId, CommentConditionRequest commentConditionRequest) {
@@ -82,7 +79,7 @@ public class CommentService {
         }
     }
 
-    public CommentResponse updateComment(Long commentId, CommentRequest commentRequest, Member member) throws PermissionException {
+    public void updateComment(Long commentId, CommentRequest commentRequest, Member member) throws PermissionException {
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException());
@@ -91,7 +88,6 @@ public class CommentService {
 
         if (commentWriter.getId().equals(member.getId())) {
             comment.setContent(commentRequest.getContent());
-            return CommentResponse.toDto(comment);
         } else {
             throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
         }
