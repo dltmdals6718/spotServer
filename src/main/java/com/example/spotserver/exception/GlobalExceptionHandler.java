@@ -3,12 +3,14 @@ package com.example.spotserver.exception;
 import com.example.spotserver.domain.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.client.HttpClientErrorException;
+import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.NoSuchElementException;
 
@@ -69,5 +71,30 @@ public class GlobalExceptionHandler {
                 .status(errorCode.getHttpStatus())
                 .body(errorResponse);
     }
+
+    @ExceptionHandler(value = FileException.class)
+    public ResponseEntity<ErrorResponse> fileException(FileException e) {
+        ErrorCode errorCode = e.getErrorCode();
+        ErrorResponse errorResponse = new ErrorResponse(errorCode);
+        return ResponseEntity
+                .status(errorCode.getHttpStatus())
+                .body(errorResponse);
+    }
+
+//    @ExceptionHandler(value = HttpMessageNotReadableException.class)
+//    public ResponseEntity<String> test(HttpMessageNotReadableException e) {
+//        System.out.println("e = " + e);
+//        System.out.println("e.getMessage() = " + e.getMessage());
+//        return ResponseEntity
+//                .ok("HttpMessageNotReadableException!!!!");
+//    }
+//
+//    @ExceptionHandler(value = MissingServletRequestPartException.class)
+//    public ResponseEntity<String> test2(MissingServletRequestPartException e) {
+//        System.out.println("e = " + e);
+//        System.out.println("e.getMessage() = " + e.getMessage());
+//        return ResponseEntity
+//                .ok("MissingServletRequestPartException!!!!");
+//    }
 
 }

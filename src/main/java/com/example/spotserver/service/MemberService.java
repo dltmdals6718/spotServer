@@ -53,7 +53,8 @@ public class MemberService {
         this.imageStore = imageStore;
     }
 
-    public MemberResponse addMember(SignUpMember signUpMember, MultipartFile memberImg) throws DuplicateException, IOException, MailException {
+    @Transactional(rollbackOn = {FileException.class})
+    public MemberResponse addMember(SignUpMember signUpMember, MultipartFile memberImg) throws DuplicateException, IOException, MailException, FileException {
 
 
         String loginId = signUpMember.getLoginId();
@@ -96,6 +97,16 @@ public class MemberService {
         member.setLoginPwd(bCryptPasswordEncoder.encode(member.getLoginPwd()));
 
         if (memberImg != null) {
+
+            if(memberImg.getSize() > 1000000) {
+                throw new FileException(ErrorCode.FAIL_FILE_SIZE);
+            }
+
+            String extension = ImageStore.getFileExtension(memberImg.getOriginalFilename());
+            List<String> supportFile = new ArrayList<>(Arrays.asList("jpeg", "jpg", "png"));
+            if(!supportFile.contains(extension))
+                throw new FileException(ErrorCode.NOT_SUPPORT_FILE);
+
             MemberImage memberImage = imageStore.storeMemberImage(memberImg);
             memberImage.setMember(member);
             member.setMemberImg(memberImage);

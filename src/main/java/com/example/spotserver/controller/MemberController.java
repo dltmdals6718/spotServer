@@ -41,7 +41,7 @@ public class MemberController {
 
     @PostMapping("/signup")
     public ResponseEntity<MemberResponse> signupMember(@Valid @RequestPart SignUpMember signUpMember,
-                                                       @RequestPart(required = false) MultipartFile memberImg) throws DuplicateException, IOException, MailException {
+                                                       @RequestPart(required = false) MultipartFile memberImg) throws DuplicateException, IOException, MailException, FileException {
 
         MemberResponse memberResponse = memberService.addMember(signUpMember, memberImg);
 
@@ -54,6 +54,7 @@ public class MemberController {
     @PostMapping("/signin")
     public ResponseEntity<Map> signinMember(@Valid @RequestBody SignInMember signInMember) throws LoginFailException {
 
+        System.out.println("MemberController.signinMember");
 
         String loginId = signInMember.getLoginId();
         String loginPwd = signInMember.getLoginPwd();

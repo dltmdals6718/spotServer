@@ -86,7 +86,7 @@ public class ImageStore {
         return memberImgDir+imageFileName;
     }
 
-    public String getFileExtension(String fileName) {
+    public static String getFileExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf('.')+1);
     }
 }
