@@ -39,7 +39,7 @@ public class MemberController {
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
     }
 
-    @PostMapping("/signup")
+    @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MemberResponse> signupMember(@Valid @RequestPart SignUpMember signUpMember,
                                                        @RequestPart(required = false) MultipartFile memberImg) throws DuplicateException, IOException, MailException, FileException {
 
@@ -51,10 +51,8 @@ public class MemberController {
                 .body(memberResponse);
     }
 
-    @PostMapping("/signin")
+    @PostMapping(value = "/signin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> signinMember(@Valid @RequestBody SignInMember signInMember) throws LoginFailException {
-
-        System.out.println("MemberController.signinMember");
 
         String loginId = signInMember.getLoginId();
         String loginPwd = signInMember.getLoginPwd();
@@ -108,7 +106,7 @@ public class MemberController {
                 .body(memberImage);
     }
 
-    @PutMapping("/{memberId}")
+    @PutMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MemberResponse> updateMember(@PathVariable Long memberId,
                                                        @Valid @RequestPart(required = false) MemberUpdateRequest memberUpdateRequest,
                                                        @RequestPart(required = false) MultipartFile memberImg,
@@ -123,7 +121,7 @@ public class MemberController {
                 .ok(memberResponse);
     }
 
-    @GetMapping("/kakao")
+    @GetMapping(value = "/kakao", produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> kakaoLogin(@RequestParam(name = "code") String code) {
         Member member = memberService.kakaoLogin(code);
 

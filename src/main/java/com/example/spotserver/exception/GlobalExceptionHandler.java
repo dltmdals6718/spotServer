@@ -81,20 +81,13 @@ public class GlobalExceptionHandler {
                 .body(errorResponse);
     }
 
-//    @ExceptionHandler(value = HttpMessageNotReadableException.class)
-//    public ResponseEntity<String> test(HttpMessageNotReadableException e) {
-//        System.out.println("e = " + e);
-//        System.out.println("e.getMessage() = " + e.getMessage());
-//        return ResponseEntity
-//                .ok("HttpMessageNotReadableException!!!!");
-//    }
-//
-//    @ExceptionHandler(value = MissingServletRequestPartException.class)
-//    public ResponseEntity<String> test2(MissingServletRequestPartException e) {
-//        System.out.println("e = " + e);
-//        System.out.println("e.getMessage() = " + e.getMessage());
-//        return ResponseEntity
-//                .ok("MissingServletRequestPartException!!!!");
-//    }
+    @ExceptionHandler(value = MissingServletRequestPartException.class)
+    public ResponseEntity<ErrorResponse> multiPartException(MissingServletRequestPartException e) {
+        ErrorResponse errorResponse = new ErrorResponse(ErrorCode.NOT_VALID);
+        errorResponse.setMessage(e.getRequestPartName() + "를 입력해주세요.");
+        return ResponseEntity
+                .status(e.getStatusCode())
+                .body(errorResponse);
+    }
 
 }

@@ -55,7 +55,7 @@ public class LocationController {
 
             boolean containsAdmin = authorities.contains(new SimpleGrantedAuthority(Role.ADMIN.toString()));
 
-            if(!containsAdmin) {
+            if (!containsAdmin) {
                 throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
             }
         }
@@ -68,9 +68,9 @@ public class LocationController {
                 .body(pageResponse);
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_CBOR_VALUE)
     public ResponseEntity<Map> addLocation(@Valid @RequestPart LocationRequest locationRequest,
-                                                        @RequestPart(required = false) List<MultipartFile> files) throws IOException {
+                                           @RequestPart(required = false) List<MultipartFile> files) throws IOException {
 
         Location location = LocationRequest.toEntity(locationRequest);
 
@@ -94,7 +94,7 @@ public class LocationController {
                 .body(response);
     }
 
-    @PutMapping("/{locationId}/approve")
+    @PutMapping(value = "/{locationId}/approve", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApproveResponse> updateLocationApprove(@PathVariable Long locationId, @RequestBody ApproveRequest approveRequest) {
 
         ApproveResponse approveResponse = locationService.updateApprove(locationId, approveRequest);

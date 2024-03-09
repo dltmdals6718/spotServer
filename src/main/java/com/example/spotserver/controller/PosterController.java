@@ -34,7 +34,7 @@ public class PosterController {
         this.posterService = posterService;
     }
 
-    @PostMapping(value = "/locations/{locationId}/posters", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(value = "/locations/{locationId}/posters", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> addPoster(@Valid @RequestPart PosterRequest posterRequest,
                                          @RequestPart(required = false) List<MultipartFile> files,
                                          @PathVariable Long locationId,
@@ -72,7 +72,7 @@ public class PosterController {
                 .body(posterResponse);
     }
 
-    @PutMapping(value = "/posters/{posterId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PutMapping(value = "/posters/{posterId}", consumes = {MediaType.APPLICATION_JSON_VALUE, MediaType.MULTIPART_FORM_DATA_VALUE}, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> updatePoster(@PathVariable Long posterId,
                                             @Valid @RequestPart PosterRequest posterRequest,
                                             @RequestPart(required = false) List<MultipartFile> addFiles,

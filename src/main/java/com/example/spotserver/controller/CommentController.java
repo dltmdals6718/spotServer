@@ -17,6 +17,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
@@ -37,7 +38,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    @PostMapping("/comments/{posterId}")
+    @PostMapping(value = "/comments/{posterId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> addComment(@PathVariable Long posterId,
                                           @Valid @RequestBody CommentRequest commentRequest,
                                           @AuthenticationPrincipal(expression = "member") Member member) {
@@ -85,7 +86,7 @@ public class CommentController {
                 .build();
     }
 
-    @PutMapping("/comments/{commentId}")
+    @PutMapping(value = "/comments/{commentId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> updateComment(@PathVariable Long commentId,
                                                          @Valid @RequestBody CommentRequest commentRequest,
                                                          @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
