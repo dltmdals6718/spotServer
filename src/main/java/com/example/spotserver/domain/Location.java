@@ -5,6 +5,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -26,7 +27,12 @@ public class Location {
     @Column(columnDefinition = "TINYINT(1) DEFAULT false")
     private Boolean approve = false;
 
-    @OneToMany(cascade = CascadeType.REMOVE)
-    private List<LocationLike> locationLikes;
+    @OneToMany(mappedBy = "location", cascade = CascadeType.REMOVE)
+    private List<LocationLike> locationLikes = new ArrayList<>();
 
+    @OneToMany(mappedBy = "location", cascade = CascadeType.REMOVE)
+    private List<Poster> posters = new ArrayList<>();
+
+    @OneToMany(mappedBy = "location", cascade = CascadeType.REMOVE)
+    private List<LocationImage> locationImages = new ArrayList<>();
 }

@@ -588,15 +588,15 @@ false - 미승인으로 변경
 ```
 
 </td>
-    <td>장소 승인 상태 변경</td>
+    <td>장소 승인 상태 변경 (어드민 권한)</td>
 </tr>
 
 <tr>
     <td>DELETE</td>
-    <td>*예정</td>
+    <td>/locations/{locationId}</td>
     <td></td>
-    <td></td>
-    <td>장소 삭제</td>
+    <td>삭제 성공시 HTTP 상태 코드는 204를 가지며 responseBody는 갖지 않는다.</td>
+    <td>장소 삭제(어드민 권한)</td>
 </tr>
 
 

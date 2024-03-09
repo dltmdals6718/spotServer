@@ -103,6 +103,15 @@ public class LocationController {
                 .ok(approveResponse);
     }
 
+    @DeleteMapping("/{locationId}")
+    public ResponseEntity deleteLocation(@PathVariable Long locationId) {
+        locationService.deleteLocation(locationId);
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
+    }
+
+
     @GetMapping("/{locationId}")
     public ResponseEntity<LocationResponse> getLocation(@PathVariable Long locationId) {
 

@@ -74,6 +74,20 @@ public class ImageStore {
         return memberImage;
     }
 
+    public void deletePosterImage(PosterImage posterImage) {
+        String storeFileName = posterImage.getStoreFileName();
+        File file = new File(posterImgDir + storeFileName);
+        if(file.exists())
+            file.delete();
+    }
+
+    public void deleteLocationImage(LocationImage locationImage) {
+        String storeFileName = locationImage.getStoreFileName();
+        File file = new File(locationImgDir + storeFileName);
+        if(file.exists())
+            file.delete();
+    }
+
     public String getLocationImgFullPath(String imageFileName) {
         return locationImgDir+imageFileName;
     }

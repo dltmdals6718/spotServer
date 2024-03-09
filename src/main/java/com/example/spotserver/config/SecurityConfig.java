@@ -54,6 +54,7 @@ public class SecurityConfig {
         http.authorizeHttpRequests(request ->
                 request
                         .requestMatchers("/locations/*/approve").hasAuthority("ADMIN")
+                        .requestMatchers(HttpMethod.DELETE, "/locations/*").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/members").authenticated()
                         .requestMatchers(HttpMethod.GET).permitAll()
                         .requestMatchers(HttpMethod.POST, "/members/signup", "/members/signin").permitAll()

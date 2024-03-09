@@ -7,6 +7,7 @@ import lombok.Data;
 import org.hibernate.annotations.CreationTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Entity
@@ -27,10 +28,10 @@ public class Poster {
 
 
     @OneToMany(mappedBy = "poster", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
-    private List<PosterImage> posterImages;
+    private List<PosterImage> posterImages = new ArrayList<>();
 
     @OneToMany(mappedBy = "poster", cascade = CascadeType.REMOVE)
-    private List<Comment> comments;
+    private List<Comment> comments = new ArrayList<>();
 
     private String title;
     private String content;
@@ -40,7 +41,7 @@ public class Poster {
 
 
     @OneToMany(mappedBy = "poster", cascade = CascadeType.REMOVE)
-    private List<PosterLike> posterLikes;
+    private List<PosterLike> posterLikes = new ArrayList<>();
 
     public void updatePoster(PosterRequest posterRequest) {
         this.title = posterRequest.getTitle();

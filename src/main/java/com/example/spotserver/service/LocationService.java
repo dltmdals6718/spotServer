@@ -27,17 +27,18 @@ public class LocationService {
 
     private LocationRepository locationRepository;
     private LocationLikeRepository locationLikeRepository;
+    private ImageStore imageStore;
 
     @Autowired
-    public LocationService(LocationRepository locationRepository,
-                           LocationLikeRepository locationLikeRepository) {
+    public LocationService(LocationRepository locationRepository, LocationLikeRepository locationLikeRepository, ImageStore imageStore) {
         this.locationRepository = locationRepository;
         this.locationLikeRepository = locationLikeRepository;
+        this.imageStore = imageStore;
     }
 
     public PageResponse<List<LocationResponse>> searchLocations(Double latitude,
-                                       Double longitude,
-                                       LocationConditionRequest conditionRequest) {
+                                                                Double longitude,
+                                                                LocationConditionRequest conditionRequest) {
 
         Page<LocationResponse> locationResponses = locationRepository.searchLocations(latitude, longitude, conditionRequest);
         PageResponse<List<LocationResponse>> pageResponse = new PageResponse<>(locationResponses);
@@ -61,6 +62,28 @@ public class LocationService {
 
         ApproveResponse approveResponse = new ApproveResponse(locationId, approve);
         return approveResponse;
+    }
+
+    @Transactional
+    public void deleteLocation(Long locationId) {
+
+        Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        List<Poster> posters = location.getPosters();
+        for (Poster poster : posters) {
+            List<PosterImage> posterImages = poster.getPosterImages();
+            for (PosterImage posterImage : posterImages) {
+                imageStore.deletePosterImage(posterImage);
+            }
+        }
+
+        List<LocationImage> locationImages = location.getLocationImages();
+        for (LocationImage locationImage : locationImages) {
+            imageStore.deleteLocationImage(locationImage);
+        }
+
+        locationRepository.deleteById(locationId);
     }
 
     public LocationResponse getLocation(Long locationId) {
