@@ -16,7 +16,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -45,8 +47,20 @@ public class LocationService {
         return pageResponse;
     }
 
-    public Location addLocation(Location location) {
+    public Location addLocation(Location location, List<MultipartFile> files) throws IOException {
+
+
+        if (files != null) {
+            List<LocationImage> imgFiles = imageStore.storeLocationImages(files);
+            location.setLocationImages(imgFiles);
+
+            for (LocationImage imgFile : imgFiles) {
+                imgFile.setLocation(location);
+            }
+        }
+
         Location saveLocation = locationRepository.save(location);
+
         return saveLocation;
     }
 

@@ -30,14 +30,6 @@ public class ImageFileService {
         this.imageStore = imageStore;
     }
 
-    public void savePosterImageList(List<PosterImage> imageList) {
-        posterImageRepository.saveAll(imageList);
-    }
-
-    public void saveLocationImageList(List<LocationImage> imageList) {
-        locationImageRepository.saveAll(imageList);
-    }
-
     public List<PosterImage> getPosterImageList(Long posterId) {
         List<PosterImage> posterImages = posterImageRepository.findByPosterId(posterId);
         return posterImages;

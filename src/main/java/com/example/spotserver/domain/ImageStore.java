@@ -88,16 +88,16 @@ public class ImageStore {
             file.delete();
     }
 
-    public String getLocationImgFullPath(String imageFileName) {
-        return locationImgDir+imageFileName;
+    public String getLocationImgFullPath(String imageStoreFileName) {
+        return locationImgDir+imageStoreFileName;
     }
 
-    public String getPosterImgFullPath(String imageFileName) {
-        return posterImgDir+imageFileName;
+    public String getPosterImgFullPath(String imageStoreFileName) {
+        return posterImgDir+imageStoreFileName;
     }
 
-    public String getMemberImgFullPath(String imageFileName) {
-        return memberImgDir+imageFileName;
+    public String getMemberImgFullPath(String imageStoreFileName) {
+        return memberImgDir+imageStoreFileName;
     }
 
     public static String getFileExtension(String fileName) {

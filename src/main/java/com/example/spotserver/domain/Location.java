@@ -33,6 +33,6 @@ public class Location {
     @OneToMany(mappedBy = "location", cascade = CascadeType.REMOVE)
     private List<Poster> posters = new ArrayList<>();
 
-    @OneToMany(mappedBy = "location", cascade = CascadeType.REMOVE)
+    @OneToMany(mappedBy = "location", cascade = {CascadeType.REMOVE, CascadeType.PERSIST})
     private List<LocationImage> locationImages = new ArrayList<>();
 }

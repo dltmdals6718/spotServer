@@ -12,9 +12,7 @@ import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.service.ImageFileService;
 import com.example.spotserver.service.LocationService;
-import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
-import org.springframework.boot.autoconfigure.security.oauth2.resource.OAuth2ResourceServerProperties;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -34,13 +32,9 @@ import java.util.*;
 public class LocationController {
 
     private LocationService locationService;
-    private ImageFileService imageFileService;
-    private ImageStore imageStore;
 
-    public LocationController(LocationService locationService, ImageFileService imageFileService, ImageStore imageStore) {
+    public LocationController(LocationService locationService) {
         this.locationService = locationService;
-        this.imageFileService = imageFileService;
-        this.imageStore = imageStore;
     }
 
     @GetMapping
@@ -73,18 +67,7 @@ public class LocationController {
                                            @RequestPart(required = false) List<MultipartFile> files) throws IOException {
 
         Location location = LocationRequest.toEntity(locationRequest);
-
-        locationService.addLocation(location);
-
-        if (files != null) {
-            List<LocationImage> imgFiles = imageStore.storeLocationImages(files);
-
-            for (LocationImage imgFile : imgFiles) {
-                imgFile.setLocation(location);
-            }
-
-            imageFileService.saveLocationImageList(imgFiles);
-        }
+        locationService.addLocation(location, files);
 
         Map<String, Object> response = new HashMap<>();
         response.put("locationId", location.getId());
