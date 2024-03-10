@@ -1202,7 +1202,7 @@ Results
     <tbody>
         <tr>
             <td>POST</td>
-            <td>/comments/{posterId}</td>
+            <td>/posters/{posterId}/comments</td>
 <td>
 
 ```json

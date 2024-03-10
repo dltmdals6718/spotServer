@@ -38,7 +38,7 @@ public class CommentController {
         this.commentService = commentService;
     }
 
-    @PostMapping(value = "/comments/{posterId}", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(value = "/posters/{posterId}/comments", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> addComment(@PathVariable Long posterId,
                                           @Valid @RequestBody CommentRequest commentRequest,
                                           @AuthenticationPrincipal(expression = "member") Member member) {
