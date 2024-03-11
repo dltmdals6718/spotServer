@@ -199,41 +199,21 @@ public class MemberService {
         return findMember;
     }
 
-    public Member kakaoLogin(String code) {
+    public Member loginWithKakaoAccessToken(String kakaoAccessToken) {
 
         RestTemplate restTemplate = new RestTemplate();
 
         HttpHeaders httpHeaders = new HttpHeaders();
         httpHeaders.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
+        httpHeaders.add("Authorization", "Bearer " + kakaoAccessToken);
 
-        MultiValueMap<String, String> multiValueMap = new LinkedMultiValueMap<>();
-        multiValueMap.add("grant_type", "authorization_code");
-        multiValueMap.add("client_id", KakaoConfig.CLIENT_ID);
-        multiValueMap.add("redirect_uri", KakaoConfig.REDIRECT_URI);
-        multiValueMap.add("code", code);
-
-        HttpEntity httpEntity = new HttpEntity(multiValueMap, httpHeaders);
-        ResponseEntity<KakaoToken> code_response = restTemplate.postForEntity(
-                "https://kauth.kakao.com/oauth/token",
-                httpEntity,
-                KakaoToken.class);
-
-        KakaoToken kakaoToken = code_response.getBody();
-        String accessToken = kakaoToken.getAccess_token();
-
-        httpHeaders = new HttpHeaders();
-        httpHeaders.add("Content-type", "application/x-www-form-urlencoded;charset=utf-8");
-        httpHeaders.add("Authorization", "Bearer " + accessToken);
-
-        Map<String, String> params = new HashMap<>();
-        httpEntity = new HttpEntity(multiValueMap, httpHeaders);
+        HttpEntity httpEntity = new HttpEntity(httpHeaders);
 
         ResponseEntity<String> token_response = restTemplate.exchange(
                 "https://kapi.kakao.com/v2/user/me",
                 HttpMethod.GET,
                 httpEntity,
-                String.class,
-                params
+                String.class
         );
 
         JSONObject jsonObject = new JSONObject(token_response.getBody());
@@ -243,10 +223,8 @@ public class MemberService {
 
         Optional<Member> oldMember = memberRepository.findByTypeAndSnsId(MemberType.KAKAO, snsId);
         if(oldMember.isPresent()) {
-            System.out.println("이미 존재하는 카카오 회원");
             return oldMember.get();
         } else {
-            System.out.println("새로운 카카오 회원");
             Member newMember = new Member();
             newMember.setType(MemberType.KAKAO);
             newMember.setName(name);
@@ -255,6 +233,5 @@ public class MemberService {
             memberRepository.save(newMember);
             return newMember;
         }
-
     }
 }

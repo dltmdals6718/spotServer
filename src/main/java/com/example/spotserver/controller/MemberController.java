@@ -121,9 +121,9 @@ public class MemberController {
                 .ok(memberResponse);
     }
 
-    @GetMapping(value = "/kakao", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map> kakaoLogin(@RequestParam(name = "code") String code) {
-        Member member = memberService.kakaoLogin(code);
+    @PostMapping(value = "/signin-kakao", produces = MediaType.APPLICATION_JSON_VALUE)
+    public ResponseEntity<Map> kakaoLogin(@RequestParam(name = "kakaoToken") String kakaoToken) {
+        Member member = memberService.loginWithKakaoAccessToken(kakaoToken);
 
         Map<String, Object> tokenInfo = new HashMap<>();
         String token = memberService.createToken(member.getId());

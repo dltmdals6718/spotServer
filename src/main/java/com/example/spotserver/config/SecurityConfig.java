@@ -45,7 +45,6 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
-//        http.addFilterBefore(new MyFilter3(), SecurityContextPersistenceFilter.class);
         http.csrf(AbstractHttpConfigurer::disable);
         http.sessionManagement(session ->
                 session
@@ -57,7 +56,7 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.DELETE, "/locations/*").hasAuthority("ADMIN")
                         .requestMatchers(HttpMethod.GET, "/members").authenticated()
                         .requestMatchers(HttpMethod.GET).permitAll()
-                        .requestMatchers(HttpMethod.POST, "/members/signup", "/members/signin").permitAll()
+                        .requestMatchers(HttpMethod.POST, "/members/signup", "/members/signin", "/members/signin-kakao").permitAll()
                         .requestMatchers("/mails/certification").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated());

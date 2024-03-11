@@ -230,6 +230,24 @@ Content-Type : multipart/form-data <br>
   </tr>
 
 <tr>
+    <td>POST</td>
+    <td>/members/signin-kakao<br>?kakaoToken={kakaoSDK 로그인을 통해 받은 액세스 토큰}</td>
+    <td></td>
+<td>
+
+```json
+{
+  "expire_in": 1500,
+  "token": "tokenString"
+}
+```
+
+</td>
+    <td>카카오 로그인</td>
+<tr>
+
+
+<tr>
     <td>PUT</td>
     <td>/members/{memberId}</td>
 <td>
