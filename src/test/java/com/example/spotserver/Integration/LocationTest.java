@@ -2,11 +2,16 @@ package com.example.spotserver.Integration;
 
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.ApproveRequest;
+import com.example.spotserver.exception.DuplicateException;
+import com.example.spotserver.exception.MailException;
 import com.example.spotserver.repository.*;
 import com.example.spotserver.service.LocationService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.assertj.core.api.Assertions;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,10 +56,27 @@ public class LocationTest {
     LocationImageRepository locationImageRepository;
 
     @Autowired
+    LocationLikeRepository locationLikeRepository;
+
+    @Autowired
+    MemberRepository memberRepository;
+
+    @Autowired
     ImageStore imageStore;
 
     @Autowired
     EntityManager em;
+
+    Member member;
+
+    @BeforeEach
+    void init() {
+        member = new Member();
+        member.setName("테스터");
+        member.setRole(Role.USER);
+        memberRepository.save(member);
+    }
+
 
     @Test
     @DisplayName("Location 등록")
@@ -212,5 +234,135 @@ public class LocationTest {
                 .isNotPresent();
     }
 
+    @Test
+    @DisplayName("Location 승인으로 변경")
+    void approveLocation() {
+
+        //given
+        Location location = new Location();
+        location.setTitle("테스트 장소");
+
+        locationRepository.save(location);
+
+        ApproveRequest approveRequest = new ApproveRequest();
+        approveRequest.setApprove(true);
+
+        //when
+        locationService.updateApprove(location.getId(), approveRequest);
+
+        //then
+        Assertions
+                .assertThat(location.getApprove())
+                .isTrue();
+    }
+
+    @Test
+    @DisplayName("Location 미승인으로 변경")
+    void unapproveLocation() {
+
+        //given
+        Location location = new Location();
+        location.setTitle("테스트 장소");
+        location.setApprove(true);
+
+        locationRepository.save(location);
+
+        ApproveRequest approveRequest = new ApproveRequest();
+        approveRequest.setApprove(false);
+
+        //when
+        locationService.updateApprove(location.getId(), approveRequest);
+
+        //then
+        Assertions
+                .assertThat(location.getApprove())
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("좋아요 등록")
+    void addLike() throws DuplicateException {
+
+        //given
+        Location location = new Location();
+        location.setTitle("테스트 장소");
+        locationRepository.save(location);
+
+        //when
+        locationService.addLike(location.getId(), member.getId());
+
+        em.clear();
+
+        //then
+        Location findLocation = locationRepository.findById(location.getId())
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Assertions
+                .assertThat(findLocation.getLocationLikes().size())
+                .isEqualTo(1);
+    }
+
+    @Test
+    @DisplayName("중복된 좋아요 등록")
+    void duplicateLike() throws DuplicateException {
+
+        //given
+        Location location = new Location();
+        location.setTitle("테스트 장소");
+        locationRepository.save(location);
+
+        //when
+        locationService.addLike(location.getId(), member.getId());
+
+        Assertions
+                .assertThatThrownBy(() -> locationService.addLike(location.getId(), member.getId()))
+                .isInstanceOf(DuplicateException.class);
+
+    }
+
+    @Test
+    @DisplayName("좋아요 삭제")
+    void deleteLike() {
+
+        //given
+        Location location = new Location();
+        location.setTitle("테스트 장소");
+        locationRepository.save(location);
+
+        //when
+        LocationLike locationLike1 = new LocationLike();
+        locationLike1.setLocation(location);
+        locationLike1.setMember(member);
+        locationLikeRepository.save(locationLike1);
+
+        em.clear();
+
+        locationService.deleteLike(location.getId(), member.getId());
+
+
+        //then
+        Location findLocation = locationRepository.findById(location.getId())
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Assertions
+                .assertThat(findLocation.getLocationLikes().size())
+                .isEqualTo(1);
+
+    }
+
+    @Test
+    @DisplayName("존재하지 않는 좋아요 삭제")
+    void deleteNoExistLike() {
+
+        //given
+        Location location = new Location();
+        location.setTitle("테스트 장소");
+        locationRepository.save(location);
+
+        Assertions
+                .assertThatThrownBy(() -> locationService.deleteLike(location.getId(), member.getId()))
+                .isInstanceOf(NoSuchElementException.class);
+
+    }
 
 }

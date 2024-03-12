@@ -127,7 +127,7 @@ public class LocationController {
     public ResponseEntity addLike(@PathVariable Long locationId,
                                   @AuthenticationPrincipal(expression = "member") Member member) throws DuplicateException {
 
-        locationService.addLike(locationId, member);
+        locationService.addLike(locationId, member.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -138,7 +138,7 @@ public class LocationController {
     public ResponseEntity deleteLike(@PathVariable Long locationId,
                                      @AuthenticationPrincipal(expression = "member") Member member) {
 
-        locationService.deleteLike(locationId, member);
+        locationService.deleteLike(locationId, member.getId());
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)

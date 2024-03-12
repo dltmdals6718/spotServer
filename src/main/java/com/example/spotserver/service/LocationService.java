@@ -11,6 +11,7 @@ import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.repository.LocationLikeRepository;
 import com.example.spotserver.repository.LocationRepository;
+import com.example.spotserver.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -29,12 +30,14 @@ public class LocationService {
 
     private LocationRepository locationRepository;
     private LocationLikeRepository locationLikeRepository;
+    private MemberRepository memberRepository;
     private ImageStore imageStore;
 
     @Autowired
-    public LocationService(LocationRepository locationRepository, LocationLikeRepository locationLikeRepository, ImageStore imageStore) {
+    public LocationService(LocationRepository locationRepository, LocationLikeRepository locationLikeRepository, MemberRepository memberRepository, ImageStore imageStore) {
         this.locationRepository = locationRepository;
         this.locationLikeRepository = locationLikeRepository;
+        this.memberRepository = memberRepository;
         this.imageStore = imageStore;
     }
 
@@ -128,10 +131,14 @@ public class LocationService {
     }
 
     public void addLike(Long locationId,
-                        Member member) throws DuplicateException {
+                        Long memberId) throws DuplicateException {
 
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException());
+
 
         if(locationLikeRepository.existsLocationLikeByLocationAndMember(location, member)) {
             throw new DuplicateException(ErrorCode.DUPLICATE_LIKE);
@@ -145,9 +152,12 @@ public class LocationService {
     }
 
     public void deleteLike(Long locationId,
-                           Member member) {
+                           Long memberId) {
 
         Location location = locationRepository.findById(locationId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
 
         LocationLike locationLike = locationLikeRepository.findByLocationAndMember(location, member)
