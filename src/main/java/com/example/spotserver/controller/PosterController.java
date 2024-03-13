@@ -41,7 +41,7 @@ public class PosterController {
                                          @AuthenticationPrincipal(expression = "member") Member member) throws IOException {
 
         Poster poster = PosterRequest.toEntity(posterRequest);
-        posterService.addPoster(poster, files, locationId, member);
+        posterService.addPoster(poster, files, locationId, member.getId());
 
         Map<String, Object> response = new HashMap<>();
         response.put("posterId", poster.getId());
@@ -79,7 +79,7 @@ public class PosterController {
                                             @RequestPart(required = false) List<Long> deleteFilesId,
                                             @AuthenticationPrincipal(expression = "member") Member member) throws IOException, PermissionException {
 
-        posterService.updatePoster(posterId, posterRequest, addFiles, deleteFilesId, member);
+        posterService.updatePoster(posterId, posterRequest, addFiles, deleteFilesId, member.getId());
 
         Map<String, Object> response = new HashMap<>();
         response.put("posterId", posterId);

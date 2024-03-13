@@ -151,8 +151,9 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest, MultipartFile memberImg, Member member) throws DuplicateException, IOException {
-        member = memberRepository.findById(member.getId())
+    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest, MultipartFile memberImg, Long memberId) throws DuplicateException, IOException {
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
 
         if (memberUpdateRequest != null) {

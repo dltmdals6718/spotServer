@@ -32,42 +32,42 @@ import java.util.NoSuchElementException;
 public class LocationTest {
 
     @Autowired
-    LocationService locationService;
+    private LocationService locationService;
 
     @Autowired
-    LocationRepository locationRepository;
+    private LocationRepository locationRepository;
 
     @Autowired
-    PosterRepository posterRepository;
+    private PosterRepository posterRepository;
 
     @Autowired
-    CommentLikeRepository commentLikeRepository;
+    private CommentLikeRepository commentLikeRepository;
 
     @Autowired
-    CommentRepository commentRepository;
+    private CommentRepository commentRepository;
 
     @Autowired
-    PosterLikeRepository posterLikeRepository;
+    private PosterLikeRepository posterLikeRepository;
 
     @Autowired
-    PosterImageRepository posterImageRepository;
+    private PosterImageRepository posterImageRepository;
 
     @Autowired
-    LocationImageRepository locationImageRepository;
+    private LocationImageRepository locationImageRepository;
 
     @Autowired
-    LocationLikeRepository locationLikeRepository;
+    private LocationLikeRepository locationLikeRepository;
 
     @Autowired
-    MemberRepository memberRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
-    ImageStore imageStore;
+    private ImageStore imageStore;
 
     @Autowired
-    EntityManager em;
+    private EntityManager em;
 
-    Member member;
+    private Member member;
 
     @BeforeEach
     void init() {
@@ -198,9 +198,9 @@ public class LocationTest {
         commentLike.setComment(comment);
         commentLikeRepository.save(commentLike);
 
-        em.clear();
 
         //when
+        em.clear();
         locationService.deleteLocation(location.getId());
 
         //then

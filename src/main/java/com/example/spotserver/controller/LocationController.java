@@ -62,7 +62,7 @@ public class LocationController {
                 .body(pageResponse);
     }
 
-    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_CBOR_VALUE)
+    @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> addLocation(@Valid @RequestPart LocationRequest locationRequest,
                                            @RequestPart(required = false) List<MultipartFile> files) throws IOException {
 

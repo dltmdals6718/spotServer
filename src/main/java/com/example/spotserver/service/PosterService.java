@@ -8,10 +8,7 @@ import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.PermissionException;
-import com.example.spotserver.repository.LocationRepository;
-import com.example.spotserver.repository.PosterImageRepository;
-import com.example.spotserver.repository.PosterLikeRepository;
-import com.example.spotserver.repository.PosterRepository;
+import com.example.spotserver.repository.*;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -27,31 +24,36 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 
 @Service
-@Transactional
 public class PosterService {
 
     private PosterRepository posterRepository;
     private PosterLikeRepository posterLikeRepository;
     private LocationRepository locationRepository;
     private PosterImageRepository posterImageRepository;
+    private MemberRepository memberRepository;
     private ImageStore imageStore;
 
 
     @Autowired
-    public PosterService(PosterRepository posterRepository, PosterLikeRepository posterLikeRepository, LocationRepository locationRepository, PosterImageRepository posterImageRepository, ImageStore imageStore) {
+    public PosterService(PosterRepository posterRepository, PosterLikeRepository posterLikeRepository, LocationRepository locationRepository, PosterImageRepository posterImageRepository, ImageStore imageStore, MemberRepository memberRepository) {
         this.posterRepository = posterRepository;
         this.posterLikeRepository = posterLikeRepository;
         this.locationRepository = locationRepository;
         this.posterImageRepository = posterImageRepository;
         this.imageStore = imageStore;
+        this.memberRepository = memberRepository;
     }
 
     public void addPoster(Poster poster,
                           List<MultipartFile> files,
                           Long locationId,
-                          Member member) throws IOException {
+                          Long memberId) throws IOException {
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException());
+
         poster.setWriter(member);
         poster.setLocation(location);
 
@@ -97,9 +99,12 @@ public class PosterService {
                              PosterRequest posterRequest,
                              List<MultipartFile> addFiles,
                              List<Long> deleteFilesId,
-                             Member member) throws IOException, PermissionException {
+                             Long memberId) throws IOException, PermissionException {
 
         Poster poster = posterRepository.findById(posterId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
 
         if (!poster.getWriter().getId().equals(member.getId())) {
@@ -119,8 +124,8 @@ public class PosterService {
                     if (file.exists())
                         file.delete();
                     posterImageRepository.deleteById(fileId);
+                    poster.getPosterImages().remove(posterImage);
                 }
-
             }
         }
 

@@ -125,7 +125,7 @@ class PosterControllerTest {
                 .file(file2));
 
         verify(posterService, times(1))
-                .addPoster(null, files, locationId, member);
+                .addPoster(null, files, locationId, null);
 
         resultActions
                 .andExpectAll(
@@ -233,7 +233,7 @@ class PosterControllerTest {
                 .with(csrf()));
 
         verify(posterService, times(1))
-                .updatePoster(poster.getId(), posterRequestDto, addFiles, deleteFilesId, member);
+                .updatePoster(poster.getId(), posterRequestDto, addFiles, deleteFilesId, null);
 
         resultActions
                 .andExpectAll(

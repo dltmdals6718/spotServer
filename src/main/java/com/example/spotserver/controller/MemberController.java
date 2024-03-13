@@ -115,7 +115,7 @@ public class MemberController {
         if (!member.getId().equals(memberId))
             throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
 
-        MemberResponse memberResponse = memberService.updateMember(memberUpdateRequest, memberImg, member);
+        MemberResponse memberResponse = memberService.updateMember(memberUpdateRequest, memberImg, member.getId());
 
         return ResponseEntity
                 .ok(memberResponse);
