@@ -87,7 +87,6 @@ public class PosterTest {
 
     @AfterEach
     void clearFile() {
-        em.clear();
 
         Poster findPoster = posterRepository.findById(poster.getId())
                 .orElseThrow(() -> new NoSuchElementException());
@@ -148,6 +147,9 @@ public class PosterTest {
             Assertions
                     .assertThat(file.exists())
                     .isTrue();
+
+            if(file.exists())
+                file.delete();
 
         }
 
