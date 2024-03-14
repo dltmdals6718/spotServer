@@ -113,7 +113,7 @@ public class PosterController {
     public ResponseEntity addLike(@PathVariable Long posterId,
                                   @AuthenticationPrincipal(expression = "member") Member member) throws DuplicateException {
 
-        posterService.addLike(posterId, member);
+        posterService.addLike(posterId, member.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

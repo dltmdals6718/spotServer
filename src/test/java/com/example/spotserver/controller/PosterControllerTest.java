@@ -284,13 +284,13 @@ class PosterControllerTest {
 
         doNothing()
                 .when(posterService)
-                .addLike(poster.getId(), member);
+                .addLike(poster.getId(), null);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .request(HttpMethod.POST, "/posters/" + poster.getId() + "/likes"));
 
         verify(posterService, times(1))
-                .addLike(poster.getId(), member);
+                .addLike(poster.getId(), null);
 
         resultActions
                 .andExpectAll(

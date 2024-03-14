@@ -182,9 +182,12 @@ public class PosterService {
         return response;
     }
 
-    public void addLike(Long posterId, Member member) throws DuplicateException {
+    public void addLike(Long posterId, Long memberId) throws DuplicateException {
 
         Poster poster = posterRepository.findById(posterId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
 
         if (posterLikeRepository.existsPosterLikeByPosterAndMember(poster, member)) {

@@ -2,6 +2,7 @@ package com.example.spotserver.Integration;
 
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.PosterRequest;
+import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.repository.LocationRepository;
 import com.example.spotserver.repository.MemberRepository;
@@ -96,7 +97,7 @@ public class PosterTest {
         for (PosterImage posterImage : posterImages) {
             String posterImgFullPath = imageStore.getPosterImgFullPath(posterImage.getStoreFileName());
             File file = new File(posterImgFullPath);
-            if(file.exists())
+            if (file.exists())
                 file.delete();
         }
     }
@@ -148,7 +149,7 @@ public class PosterTest {
                     .assertThat(file.exists())
                     .isTrue();
 
-            if(file.exists())
+            if (file.exists())
                 file.delete();
 
         }
@@ -196,4 +197,26 @@ public class PosterTest {
                 .isEqualTo(posterRequest.getContent());
     }
 
+    @Test
+    @DisplayName("게시글 좋아요 등록")
+    void addLike() throws DuplicateException {
+        posterService.addLike(poster.getId(), member.getId());
+
+        em.flush();
+        em.clear();
+
+        Poster findPoster = posterRepository.findById(poster.getId())
+                .orElseThrow(() -> new NoSuchElementException());
+
+        List<PosterLike> posterLikes = findPoster.getPosterLikes();
+
+        Assertions
+                .assertThat(posterLikes.size())
+                .isEqualTo(1);
+
+        Assertions
+                .assertThat(posterLikes.get(0).getMember().getId())
+                .isEqualTo(member.getId());
+
+    }
 }
