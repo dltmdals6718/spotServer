@@ -4,10 +4,7 @@ import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.PermissionException;
-import com.example.spotserver.repository.LocationRepository;
-import com.example.spotserver.repository.MemberRepository;
-import com.example.spotserver.repository.PosterImageRepository;
-import com.example.spotserver.repository.PosterRepository;
+import com.example.spotserver.repository.*;
 import com.example.spotserver.service.PosterService;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -49,6 +46,9 @@ public class PosterTest {
     private PosterImageRepository posterImageRepository;
 
     @Autowired
+    private PosterLikeRepository posterLikeRepository;
+
+    @Autowired
     private ImageStore imageStore;
 
     @Autowired
@@ -77,12 +77,16 @@ public class PosterTest {
         String storeFileName = UUID.randomUUID() + ".jpg";
         posterImage.setPoster(poster);
         posterImage.setStoreFileName(storeFileName);
-        System.out.println("posterImage.getStoreFileName() = " + posterImage.getStoreFileName());
 
         List<PosterImage> posterImages = new ArrayList<>();
         posterImages.add(posterImage);
         poster.setPosterImages(posterImages);
         posterRepository.save(poster);
+
+        PosterLike posterLike = new PosterLike();
+        posterLike.setMember(member);
+        posterLike.setPoster(poster);
+        posterLikeRepository.save(posterLike);
 
     }
 
@@ -200,11 +204,19 @@ public class PosterTest {
     @Test
     @DisplayName("게시글 좋아요 등록")
     void addLike() throws DuplicateException {
-        posterService.addLike(poster.getId(), member.getId());
+
+        Member testMember = new Member();
+        testMember.setName("좋아요 누를 예정인 사람");
+        memberRepository.save(testMember);
+
+        //given & when
+        posterService.addLike(poster.getId(), testMember.getId());
 
         em.flush();
         em.clear();
 
+
+        //then
         Poster findPoster = posterRepository.findById(poster.getId())
                 .orElseThrow(() -> new NoSuchElementException());
 
@@ -212,11 +224,28 @@ public class PosterTest {
 
         Assertions
                 .assertThat(posterLikes.size())
-                .isEqualTo(1);
+                .isEqualTo(2);
 
         Assertions
-                .assertThat(posterLikes.get(0).getMember().getId())
-                .isEqualTo(member.getId());
+                .assertThat(posterLikes.get(1).getMember().getId())
+                .isEqualTo(testMember.getId());
 
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요 취소")
+    void deleteLike() {
+
+        //given & when
+        posterService.deleteLike(poster.getId(), member.getId());
+
+        em.flush();
+        em.clear();
+
+        //then
+        Assertions
+                .assertThat(posterLikeRepository.findByPosterAndMember(poster, member))
+                .isNotPresent();
+        
     }
 }

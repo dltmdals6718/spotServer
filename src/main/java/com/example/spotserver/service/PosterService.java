@@ -201,9 +201,12 @@ public class PosterService {
 
     }
 
-    public void deleteLike(Long posterId, Member member) {
+    public void deleteLike(Long posterId, Long memberId) {
 
         Poster poster = posterRepository.findById(posterId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
 
         PosterLike posterLike = posterLikeRepository.findByPosterAndMember(poster, member)

@@ -124,7 +124,7 @@ public class PosterController {
     public ResponseEntity deleteLike(@PathVariable Long posterId,
                                      @AuthenticationPrincipal(expression = "member") Member member) {
 
-        posterService.deleteLike(posterId, member);
+        posterService.deleteLike(posterId, member.getId());
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)

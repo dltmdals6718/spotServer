@@ -307,13 +307,13 @@ class PosterControllerTest {
 
         doNothing()
                 .when(posterService)
-                .deleteLike(poster.getId(), member);
+                .deleteLike(poster.getId(), null);
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .request(HttpMethod.DELETE, "/posters/" + poster.getId() + "/likes"));
 
         verify(posterService, times(1))
-                .deleteLike(poster.getId(), member);
+                .deleteLike(poster.getId(), null);
 
         resultActions
                 .andExpectAll(
