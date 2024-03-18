@@ -45,7 +45,7 @@ public class CommentController {
 
 
         Comment comment = CommentRequest.toEntity(commentRequest);
-        commentService.addComment(posterId, comment, member);
+        commentService.addComment(posterId, comment, member.getId());
 
         Map<String, Object> response = new HashMap<>();
         response.put("commentId", comment.getId());
@@ -79,7 +79,7 @@ public class CommentController {
     public ResponseEntity deleteComment(@PathVariable Long commentId,
                                         @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
 
-        commentService.deleteComment(commentId, member);
+        commentService.deleteComment(commentId, member.getId());
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
@@ -114,7 +114,7 @@ public class CommentController {
     public ResponseEntity deleteLike(@PathVariable Long commentId,
                                      @AuthenticationPrincipal(expression = "member") Member member) {
 
-        commentService.deleteLike(commentId, member);
+        commentService.deleteLike(commentId, member.getId());
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)

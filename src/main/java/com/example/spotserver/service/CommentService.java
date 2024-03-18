@@ -14,6 +14,7 @@ import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.repository.CommentLikeRepository;
 import com.example.spotserver.repository.CommentRepository;
+import com.example.spotserver.repository.MemberRepository;
 import com.example.spotserver.repository.PosterRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,18 +30,24 @@ public class CommentService {
     private CommentRepository commentRepository;
     private PosterRepository posterRepository;
     private CommentLikeRepository commentLikeRepository;
+    private MemberRepository memberRepository;
 
     @Autowired
-    public CommentService(CommentRepository commentRepository, PosterRepository posterRepository, CommentLikeRepository commentLikeRepository) {
+    public CommentService(CommentRepository commentRepository, PosterRepository posterRepository, CommentLikeRepository commentLikeRepository, MemberRepository memberRepository) {
         this.commentRepository = commentRepository;
         this.posterRepository = posterRepository;
         this.commentLikeRepository = commentLikeRepository;
+        this.memberRepository = memberRepository;
     }
 
-    public void addComment(Long posterId, Comment comment, Member member) {
+    public void addComment(Long posterId, Comment comment, Long memberId) {
 
         Poster poster = posterRepository.findById(posterId)
                 .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException());
+
 
         comment.setPoster(poster);
         comment.setWriter(member);
@@ -64,9 +71,12 @@ public class CommentService {
         return commentResponse;
     }
 
-    public void deleteComment(Long commentId, Member member) throws PermissionException {
+    public void deleteComment(Long commentId, Long memberId) throws PermissionException {
 
         Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
 
         Member commentWriter = comment.getWriter();
@@ -108,8 +118,11 @@ public class CommentService {
         commentLikeRepository.save(commentLike);
     }
 
-    public void deleteLike(Long commentId, Member member) {
+    public void deleteLike(Long commentId, Long memberId) {
         Comment comment = commentRepository.findById(commentId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
 
         CommentLike commentLike = commentLikeRepository.findByCommentAndMember(comment, member)
