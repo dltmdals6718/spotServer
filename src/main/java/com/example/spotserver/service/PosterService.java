@@ -70,7 +70,7 @@ public class PosterService {
 
     }
 
-    public PageResponse<List<PosterResponse>> getLocationPosters(Long locationId, PosterPageRequest posterPageRequest) {
+    public PageResponse<PosterResponse> getLocationPosters(Long locationId, PosterPageRequest posterPageRequest) {
 
 
         PageRequest pageRequest = posterPageRequest.makePageRequest();
@@ -85,7 +85,7 @@ public class PosterService {
             posters = posterRepository.searchPostersByRecent(locationId, pageRequest);
         }
 
-        PageResponse<List<PosterResponse>> pageResponse = new PageResponse<>(posters);
+        PageResponse<PosterResponse> pageResponse = new PageResponse<>(posters);
         return pageResponse;
     }
 
@@ -214,6 +214,13 @@ public class PosterService {
 
         posterLikeRepository.delete(posterLike);
 
+    }
+
+    public PageResponse<PosterResponse> getLikePosters(Integer page, Long memberId) {
+        PageRequest pageRequest = PageRequest.of(page-1, 5);
+        Page<PosterResponse> likePosters = posterRepository.getLikePosters(memberId, pageRequest);
+        PageResponse<PosterResponse> pageResponse = new PageResponse<>(likePosters);
+        return pageResponse;
     }
 
     public List<PosterResponse> getBestPosters() {

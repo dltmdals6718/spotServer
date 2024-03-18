@@ -14,7 +14,7 @@ public class PageResponse<T> {
     private PageInfo pageInfo;
 
 
-    public PageResponse(Page page) {
+    public PageResponse(Page<T> page) {
         results = page.getContent();
         pageInfo = new PageInfo();
         pageInfo.setPage(page.getNumber()+1); // Page의 페이지는 0부터 시작이라 사용자를 위해 +1해서 1부터 시작하게함

@@ -65,10 +65,10 @@ public class CommentController {
     }
 
     @GetMapping("/posters/{posterId}/comments")
-    public ResponseEntity<PageResponse<List<CommentResponse>>> getComments(@PathVariable Long posterId,
+    public ResponseEntity<PageResponse<CommentResponse>> getComments(@PathVariable Long posterId,
                                                                            @Valid @ModelAttribute CommentConditionRequest commentConditionRequest) {
 
-        PageResponse<List<CommentResponse>> comments = commentService.getComments(posterId, commentConditionRequest);
+        PageResponse<CommentResponse> comments = commentService.getComments(posterId, commentConditionRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

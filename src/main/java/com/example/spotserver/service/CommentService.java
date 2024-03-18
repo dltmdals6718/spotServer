@@ -56,9 +56,9 @@ public class CommentService {
 
     }
 
-    public PageResponse<List<CommentResponse>> getComments(Long posterId, CommentConditionRequest commentConditionRequest) {
+    public PageResponse<CommentResponse> getComments(Long posterId, CommentConditionRequest commentConditionRequest) {
         Page<CommentResponse> comments = commentRepository.getComments(posterId, commentConditionRequest);
-        PageResponse<List<CommentResponse>> pageResponse = new PageResponse<>(comments);
+        PageResponse<CommentResponse> pageResponse = new PageResponse<>(comments);
         return pageResponse;
     }
 

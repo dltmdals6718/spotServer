@@ -52,11 +52,11 @@ public class PosterController {
     }
 
     @GetMapping("/locations/{locationId}/posters")
-    public ResponseEntity<PageResponse<List<PosterResponse>>> getLocationPosters(@PathVariable Long locationId,
+    public ResponseEntity<PageResponse<PosterResponse>> getLocationPosters(@PathVariable Long locationId,
                                                                                  @Valid @ModelAttribute PosterPageRequest posterPageRequest) {
 
 
-        PageResponse<List<PosterResponse>> posters = posterService.getLocationPosters(locationId, posterPageRequest);
+        PageResponse<PosterResponse> posters = posterService.getLocationPosters(locationId, posterPageRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

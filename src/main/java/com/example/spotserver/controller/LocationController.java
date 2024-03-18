@@ -38,7 +38,7 @@ public class LocationController {
     }
 
     @GetMapping
-    public ResponseEntity<PageResponse<List<LocationResponse>>> getLocations(@RequestParam("latitude") Double latitude,
+    public ResponseEntity<PageResponse<LocationResponse>> getLocations(@RequestParam("latitude") Double latitude,
                                                                              @RequestParam("longitude") Double longitude,
                                                                              @Valid @ModelAttribute LocationConditionRequest conditionRequest) throws PermissionException {
 
@@ -55,7 +55,7 @@ public class LocationController {
         }
 
 
-        PageResponse<List<LocationResponse>> pageResponse = locationService.searchLocations(latitude, longitude, conditionRequest);
+        PageResponse<LocationResponse> pageResponse = locationService.searchLocations(latitude, longitude, conditionRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

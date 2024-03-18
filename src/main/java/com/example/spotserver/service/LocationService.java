@@ -41,12 +41,12 @@ public class LocationService {
         this.imageStore = imageStore;
     }
 
-    public PageResponse<List<LocationResponse>> searchLocations(Double latitude,
+    public PageResponse<LocationResponse> searchLocations(Double latitude,
                                                                 Double longitude,
                                                                 LocationConditionRequest conditionRequest) {
 
         Page<LocationResponse> locationResponses = locationRepository.searchLocations(latitude, longitude, conditionRequest);
-        PageResponse<List<LocationResponse>> pageResponse = new PageResponse<>(locationResponses);
+        PageResponse<LocationResponse> pageResponse = new PageResponse<>(locationResponses);
         return pageResponse;
     }
 
