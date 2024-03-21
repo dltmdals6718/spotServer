@@ -2,6 +2,8 @@ package com.example.spotserver.Integration;
 
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.PosterRequest;
+import com.example.spotserver.dto.response.PageResponse;
+import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.repository.*;
@@ -247,5 +249,42 @@ public class PosterTest {
                 .assertThat(posterLikeRepository.findByPosterAndMember(poster, member))
                 .isNotPresent();
         
+    }
+
+    @Test
+    @DisplayName("좋아요 게시글 조회")
+    void getLikePosters() {
+
+        //given
+        Member posterLiker = new Member();
+        memberRepository.save(posterLiker);
+
+        Poster poster1 = new Poster();
+        poster1.setWriter(member);
+        Poster poster2 = new Poster();
+        poster2.setWriter(member);
+        posterRepository.save(poster1);
+        posterRepository.save(poster2);
+
+        PosterLike posterLike1 = new PosterLike();
+        posterLike1.setPoster(poster1);
+        posterLike1.setMember(posterLiker);
+        posterLikeRepository.save(posterLike1);
+
+        PosterLike posterLike2 = new PosterLike();
+        posterLike2.setPoster(poster2);
+        posterLike2.setMember(posterLiker);
+        posterLikeRepository.save(posterLike2);
+
+        //when
+        em.flush();
+        em.clear();
+        PageResponse<PosterResponse> likePosters = posterService.getLikePosters(1, posterLiker.getId());
+
+        //then
+        List<PosterResponse> results = likePosters.getResults();
+        Assertions
+                .assertThat(results.size())
+                .isEqualTo(2);
     }
 }

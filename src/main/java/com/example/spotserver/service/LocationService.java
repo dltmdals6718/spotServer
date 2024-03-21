@@ -15,6 +15,7 @@ import com.example.spotserver.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -165,5 +166,12 @@ public class LocationService {
 
         locationLikeRepository.delete(locationLike);
 
+    }
+
+    public PageResponse<LocationResponse> getLikeLocations(Integer page, Long memberId) {
+        PageRequest pageRequest = PageRequest.of(page - 1, 5);
+        Page<LocationResponse> likeLocations = locationRepository.getLikeLocations(memberId, pageRequest);
+        PageResponse<LocationResponse> pageResponse = new PageResponse<>(likeLocations);
+        return pageResponse;
     }
 }

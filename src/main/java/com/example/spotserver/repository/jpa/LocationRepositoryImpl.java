@@ -2,14 +2,17 @@ package com.example.spotserver.repository.jpa;
 
 import com.example.spotserver.domain.QLocation;
 import com.example.spotserver.domain.QLocationLike;
+import com.example.spotserver.domain.QMember;
 import com.example.spotserver.dto.request.LocationConditionRequest;
 import com.example.spotserver.dto.response.LocationResponse;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.dto.response.QLocationResponse;
 import com.example.spotserver.repository.LocationRepositoryCustom;
+import com.querydsl.core.types.ExpressionUtils;
 import com.querydsl.core.types.Projections;
 import com.querydsl.core.types.dsl.Expressions;
 import com.querydsl.core.types.dsl.StringPath;
+import com.querydsl.jpa.JPAExpressions;
 import com.querydsl.jpa.impl.JPAQuery;
 import com.querydsl.jpa.impl.JPAQueryFactory;
 import jakarta.persistence.EntityManager;
@@ -181,4 +184,41 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
     }
 
 
+    @Override
+    public Page<LocationResponse> getLikeLocations(Long memberId, Pageable pageable) {
+
+        QLocation location = QLocation.location;
+        QLocationLike locationLike = QLocationLike.locationLike;
+
+        List<LocationResponse> locations = jpaQueryFactory
+                .select(new QLocationResponse(
+                        location.id,
+                        location.latitude,
+                        location.longitude,
+                        location.title,
+                        location.address,
+                        location.description,
+                        location.regDate,
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(locationLike.count())
+                                        .from(locationLike)
+                                        .where(locationLike.location.id.eq(location.id)), "like_count")
+                ))
+                .from(locationLike)
+                .leftJoin(location).on(location.id.eq(locationLike.location.id))
+                .where(locationLike.member.id.eq(memberId))
+                .orderBy(locationLike.regDate.desc())
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetch();
+
+        JPAQuery<Long> countQuery = jpaQueryFactory
+                .select(location.count())
+                .from(locationLike)
+                .leftJoin(location).on(location.id.eq(locationLike.location.id))
+                .where(locationLike.member.id.eq(memberId));
+
+        return PageableExecutionUtils.getPage(locations, pageable, countQuery::fetchOne);
+    }
 }

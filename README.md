@@ -310,15 +310,80 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "memberId": 126,
-  "name": "namezz",
-  "role": "USER"
+  "memberId": 109,
+  "name": "LSM",
+  "role": "USER",
+  "memberImg": "http://localhost:8080/members/109/images/d65d8d3d-19ac-4bf0-9860-d62fbdd76286.png"
 }
 ```
 
 </td>
     <td>자신 정보 조회</td>
 </tr>
+        <tr>
+            <td>GET</td>
+            <td>/members/like-locations<br>?page={페이지번호}</td>
+            <td></td>
+<td>
+
+```json
+{
+    "results": [
+        {
+            "locationId": 62,
+            "latitude": 35.24308,
+            "longitude": 128.6934,
+            "title": "테스트장소1",
+            "address": "주소",
+            "description": "설명",
+            "regDate": "2024-03-18T15:17:33",
+            "likeCnt": 1
+        }
+    ],
+    "pageInfo": {
+        "page": 1,
+        "size": 5,
+        "numberOfElements": 1,
+        "totalElements": 1,
+        "totalPage": 1
+    }
+}
+```
+</td>
+            <td>좋아요 장소 조회</td>
+        </tr>
+        <tr>
+            <td>GET</td>
+            <td>/members/like-posters<br>?page={페이지번호}</td>
+            <td></td>
+<td>
+
+```json
+{
+    "results": [
+        {
+            "posterId": 17,
+            "writerId": 7,
+            "writerName": "작성자 닉네임",
+            "title": "게시글 제목",
+            "content": "게시글 내용",
+            "regDate": "2024-03-16T06:57:42",
+            "likeCnt": 1,
+            "commentCnt": 0
+        }
+    ],
+    "pageInfo": {
+        "page": 1,
+        "size": 5,
+        "numberOfElements": 1,
+        "totalElements": 1,
+        "totalPage": 1
+    }
+}
+```
+</td>
+            <td>좋아요 게시글 조회</td>
+        </tr>
     </tbody>
 </table>
 

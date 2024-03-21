@@ -6,9 +6,14 @@ import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.SignInMember;
 import com.example.spotserver.dto.request.SignUpMember;
+import com.example.spotserver.dto.response.LocationResponse;
 import com.example.spotserver.dto.response.MemberResponse;
+import com.example.spotserver.dto.response.PageResponse;
+import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.*;
+import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.MemberService;
+import com.example.spotserver.service.PosterService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
@@ -23,6 +28,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 @RestController
@@ -30,13 +36,15 @@ import java.util.Map;
 public class MemberController {
 
     private MemberService memberService;
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private PosterService posterService;
+    private LocationService locationService;
 
 
     @Autowired
-    public MemberController(MemberService memberService, BCryptPasswordEncoder bCryptPasswordEncoder) {
+    public MemberController(MemberService memberService, PosterService posterService, LocationService locationService) {
         this.memberService = memberService;
-        this.bCryptPasswordEncoder = bCryptPasswordEncoder;
+        this.posterService = posterService;
+        this.locationService = locationService;
     }
 
     @PostMapping(value = "/signup", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
@@ -134,6 +142,21 @@ public class MemberController {
                 .body(tokenInfo);
     }
 
+    @GetMapping("/like-posters")
+    public ResponseEntity<PageResponse<PosterResponse>> likePosters(@AuthenticationPrincipal(expression = "member") Member member,
+                                                                    @RequestParam(defaultValue = "1") Integer page) {
+        PageResponse<PosterResponse> likePosters = posterService.getLikePosters(page, member.getId());
+        return ResponseEntity
+                .ok(likePosters);
+    }
+
+    @GetMapping("/like-locations")
+    public ResponseEntity<PageResponse<LocationResponse>> likeLocations(@AuthenticationPrincipal(expression = "member") Member member,
+                                                                        @RequestParam(defaultValue = "1") Integer page) {
+        PageResponse<LocationResponse> likeLocations = locationService.getLikeLocations(page, member.getId());
+        return ResponseEntity
+                .ok(likeLocations);
+    }
 
     @ExceptionHandler(value = LoginFailException.class)
     public ResponseEntity<ErrorResponse> loginFailException(LoginFailException e) {

@@ -11,6 +11,7 @@ public interface PosterRepositoryCustom {
 
     Page<PosterResponse> searchPostersByRecent(Long locationId, Pageable pageable);
     Page<PosterResponse> searchPostersByLike(Long locationId, Pageable pageable);
+    Page<PosterResponse> getLikePosters(Long memberId, Pageable pageable);
     Optional<PosterResponse> getPosterById(Long posterId);
     List<PosterResponse> getBestPosters();
 }

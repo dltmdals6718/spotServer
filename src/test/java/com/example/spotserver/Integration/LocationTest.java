@@ -3,6 +3,8 @@ package com.example.spotserver.Integration;
 
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.ApproveRequest;
+import com.example.spotserver.dto.response.LocationResponse;
+import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.MailException;
@@ -369,6 +371,46 @@ public class LocationTest {
                 .assertThatThrownBy(() -> locationService.deleteLike(location.getId(), member.getId()))
                 .isInstanceOf(NoSuchElementException.class);
 
+    }
+
+    @Test
+    @DisplayName("좋아요 장소 조회")
+    void getLikeLocations() {
+
+        //given
+        Member locationLiker = new Member();
+        memberRepository.save(locationLiker);
+
+        Location location1 = new Location();
+        Location location2 = new Location();
+        locationRepository.save(location1);
+        locationRepository.save(location2);
+
+        LocationLike locationLike1 = new LocationLike();
+        locationLike1.setLocation(location1);
+        locationLike1.setMember(locationLiker);
+        locationLikeRepository.save(locationLike1);
+
+        LocationLike locationLike2 = new LocationLike();
+        locationLike2.setLocation(location2);
+        locationLike2.setMember(locationLiker);
+        locationLikeRepository.save(locationLike2);
+
+        LocationLike locationLike3 = new LocationLike();
+        locationLike3.setLocation(location);
+        locationLike3.setMember(locationLiker);
+        locationLikeRepository.save(locationLike3);
+
+        //when
+        em.flush();
+        em.clear();
+        PageResponse<LocationResponse> likeLocations = locationService.getLikeLocations(1, locationLiker.getId());
+
+        //then
+        List<LocationResponse> results = likeLocations.getResults();
+        Assertions
+                .assertThat(results.size())
+                .isEqualTo(3);
     }
 
 }

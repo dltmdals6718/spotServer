@@ -184,4 +184,47 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
 
         return bestPosters;
     }
+
+    @Override
+    public Page<PosterResponse> getLikePosters(Long memberId, Pageable pageable) {
+
+        QPoster poster = QPoster.poster;
+        QComment comment = QComment.comment;
+        QPosterLike posterLike = QPosterLike.posterLike;
+
+        List<PosterResponse> posters = jpaQueryFactory
+                .select(new QPosterResponse(
+                        poster.id,
+                        poster.writer.id,
+                        poster.writer.name,
+                        poster.title,
+                        poster.content,
+                        poster.regDate,
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(posterLike.count())
+                                        .from(posterLike)
+                                        .where(posterLike.poster.id.eq(poster.id)), "like_count"),
+                        ExpressionUtils.as(
+                                JPAExpressions
+                                        .select(comment.count())
+                                        .from(comment)
+                                        .where(comment.poster.id.eq(poster.id)), "comment_count")
+                ))
+                .from(posterLike)
+                .leftJoin(poster).on(poster.id.eq(posterLike.poster.id))
+                .where(posterLike.member.id.eq(memberId))
+                .orderBy(posterLike.regDate.desc())
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetch();
+
+        JPAQuery<Long> countQuery = jpaQueryFactory
+                .select(poster.count())
+                .from(posterLike)
+                .leftJoin(poster).on(poster.id.eq(posterLike.poster.id))
+                .where(posterLike.member.id.eq(memberId));
+
+        return PageableExecutionUtils.getPage(posters, pageable, countQuery::fetchOne);
+    }
 }
