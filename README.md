@@ -360,25 +360,25 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-    "results": [
-        {
-            "posterId": 17,
-            "writerId": 7,
-            "writerName": "작성자 닉네임",
-            "title": "게시글 제목",
-            "content": "게시글 내용",
-            "regDate": "2024-03-16T06:57:42",
-            "likeCnt": 1,
-            "commentCnt": 0
-        }
-    ],
-    "pageInfo": {
-        "page": 1,
-        "size": 5,
-        "numberOfElements": 1,
-        "totalElements": 1,
-        "totalPage": 1
+  "results": [
+    {
+      "posterId": 17,
+      "writerId": 7,
+      "writerName": "작성자 닉네임",
+      "title": "게시글 제목",
+      "content": "게시글 내용",
+      "regDate": "2024-03-16T06:57:42",
+      "likeCnt": 1,
+      "commentCnt": 0
     }
+  ],
+  "pageInfo": {
+    "page": 1,
+    "size": 5,
+    "numberOfElements": 1,
+    "totalElements": 1,
+    "totalPage": 1
+  }
 }
 ```
 </td>
