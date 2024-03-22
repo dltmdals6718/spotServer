@@ -3,13 +3,10 @@ package com.example.spotserver.exception;
 import com.example.spotserver.domain.ErrorResponse;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.http.converter.HttpMessageNotReadableException;
-import org.springframework.web.HttpMediaTypeException;
 import org.springframework.web.HttpMediaTypeNotSupportedException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
 
 import java.util.NoSuchElementException;
@@ -48,9 +45,18 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler({PermissionException.class})
     public ResponseEntity<ErrorResponse> permissionException(PermissionException e) {
-        ErrorResponse errorResponse = new ErrorResponse(ErrorCode.FORBIDDEN_CLIENT);
+        ErrorCode errorCode = e.getErrorCode();
+        ErrorResponse errorResponse = new ErrorResponse(errorCode);
         return ResponseEntity
-                .status(ErrorCode.FORBIDDEN_CLIENT.getHttpStatus())
+                .status(e.getErrorCode().getHttpStatus())
+                .body(errorResponse);
+    }
+
+    @ExceptionHandler({AuthenticationException.class})
+    public ResponseEntity<ErrorResponse> authenticationException(AuthenticationException e) {
+        ErrorResponse errorResponse = new ErrorResponse(e.getErrorCode());
+        return ResponseEntity
+                .status(e.getErrorCode().getHttpStatus())
                 .body(errorResponse);
     }
 

@@ -22,6 +22,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -143,16 +144,24 @@ public class MemberController {
     }
 
     @GetMapping("/like-posters")
-    public ResponseEntity<PageResponse<PosterResponse>> likePosters(@AuthenticationPrincipal(expression = "member") Member member,
-                                                                    @RequestParam(defaultValue = "1") Integer page) {
+    public ResponseEntity<PageResponse<PosterResponse>> likePosters(@AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : member") Member member,
+                                                                    @RequestParam(defaultValue = "1") Integer page) throws AuthenticationException {
+
+        if (member == null)
+            throw new AuthenticationException(ErrorCode.UNAUTHORIZED_CLIENT);
+
         PageResponse<PosterResponse> likePosters = posterService.getLikePosters(page, member.getId());
         return ResponseEntity
                 .ok(likePosters);
     }
 
     @GetMapping("/like-locations")
-    public ResponseEntity<PageResponse<LocationResponse>> likeLocations(@AuthenticationPrincipal(expression = "member") Member member,
-                                                                        @RequestParam(defaultValue = "1") Integer page) {
+    public ResponseEntity<PageResponse<LocationResponse>> likeLocations(@AuthenticationPrincipal(expression = "#this == 'anonymousUser' ? null : member") Member member,
+                                                                        @RequestParam(defaultValue = "1") Integer page) throws AuthenticationException {
+
+        if (member == null)
+            throw new AuthenticationException(ErrorCode.UNAUTHORIZED_CLIENT);
+
         PageResponse<LocationResponse> likeLocations = locationService.getLikeLocations(page, member.getId());
         return ResponseEntity
                 .ok(likeLocations);
