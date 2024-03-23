@@ -1368,11 +1368,13 @@ Results
 
 ```json
 {
-  "commentId": 5,
-  "writerId": 1,
-  "writerName": "namezz",
-  "content": "테스트입니다.",
-  "regDate": "2024-01-25T15:51:48"
+  "commentId": 30,
+  "writerId": 109,
+  "writerName": "LSM",
+  "memberImg": "http://localhost:8080/members/109/images/d65d8d3d-19ac-4bf0-9860-d62fbdd76286.png",
+  "content": "댓글내용",
+  "regDate": "2024-03-22T15:20:07",
+  "likeCnt": 0
 }
 ```
 

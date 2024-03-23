@@ -45,10 +45,10 @@ public class CommentController {
 
 
         Comment comment = CommentRequest.toEntity(commentRequest);
-        commentService.addComment(posterId, comment, member.getId());
+        Long commentId = commentService.addComment(posterId, comment, member.getId());
 
         Map<String, Object> response = new HashMap<>();
-        response.put("commentId", comment.getId());
+        response.put("commentId", commentId);
         return ResponseEntity
                 .status(HttpStatus.CREATED)
                 .body(response);
@@ -91,7 +91,7 @@ public class CommentController {
                                                          @Valid @RequestBody CommentRequest commentRequest,
                                                          @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
 
-        commentService.updateComment(commentId, commentRequest, member);
+        commentService.updateComment(commentId, commentRequest, member.getId());
         Map<String, Object> response = new HashMap<>();
         response.put("commentId", commentId);
         return ResponseEntity
@@ -103,7 +103,7 @@ public class CommentController {
     public ResponseEntity addLike(@PathVariable Long commentId,
                                   @AuthenticationPrincipal(expression = "member") Member member) throws DuplicateException {
 
-        commentService.addLike(commentId, member);
+        commentService.addLike(commentId, member.getId());
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

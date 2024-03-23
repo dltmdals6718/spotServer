@@ -134,7 +134,7 @@ public class CommentTest {
         memberRepository.save(testMember);
 
         //when
-        commentService.addLike(comment.getId(), testMember);
+        commentService.addLike(comment.getId(), testMember.getId());
 
         //then
         Assertions
@@ -147,7 +147,7 @@ public class CommentTest {
     @DisplayName("중복된 좋아요 등록")
     void addDuplicateLike() throws DuplicateException {
         Assertions
-                .assertThatThrownBy(() -> commentService.addLike(comment.getId(), member))
+                .assertThatThrownBy(() -> commentService.addLike(comment.getId(), member.getId()))
                 .isInstanceOf(DuplicateException.class)
                 .hasMessage(ErrorCode.DUPLICATE_LIKE.getMessage());
 

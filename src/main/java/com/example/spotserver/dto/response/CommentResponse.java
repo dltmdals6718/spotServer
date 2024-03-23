@@ -20,16 +20,6 @@ public class CommentResponse {
     private LocalDateTime regDate;
     private Long likeCnt;
 
-    public static CommentResponse toDto(Comment comment) {
-        CommentResponse commentResponse = new CommentResponse();
-        commentResponse.setCommentId(comment.getId());
-        commentResponse.setWriterId(comment.getWriter().getId());
-        commentResponse.setWriterName(comment.getWriter().getName());
-        commentResponse.setContent(comment.getContent());
-        commentResponse.setRegDate(comment.getRegDate());
-        return commentResponse;
-    }
-
     @QueryProjection
     public CommentResponse(Long commentId, Long writerId, String writerName, String memberImg, String content, LocalDateTime regDate, Long likeCnt) {
         this.commentId = commentId;

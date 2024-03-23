@@ -55,8 +55,7 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
                         memberImage.storeFileName,
                         comment.content,
                         comment.regDate,
-                        commentLike.count().as("like_count")
-                ))
+                        commentLike.count().as("like_count")))
                 .from(comment)
                 .join(member).on(member.id.eq(comment.writer.id))
                 .leftJoin(memberImage).on(memberImage.member.id.eq(member.id))
@@ -99,4 +98,26 @@ public class CommentRepositoryImpl implements CommentRepositoryCustom {
 
     }
 
+    @Override
+    public CommentResponse getCommentById(Long commentId) {
+
+        QComment comment = QComment.comment;
+        QCommentLike commentLike = QCommentLike.commentLike;
+
+        CommentResponse commentResponse = jpaQueryFactory
+                .select(new QCommentResponse(
+                        comment.id,
+                        comment.writer.id,
+                        comment.writer.name,
+                        comment.writer.memberImg.storeFileName,
+                        comment.content,
+                        comment.regDate,
+                        commentLike.count()))
+                .from(comment)
+                .leftJoin(commentLike).on(commentLike.comment.id.eq(comment.id))
+                .groupBy(comment.id, comment.writer.memberImg.storeFileName)
+                .where(comment.id.eq(commentId))
+                .fetchOne();
+        return commentResponse;
+    }
 }

@@ -7,5 +7,6 @@ import org.springframework.data.domain.Page;
 public interface CommentRepositoryCustom {
 
     Page<CommentResponse> getComments(Long posterId, CommentConditionRequest commentConditionRequest);
+    CommentResponse getCommentById(Long commentId);
 
 }

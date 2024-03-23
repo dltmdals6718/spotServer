@@ -40,7 +40,7 @@ public class CommentService {
         this.memberRepository = memberRepository;
     }
 
-    public void addComment(Long posterId, Comment comment, Long memberId) {
+    public Long addComment(Long posterId, Comment comment, Long memberId) {
 
         Poster poster = posterRepository.findById(posterId)
                 .orElseThrow(() -> new NoSuchElementException());
@@ -53,7 +53,7 @@ public class CommentService {
         comment.setWriter(member);
 
         commentRepository.save(comment);
-
+        return comment.getId();
     }
 
     public PageResponse<CommentResponse> getComments(Long posterId, CommentConditionRequest commentConditionRequest) {
@@ -63,11 +63,9 @@ public class CommentService {
     }
 
     public CommentResponse getComment(Long commentId) {
-        Comment comment = commentRepository.findById(commentId)
-                .orElseThrow(() -> new NoSuchElementException());
-
-        CommentResponse commentResponse = CommentResponse.toDto(comment);
-
+        CommentResponse commentResponse = commentRepository.getCommentById(commentId);
+        if(commentResponse==null)
+            throw new NoSuchElementException();
         return commentResponse;
     }
 
@@ -89,7 +87,10 @@ public class CommentService {
         }
     }
 
-    public void updateComment(Long commentId, CommentRequest commentRequest, Member member) throws PermissionException {
+    public void updateComment(Long commentId, CommentRequest commentRequest, Long memberId) throws PermissionException {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException());
 
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException());
@@ -104,8 +105,10 @@ public class CommentService {
 
     }
 
-    public void addLike(Long commentId, Member member) throws DuplicateException {
+    public void addLike(Long commentId, Long memberId) throws DuplicateException {
 
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException());
         Comment comment = commentRepository.findById(commentId)
                 .orElseThrow(() -> new NoSuchElementException());
 
