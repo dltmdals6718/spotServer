@@ -7,10 +7,7 @@ import com.example.spotserver.domain.MemberImage;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.SignInMember;
 import com.example.spotserver.dto.request.SignUpMember;
-import com.example.spotserver.exception.DuplicateException;
-import com.example.spotserver.exception.FileException;
-import com.example.spotserver.exception.LoginFailException;
-import com.example.spotserver.exception.MailException;
+import com.example.spotserver.exception.*;
 import com.example.spotserver.repository.MailCertificationRepository;
 import com.example.spotserver.repository.MemberRepository;
 import com.example.spotserver.service.MailSerivce;
@@ -31,6 +28,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
 import java.util.UUID;
 
@@ -59,6 +57,7 @@ public class MemberTest {
     Member member;
     String loginId = "testId";
     String loginPwd = "testPwd";
+    String mail = "smsmsmtp@gmail.com";
 
     @BeforeEach
     void init() throws IOException {
@@ -138,12 +137,71 @@ public class MemberTest {
     }
 
     @Test
+    @DisplayName("중복된 닉네임으로 가입 시도")
+    void duplicateNameSignup() throws FileException, DuplicateException, IOException, MailException {
+
+        //given
+        Integer code = 12345;
+        MailCertification mailCertification = new MailCertification();
+        mailCertification.setMail(mail);
+        mailCertification.setCode(code);
+        mailCertificationRepository.save(mailCertification);
+
+        SignUpMember signUpMember = new SignUpMember();
+        signUpMember.setLoginId("중복 아닌 아이디");
+        signUpMember.setLoginPwd("비밀번호");
+        signUpMember.setMail(mail);
+        signUpMember.setName(member.getName());
+        signUpMember.setCode(code);
+
+
+        //when & then
+        Assertions
+                .assertThatThrownBy(() -> memberService.addMember(signUpMember, null))
+                .isInstanceOf(DuplicateException.class)
+                .hasMessage(ErrorCode.DUPLICATE_NAME.getMessage());
+    }
+
+    @Test
+    @DisplayName("중복된 아이디로 가입 시도")
+    void duplicateLoginIdSignup() {
+        //given
+        Integer code = 12345;
+        MailCertification mailCertification = new MailCertification();
+        mailCertification.setMail(mail);
+        mailCertification.setCode(code);
+        mailCertificationRepository.save(mailCertification);
+
+        SignUpMember signUpMember = new SignUpMember();
+        signUpMember.setLoginId(member.getLoginId());
+        signUpMember.setLoginPwd("비밀번호");
+        signUpMember.setMail(mail);
+        signUpMember.setName("중복 아닌 닉네임");
+        signUpMember.setCode(code);
+
+        //when & then
+        Assertions
+                .assertThatThrownBy(() -> memberService.addMember(signUpMember, null))
+                .isInstanceOf(DuplicateException.class)
+                .hasMessage(ErrorCode.DUPLICATE_LOGINID.getMessage());
+    }
+
+    @Test
     @DisplayName("로그인")
     void signin() throws LoginFailException {
         Member loginMember = memberService.login(loginId, loginPwd);
         Assertions
                 .assertThat(member.getId())
                 .isEqualTo(loginMember.getId());
+    }
+
+    @Test
+    @DisplayName("로그인 실패")
+    void failSignin() throws LoginFailException {
+        Assertions
+                .assertThatThrownBy(() -> memberService.login(loginId, loginPwd + "haha"))
+                .isInstanceOf(LoginFailException.class)
+                .hasMessage(ErrorCode.FAIL_LOGIN.getMessage());
     }
 
     @Test
@@ -175,11 +233,97 @@ public class MemberTest {
     @Test
     @DisplayName("이메일 인증 번호 전송")
     void mailCertification() throws MessagingException, MailException {
-        String mail = "smsmsmtp@gmail.com";
         mailSerivce.sendMailCertification(mail);
         Assertions
                 .assertThat(mailCertificationRepository.findByMail(mail))
                 .isPresent();
+    }
+
+    @Test
+    @DisplayName("5분내 이메일 인증 번호 재요청 에러")
+    void failMailRequestInTime() throws MessagingException, MailException {
+
+        //given
+        mailSerivce.sendMailCertification(mail);
+
+        //when & then
+        Assertions
+                .assertThatThrownBy(() -> mailSerivce.sendMailCertification(mail))
+                .hasMessage(ErrorCode.FAIL_MAIL_CERTIFICATION_REQUEST.getMessage());
+    }
+
+    @Test
+    @DisplayName("이메일 인증 미요청")
+    void notMailCertificationRequest() throws FileException, DuplicateException, IOException, MailException {
+
+        //given
+        SignUpMember signUpMember = new SignUpMember();
+        signUpMember.setLoginId("중복 아닌 아이디");
+        signUpMember.setMail(mail);
+        signUpMember.setName("중복 아닌 닉네임");
+
+        //when & then
+        Assertions
+                .assertThatThrownBy(() -> memberService.addMember(signUpMember, null))
+                .isInstanceOf(MailException.class)
+                .hasMessage(ErrorCode.NOT_MAIL_CERTIFICATION.getMessage());
+
+    }
+
+    @Test
+    @DisplayName("이메일 인증 번호 미일치")
+    void notMatchMailCertificationCode() {
+
+        //given
+        Integer code = 12345;
+        MailCertification mailCertification = new MailCertification();
+        mailCertification.setMail(mail);
+        mailCertification.setCode(code);
+        mailCertificationRepository.save(mailCertification);
+
+        SignUpMember signUpMember = new SignUpMember();
+        signUpMember.setLoginId("중복 아닌 아이디");
+        signUpMember.setLoginPwd("비밀번호");
+        signUpMember.setMail(mail);
+        signUpMember.setName("중복 아닌 닉네임");
+        signUpMember.setCode(code+1);
+
+        //when & then
+        Assertions
+                .assertThatThrownBy(() -> memberService.addMember(signUpMember, null))
+                .isInstanceOf(MailException.class)
+                .hasMessage(ErrorCode.FAIL_MAIL_CERTIFICATION.getMessage());
+
+    }
+
+    @Test
+    @DisplayName("이메일 인증 제한 시간 초과")
+    void failMailCertificationInTime() throws FileException, DuplicateException, IOException, MailException {
+
+        //given
+        Integer code = 12345;
+        MailCertification mailCertification = new MailCertification();
+        mailCertification.setMail(mail);
+        mailCertification.setCode(code);
+        mailCertificationRepository.save(mailCertification);
+
+        MailCertification findMailCertification = mailCertificationRepository.findByMail(mail)
+                .orElseThrow(() -> new NoSuchElementException());
+        findMailCertification.setRegDate(LocalDateTime.now().minusDays(1));
+
+        SignUpMember signUpMember = new SignUpMember();
+        signUpMember.setLoginId("중복 아닌 아이디");
+        signUpMember.setLoginPwd("비밀번호");
+        signUpMember.setMail(mail);
+        signUpMember.setName("중복 아닌 닉네임");
+        signUpMember.setCode(code);
+
+        //when & then
+        Assertions
+                .assertThatThrownBy(() -> memberService.addMember(signUpMember, null))
+                .isInstanceOf(MailException.class)
+                .hasMessage(ErrorCode.FAIL_MAIL_TIMEOUT.getMessage());
+
     }
 
 }
