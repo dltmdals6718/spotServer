@@ -1,21 +1,16 @@
 package com.example.spotserver.controller;
 
-import com.example.spotserver.config.CorsConfig;
-import com.example.spotserver.config.SecurityConfig;
 import com.example.spotserver.config.auth.PrincipalDetails;
+import com.example.spotserver.domain.Comment;
 import com.example.spotserver.domain.Member;
-import com.example.spotserver.domain.Role;
 import com.example.spotserver.dto.request.CommentRequest;
 import com.example.spotserver.dto.response.CommentResponse;
-import com.example.spotserver.repository.MemberRepository;
 import com.example.spotserver.service.CommentService;
-import com.example.spotserver.service.PosterService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -23,8 +18,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContext;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.ResultActions;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -53,9 +46,6 @@ class CommentControllerTest {
 
     @MockBean
     private CommentService commentService;
-
-    @MockBean
-    private PosterService posterService;
 
     private Member member;
     private PrincipalDetails principalDetails;
@@ -91,80 +81,184 @@ class CommentControllerTest {
         context.setAuthentication(authentication);
     }
 
-//    @Test
+    @Test
     @DisplayName(value = "댓글 작성")
     void addComment() throws Exception {
-//
-//        Long posterId = 2L;
-//        Long commentId = 3L;
-//
-//        String writeCommnetUrl = "/comments/" + posterId;
-//        CommentRequest commentRequest = new CommentRequest();
-//        commentRequest.setContent("테스트 댓글 내용");
-//
-//        CommentResponse commentResponse = new CommentResponse();
-//        commentResponse.setCommentId(commentId);
-//        commentResponse.setWriterId(member.getId());
-//        commentResponse.setWriterName(member.getName());
-//        commentResponse.setContent(commentRequest.getContent());
-//        commentResponse.setRegDate(LocalDateTime.now());
-//
-//        given(commentService.addComment(posterId, commentRequest, member))
-//                .willReturn(commentResponse);
-//
-//
-//        ObjectMapper objectMapper = new ObjectMapper();
-//        String body = objectMapper.writeValueAsString(commentRequest);
-//
-//        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-//                .request(HttpMethod.POST, writeCommnetUrl)
-//                .contentType(MediaType.APPLICATION_JSON)
-//                .content(body)
-//                .characterEncoding("utf-8")
-//                .with(csrf()));
-//
-//        verify(commentService, times(1))
-//                .addComment(posterId, commentRequest, member);
-//
-//
-//        resultActions
-//                .andExpectAll(
-//                        status().is(HttpStatus.CREATED.value()),
-//                        jsonPath("$.commentId").value(commentId),
-//                        jsonPath("$.writerId").value(member.getId()),
-//                        jsonPath("$.content").value(commentRequest.getContent()),
-//                        jsonPath("$.regDate").value(commentResponse.getRegDate().toString()))
-//                .andDo(print());
+
+        //given
+        Long posterId = 2L;
+
+        CommentRequest commentRequest = new CommentRequest();
+        commentRequest.setContent("테스트 댓글 내용");
+
+        Comment comment = CommentRequest.toEntity(commentRequest);
+
+
+        given(commentService.addComment(posterId, comment, member.getId()))
+                .willReturn(1L);
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String body = objectMapper.writeValueAsString(commentRequest);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.POST, "/posters/" + posterId + "/comments")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body)
+                .characterEncoding("utf-8")
+                .with(csrf()));
+
+        //then
+        verify(commentService, times(1))
+                .addComment(posterId, comment, 1L);
+        resultActions
+                .andExpectAll(
+                        status().is(HttpStatus.CREATED.value()),
+                        jsonPath("$.commentId").value(1L))
+                .andDo(print());
 
 
     }
 
-//    @Test
+    @Test
     @DisplayName(value = "특정 댓글 조회")
     void getComment() throws Exception {
 
+        //given
+        CommentResponse commentResponse = new CommentResponse();
+        commentResponse.setCommentId(1L);
+        commentResponse.setWriterId(2L);
+        commentResponse.setWriterName("작성자");
+        commentResponse.setRegDate(LocalDateTime.now());
+        commentResponse.setContent("댓글 내용");
+        commentResponse.setLikeCnt(0L);
+        commentResponse.setMemberImg("");
+
+        given(commentService.getComment(1L))
+                .willReturn(commentResponse);
+
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.GET, "")
+                .request(HttpMethod.GET, "/comments/" + 1L)
                 .characterEncoding("utf-8")
                 .with(csrf()));
 
+        //then
+        verify(commentService, times(1))
+                .getComment(1L);
         resultActions
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.commentId").value(commentResponse.getCommentId()),
+                        jsonPath("$.writerId").value(commentResponse.getWriterId()),
+                        jsonPath("$.writerName").value(commentResponse.getWriterName()),
+                        jsonPath("$.memberImg").value(commentResponse.getMemberImg()),
+                        jsonPath("$.content").value(commentResponse.getContent()),
+                        jsonPath("$.regDate").value(commentResponse.getRegDate().toString()),
+                        jsonPath("$.likeCnt").value(commentResponse.getLikeCnt()))
                 .andDo(print());
     }
 
     @Test
-    @DisplayName(value = "전체 댓글 조회")
-    void getComments() {
-    }
-
-    @Test
     @DisplayName(value = "댓글 삭제")
-    void deleteComment() {
+    void deleteComment() throws Exception {
+
+        //given
+        Long commendId = 1L;
+
+        doNothing()
+                .when(commentService)
+                .deleteComment(commendId, 1L);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.DELETE, "/comments/" + commendId));
+
+        //then
+        verify(commentService, times(1))
+                .deleteComment(commendId, 1L);
+        resultActions
+                .andExpectAll(
+                        status().is(HttpStatus.NO_CONTENT.value()))
+                .andDo(print());
     }
 
     @Test
     @DisplayName(value = "댓글 수정")
-    void updateComment() {
+    void updateComment() throws Exception {
+
+        //given
+        Long commentId = 1L;
+        CommentRequest commentRequest = new CommentRequest();
+        commentRequest.setContent("수정될 댓글 내용");
+
+        ObjectMapper objectMapper = new ObjectMapper();
+        String body = objectMapper.writeValueAsString(commentRequest);
+
+
+        doNothing()
+                .when(commentService)
+                .updateComment(commentId,  commentRequest, 1L);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.PUT, "/comments/" + commentId)
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(body));
+
+        //then
+        verify(commentService, times(1))
+                .updateComment(commentId, commentRequest, 1L);
+        resultActions
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.commentId").value(commentId))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName(value = "댓글 좋아요 등록")
+    void addLike() throws Exception {
+
+        //given
+        Long commentId = 2L;
+        doNothing()
+                .when(commentService)
+                .addLike(commentId, 1L);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.POST, "/comments/" + commentId + "/likes"));
+
+        //then
+        verify(commentService, times(1))
+                .addLike(commentId, 1L);
+        resultActions
+                .andExpectAll(
+                        status().is(HttpStatus.CREATED.value()))
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName(value = "댓글 좋아요 취소")
+    void deleteLike() throws Exception {
+
+        //given
+        Long commentId = 2L;
+        doNothing()
+                .when(commentService)
+                .deleteLike(commentId, 1L);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.DELETE, "/comments/" + commentId + "/likes"));
+
+        //then
+        verify(commentService, times(1))
+                .deleteLike(commentId, 1L);
+        resultActions
+                .andExpectAll(status().is(HttpStatus.NO_CONTENT.value()))
+                .andDo(print());
     }
 
 
