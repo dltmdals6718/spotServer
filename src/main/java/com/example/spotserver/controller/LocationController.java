@@ -67,10 +67,10 @@ public class LocationController {
                                            @RequestPart(required = false) List<MultipartFile> files) throws IOException {
 
         Location location = LocationRequest.toEntity(locationRequest);
-        locationService.addLocation(location, files);
+        Long locationId = locationService.addLocation(location, files);
 
         Map<String, Object> response = new HashMap<>();
-        response.put("locationId", location.getId());
+        response.put("locationId", locationId);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)

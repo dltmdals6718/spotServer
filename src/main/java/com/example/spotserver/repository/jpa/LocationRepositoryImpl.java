@@ -35,7 +35,6 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
     private EntityManager entityManager;
     private JPAQueryFactory jpaQueryFactory;
-    private Double scale = 0.01;
 
     @Autowired
     public LocationRepositoryImpl(EntityManager entityManager) {
@@ -80,6 +79,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
 
         int defaultSize = 10;
         int defaultPage = 1;
+        Double scale = conditionRequest.getScale() == null ? 0.01 : conditionRequest.getScale();
 
         QLocation location = QLocation.location;
         QLocationLike locationLike = QLocationLike.locationLike;
@@ -103,8 +103,7 @@ public class LocationRepositoryImpl implements LocationRepositoryCustom {
                         location.address,
                         location.description,
                         location.regDate,
-                        locationLike.count().as("like_count")
-                ))
+                        locationLike.count().as("like_count")))
                 .from(location)
                 .leftJoin(locationLike).on(locationLike.location.id.eq(location.id))
                 .where(location.latitude.between(latitude - scale, latitude + scale)

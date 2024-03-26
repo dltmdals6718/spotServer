@@ -517,7 +517,7 @@ Content-Type : multipart/form-data <br>
     <tbody>
         <tr>
             <td>GET</td>
-            <td>/locations<br>?latitude={위도값}<br>&longitude={경도값}<br>&size={페이지크기}<br>&page={페이지번호}<br>&sort={정렬방법}<br>&search={제목 또는 내용}<br>&approve={승인여부}</td>
+            <td>/locations<br>?latitude={위도값}<br>&longitude={경도값}<br>&size={페이지크기}<br>&page={페이지번호}<br>&sort={정렬방법}<br>&search={제목 또는 내용}<br>&approve={승인여부}<br>&scale={범위}</td>
             <td></td>
 <td>
 
@@ -774,6 +774,12 @@ false - 미승인으로 변경
                 승인, 미승인 장소 구분 (미승인 장소 조회는 ADMIN만 가능)<br>
                 (0: 미승인, 1: 승인, 기본값: 1)
             </td>
+            <td>X</td>
+        </tr>
+        <tr>
+            <td>scale</td>
+            <td>Double</td>
+            <td>주위 장소 검색 범위 설정<br>(기본값:0.01)</td>
             <td>X</td>
         </tr>
     </tbody>

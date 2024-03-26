@@ -51,7 +51,7 @@ public class LocationService {
         return pageResponse;
     }
 
-    public Location addLocation(Location location, List<MultipartFile> files) throws IOException {
+    public Long addLocation(Location location, List<MultipartFile> files) throws IOException {
 
 
         if (files != null) {
@@ -65,7 +65,7 @@ public class LocationService {
 
         Location saveLocation = locationRepository.save(location);
 
-        return saveLocation;
+        return saveLocation.getId();
     }
 
     @Transactional

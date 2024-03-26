@@ -15,4 +15,5 @@ public class LocationConditionRequest {
     private String sort;
     private String search;
     private Boolean approve = true;
+    private Double scale;
 }
