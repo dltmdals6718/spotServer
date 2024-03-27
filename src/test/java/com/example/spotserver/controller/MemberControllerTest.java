@@ -8,7 +8,9 @@ import com.example.spotserver.dto.response.MemberResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.LoginFailException;
+import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.MemberService;
+import com.example.spotserver.service.PosterService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,9 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-import org.springframework.security.test.context.support.WithMockUser;
-import org.springframework.security.test.context.support.WithUserDetails;
+import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -26,10 +26,11 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 
+import java.nio.charset.StandardCharsets;
+
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
 import static org.springframework.security.test.web.servlet.request.SecurityMockMvcRequestPostProcessors.csrf;
-import static org.springframework.security.test.web.servlet.setup.SecurityMockMvcConfigurers.springSecurity;
 import static org.springframework.test.web.servlet.result.MockMvcResultHandlers.print;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
@@ -39,15 +40,14 @@ class MemberControllerTest {
 
     private MockMvc mockMvc;
 
-    private String signInUrl = "/members/signin";
-    private String signUpUrl = "/members/signup";
-    private String getMemberUrl = "/members";
-
     @MockBean
     private MemberService memberService;
 
     @MockBean
-    private BCryptPasswordEncoder bCryptPasswordEncoder;
+    private PosterService posterService;
+
+    @MockBean
+    private LocationService locationService;
 
     @Autowired
     private WebApplicationContext context;
@@ -62,33 +62,43 @@ class MemberControllerTest {
     }
 
 
-//    @Test
+    @Test
     @DisplayName("정상적인 회원가입")
     void signupMember() throws Exception {
 
+        //given
         SignUpMember signUpMember = new SignUpMember();
         signUpMember.setName("닉네임");
         signUpMember.setLoginId("아이디");
         signUpMember.setLoginPwd("비밀번호");
+        signUpMember.setMail("test@gmail.com");
+        signUpMember.setCode(1234);
 
         MemberResponse memberResponse = new MemberResponse();
         memberResponse.setMemberId(1L);
         memberResponse.setName(signUpMember.getName());
         memberResponse.setRole(Role.USER);
+        memberResponse.setMemberImg("...");
 
-        given(memberService.addMember(signUpMember, null))
-                .willReturn(memberResponse);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        String testSignUpBody = objectMapper.writeValueAsString(signUpMember);
+        String signUpMemberString = objectMapper.writeValueAsString(signUpMember);
 
+        MockMultipartFile signUpMemberPart = new MockMultipartFile("signUpMember", null, MediaType.APPLICATION_JSON_VALUE, signUpMemberString.getBytes(StandardCharsets.UTF_8));
+        MockMultipartFile memberImg = new MockMultipartFile("memberImg", "test.jpeg", MediaType.IMAGE_JPEG_VALUE, "img".getBytes());
+
+        given(memberService.addMember(signUpMember, memberImg))
+                .willReturn(memberResponse);
+
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.POST, signUpUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(testSignUpBody)
-                .characterEncoding("utf-8")
-                .with(csrf()));
+                .multipart(HttpMethod.POST, "/members/signup")
+                .file(signUpMemberPart)
+                .file(memberImg));
 
+        //then
+        verify(memberService, times(1))
+                .addMember(signUpMember, memberImg);
         resultActions
                 .andExpectAll(
                         status().isCreated(),
@@ -99,10 +109,11 @@ class MemberControllerTest {
 
     }
 
-//    @Test
+    @Test
     @DisplayName("로그인 성공")
     void signinMember() throws Exception {
 
+        //given
         SignInMember signInMember = new SignInMember();
         signInMember.setLoginId("아이디");
         signInMember.setLoginPwd("비밀번호");
@@ -110,54 +121,67 @@ class MemberControllerTest {
         Member member = new Member();
         member.setId(1L);
 
+        String token = "tokenString";
+
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(signInMember);
 
         given(memberService.login(signInMember.getLoginId(), signInMember.getLoginPwd()))
                 .willReturn(member);
         given(memberService.createToken(member.getId()))
-                .willReturn("tokenString");
+                .willReturn(token);
 
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.POST, signInUrl)
+                .request(HttpMethod.POST, "/members/signin")
                 .contentType(MediaType.APPLICATION_JSON)
                 .content(body)
                 .characterEncoding("utf-8")
                 .with(csrf()));
 
+        //then
         resultActions
                 .andExpectAll(
                         status().isOk(),
                         jsonPath("$.expire_in").exists(),
-                        jsonPath("$.token").exists())
+                        jsonPath("$.token").value(token))
                 .andDo(print());
+        verify(memberService, times(1))
+                .login(signInMember.getLoginId(), signInMember.getLoginPwd());
+        verify(memberService, times(1))
+                .createToken(member.getId());
 
 
     }
 
 
-//    @Test
+    @Test
     @DisplayName("중복된 아이디 회원가입")
     void duplicateIdSignup() throws Exception {
 
-        SignUpMember duplicateIdMember = new SignUpMember();
-        duplicateIdMember.setName("이름");
-        duplicateIdMember.setLoginId("중복 아이디");
-        duplicateIdMember.setLoginPwd("비밀번호");
+        //given
+        SignUpMember duplicateIdSignupMember = new SignUpMember();
+        duplicateIdSignupMember.setName("이름");
+        duplicateIdSignupMember.setLoginId("중복 아이디");
+        duplicateIdSignupMember.setLoginPwd("비밀번호");
+        duplicateIdSignupMember.setMail("test@gmail.com");
+        duplicateIdSignupMember.setCode(1234);
 
         ObjectMapper objectMapper = new ObjectMapper();
-        String body = objectMapper.writeValueAsString(duplicateIdMember);
+        String body = objectMapper.writeValueAsString(duplicateIdSignupMember);
+        MockMultipartFile signUpMember = new MockMultipartFile("signUpMember", null, MediaType.APPLICATION_JSON_VALUE, body.getBytes());
 
-        given(memberService.addMember(duplicateIdMember, null))
+        given(memberService.addMember(duplicateIdSignupMember, null))
                 .willThrow(new DuplicateException(ErrorCode.DUPLICATE_LOGINID));
 
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.POST, signUpUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
-                .characterEncoding("utf-8")
-                .with(csrf()));
+                .multipart(HttpMethod.POST, "/members/signup")
+                .file(signUpMember));
 
+        //then
+        verify(memberService, times(1))
+                .addMember(duplicateIdSignupMember, null);
         resultActions
                 .andExpectAll(
                         status().is(ErrorCode.DUPLICATE_LOGINID.getHttpStatus().value()),
@@ -168,29 +192,34 @@ class MemberControllerTest {
 
     }
 
-//    @Test
+    @Test
     @DisplayName("중복된 이름 회원가입")
     void duplicateSignup() throws Exception {
 
+        //given
         SignUpMember duplicateNameMember = new SignUpMember();
         duplicateNameMember.setName("중복된 이름");
         duplicateNameMember.setLoginId("아이디");
         duplicateNameMember.setLoginPwd("비밀번호");
+        duplicateNameMember.setMail("test@gmail.com");
+        duplicateNameMember.setCode(1234);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(duplicateNameMember);
+        MockMultipartFile signUpMember = new MockMultipartFile("signUpMember", null, MediaType.APPLICATION_JSON_VALUE, body.getBytes());
 
         given(memberService.addMember(duplicateNameMember, null))
                 .willThrow(new DuplicateException(ErrorCode.DUPLICATE_NAME));
 
 
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.POST, signUpUrl)
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
-                .characterEncoding("utf-8")
-                .with(csrf()));
+                .multipart(HttpMethod.POST, "/members/signup")
+                .file(signUpMember));
 
+        //then
+        verify(memberService, times(1))
+                .addMember(duplicateNameMember, null);
         resultActions
                 .andExpectAll(
                         status().is(ErrorCode.DUPLICATE_NAME.getHttpStatus().value()),
@@ -200,36 +229,43 @@ class MemberControllerTest {
 
     }
 
-//    @Test
+    @Test
     @DisplayName("회원정보 조회")
     void getMember() throws Exception {
 
-        Member member = new Member();
-        member.setId(1L);
-        member.setName("name");
-        member.setRole(Role.USER);
+        //given
+        MemberResponse memberResponse = new MemberResponse();
+        memberResponse.setMemberId(1L);
+        memberResponse.setName("테스터");
+        memberResponse.setRole(Role.USER);
+        memberResponse.setMemberImg("...");
 
         given(memberService.getMemberInfo(1L))
-                .willReturn(null);
+                .willReturn(memberResponse);
 
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.GET, getMemberUrl + "/" + 1L)
-                .contentType(MediaType.APPLICATION_JSON)
+                .request(HttpMethod.GET, "/members/" + 1L)
                 .characterEncoding("utf-8"));
 
+        //then
+        verify(memberService, times(1))
+                .getMemberInfo(1L);
         resultActions
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.memberId").value(member.getId()),
-                        jsonPath("$.name").value(member.getName()),
-                        jsonPath("$.role").value(member.getRole().name()))
+                        jsonPath("$.memberId").value(1L),
+                        jsonPath("$.name").value("테스터"),
+                        jsonPath("$.role").value("USER"),
+                        jsonPath("$.memberImg").value("..."))
                 .andDo(print());
     }
 
-//    @Test
+    @Test
     @DisplayName("로그인 실패")
     void failLogin() throws Exception {
 
+        //given
         SignInMember signInMember = new SignInMember();
         signInMember.setLoginId("아이디");
         signInMember.setLoginPwd("비밀번호");
@@ -238,17 +274,20 @@ class MemberControllerTest {
         String body = objectMapper.writeValueAsString(signInMember);
 
 
-
         given(memberService.login(signInMember.getLoginId(), signInMember.getLoginPwd()))
                 .willThrow(new LoginFailException(ErrorCode.FAIL_LOGIN));
 
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.POST, signInUrl)
+                .request(HttpMethod.POST, "/members/signin")
+                .content(body.getBytes())
                 .contentType(MediaType.APPLICATION_JSON)
-                .content(body)
                 .characterEncoding("utf-8")
                 .with(csrf()));
 
+        //then
+        verify(memberService, times(1))
+                .login(signInMember.getLoginId(), signInMember.getLoginPwd());
         resultActions
                 .andExpectAll(
                         status().is(ErrorCode.FAIL_LOGIN.getHttpStatus().value()),
