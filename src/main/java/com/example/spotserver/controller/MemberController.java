@@ -14,7 +14,11 @@ import com.example.spotserver.exception.*;
 import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.MemberService;
 import com.example.spotserver.service.PosterService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.http.HttpHeaders;
@@ -34,11 +38,13 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/members")
+@Slf4j
 public class MemberController {
 
     private MemberService memberService;
     private PosterService posterService;
     private LocationService locationService;
+    private Logger loginLogger = LoggerFactory.getLogger("login");
 
 
     @Autowired
@@ -61,7 +67,8 @@ public class MemberController {
     }
 
     @PostMapping(value = "/signin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map> signinMember(@Valid @RequestBody SignInMember signInMember) throws LoginFailException {
+    public ResponseEntity<Map> signinMember(@Valid @RequestBody SignInMember signInMember,
+                                            HttpServletRequest request) throws LoginFailException {
 
         String loginId = signInMember.getLoginId();
         String loginPwd = signInMember.getLoginPwd();
@@ -69,6 +76,9 @@ public class MemberController {
 
         Map<String, Object> tokenInfo = new HashMap<>();
         String token = memberService.createToken(member.getId());
+
+        loginLogger.info("로그인 ip : {}, member.Id : {}", request.getRemoteAddr(), member.getId());
+
         tokenInfo.put("token", token);
         tokenInfo.put("expire_in", JwtProperties.EXPIRE_TIME / 1000);
         return ResponseEntity
