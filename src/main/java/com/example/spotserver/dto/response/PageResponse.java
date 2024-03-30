@@ -21,6 +21,6 @@ public class PageResponse<T> {
         pageInfo.setSize(page.getSize());
         pageInfo.setTotalPage(page.getTotalPages()); // 총 페이지 개수
         pageInfo.setTotalElements(page.getTotalElements()); // 총 원소 개수
-        pageInfo.setNumberOfElements(page.getNumberOfElements()); // 현재 페이지에서 원소 개수
+        pageInfo.setNumberOfElements((long) page.getNumberOfElements()); // 현재 페이지에서 원소 개수
     }
 }

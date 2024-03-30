@@ -44,7 +44,7 @@ public class PosterService {
         this.memberRepository = memberRepository;
     }
 
-    public void addPoster(Poster poster,
+    public Long addPoster(Poster poster,
                           List<MultipartFile> files,
                           Long locationId,
                           Long memberId) throws IOException {
@@ -66,8 +66,9 @@ public class PosterService {
             }
         }
 
-        posterRepository.save(poster);
+        Poster savePoster = posterRepository.save(poster);
 
+        return savePoster.getId();
     }
 
     public PageResponse<PosterResponse> getLocationPosters(Long locationId, PosterPageRequest posterPageRequest) {
@@ -146,9 +147,12 @@ public class PosterService {
 
     }
 
-    public void deletePoster(Long posterId, Member member) throws PermissionException {
+    public void deletePoster(Long posterId, Long memberId) throws PermissionException {
 
         Poster poster = posterRepository.findById(posterId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
 
         if (!member.getId().equals(poster.getWriter().getId()))

@@ -33,7 +33,9 @@ import java.io.FileInputStream;
 import java.nio.charset.StandardCharsets;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -66,16 +68,14 @@ class PosterControllerTest {
                 .addFilter(new CharacterEncodingFilter("utf-8", true))
                 .build();
 
-        member = mock(Member.class);
+        member = new Member();
+        member.setId(1L);
+        member.setName("name");
         principalDetails = mock(PrincipalDetails.class);
 
         when(principalDetails.getMember())
                 .thenReturn(member);
 
-        when(member.getId())
-                .thenReturn(1L);
-        when(member.getName())
-                .thenReturn("name");
 
         objectMapper = new ObjectMapper();
 
@@ -88,10 +88,11 @@ class PosterControllerTest {
         context.setAuthentication(authentication);
     }
 
-//    @Test
+    @Test
     @DisplayName("게시글 작성")
     void addPoster() throws Exception {
 
+        //given
         Long locationId = 2L;
 
         PosterRequest posterRequestDto = new PosterRequest();
@@ -99,155 +100,133 @@ class PosterControllerTest {
         posterRequestDto.setContent("게시글 내용");
 
         Poster poster = PosterRequest.toEntity(posterRequestDto);
-        poster.setId(3L);
-        poster.setRegDate(LocalDateTime.now());
-        poster.setWriter(member);
 
         String posterRequestString = objectMapper.writeValueAsString(posterRequestDto);
         MockMultipartFile posterRequest = new MockMultipartFile("posterRequest", null, MediaType.APPLICATION_JSON_VALUE, posterRequestString.getBytes(StandardCharsets.UTF_8));
 
         List<MultipartFile> files = new ArrayList<>();
-        MockMultipartFile file1 = new MockMultipartFile("files", null, MediaType.IMAGE_PNG_VALUE, "".getBytes());
-        MockMultipartFile file2 = new MockMultipartFile("files", null, MediaType.IMAGE_PNG_VALUE, "".getBytes());
+        MockMultipartFile file1 = new MockMultipartFile("files", "file1.png", MediaType.IMAGE_PNG_VALUE, "".getBytes());
+        MockMultipartFile file2 = new MockMultipartFile("files", "file2.png", MediaType.IMAGE_PNG_VALUE, "".getBytes());
         files.add(file1);
         files.add(file2);
 
-//        PosterResponse posterResponse = PosterResponse.toDto(poster);
-        PosterResponse posterResponse = null;
+        Long posterId = 3L;
+        given(posterService.addPoster(poster, files, locationId, member.getId()))
+                .willReturn(posterId);
 
-//        given(posterService.addPoster(poster, files, locationId, member))
-//                .willReturn(posterResponse);
-
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .multipart(HttpMethod.POST, "/locations/" + locationId + "/posters")
                 .file(posterRequest)
                 .file(file1)
                 .file(file2));
 
+
+        //then
         verify(posterService, times(1))
-                .addPoster(null, files, locationId, null);
+                .addPoster(poster, files, locationId, member.getId());
 
         resultActions
                 .andExpectAll(
                         status().is(HttpStatus.CREATED.value()),
-                        jsonPath("$.posterId").value(poster.getId()),
-                        jsonPath("$.writerId").value(member.getId()),
-                        jsonPath("$.title").value(poster.getTitle()),
-                        jsonPath("$.content").value(poster.getContent()),
-                        jsonPath("$.regDate").value(poster.getRegDate().toString())
-                )
+                        jsonPath("$.posterId").value(posterId))
                 .andDo(print());
 
     }
 
     @Test
-    @DisplayName("장소 게시글 전체 조회")
-    void getLocationPosters() {
-
-    }
-
-//    @Test
     @DisplayName("특정 게시글 조회")
     void getPoster() throws Exception {
 
+        //given
+        Long posterId = 3L;
+        PosterResponse posterResponse = new PosterResponse();
+        posterResponse.setPosterId(posterId);
+        posterResponse.setTitle("제목");
+        posterResponse.setContent("내용");
+        posterResponse.setRegDate(LocalDateTime.now());
+        posterResponse.setWriterId(member.getId());
+        posterResponse.setWriterName(member.getName());
+        posterResponse.setLikeCnt(1L);
+        posterResponse.setCommentCnt(2L);
 
-        Poster poster = new Poster();
-        poster.setId(2L);
-        poster.setTitle("제목");
-        poster.setContent("내용");
-        poster.setRegDate(LocalDateTime.now());
-        poster.setWriter(member);
-
-
-//        PosterResponse posterResponse = PosterResponse.toDto(poster);
-        PosterResponse posterResponse = null;
-        given(posterService.getPoster(poster.getId()))
+        given(posterService.getPoster(posterId))
                 .willReturn(posterResponse);
 
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.GET, "/posters/" + poster.getId()));
+                .request(HttpMethod.GET, "/posters/" + posterId));
 
 
+        //then
         verify(posterService, times(1))
-                .getPoster(poster.getId());
-
-
+                .getPoster(posterId);
         resultActions
                 .andExpectAll(
                         status().is(HttpStatus.OK.value()),
-                        jsonPath("$.posterId").value(poster.getId()),
-                        jsonPath("$.writerId").value(poster.getWriter().getId()),
-                        jsonPath("$.title").value(poster.getTitle()),
-                        jsonPath("$.content").value(poster.getContent()),
-                        jsonPath("$.regDate").value(poster.getRegDate().toString()))
+                        jsonPath("$.posterId").value(posterResponse.getPosterId()),
+                        jsonPath("$.writerId").value(posterResponse.getWriterId()),
+                        jsonPath("$.writerName").value(posterResponse.getWriterName()),
+                        jsonPath("$.title").value(posterResponse.getTitle()),
+                        jsonPath("$.content").value(posterResponse.getContent()),
+                        jsonPath("$.regDate").value(posterResponse.getRegDate().toString()),
+                        jsonPath("$.likeCnt").value(posterResponse.getLikeCnt()),
+                        jsonPath("$.commentCnt").value(posterResponse.getCommentCnt()))
                 .andDo(print());
 
     }
 
-//    @Test
+    @Test
     @DisplayName("게시글 수정")
     void updatePoster() throws Exception {
 
-        Poster poster = new Poster();
-        poster.setId(1L);
-        poster.setWriter(member);
-        poster.setTitle("수정 전 제목");
-        poster.setContent("수정 전 내용");
-        poster.setRegDate(LocalDateTime.now());
-
+        //given
+        Long posterId = 3L;
         PosterRequest posterRequestDto = new PosterRequest();
         posterRequestDto.setTitle("수정 후 제목");
         posterRequestDto.setContent("수정 후 내용");
 
-        poster.updatePoster(posterRequestDto);
-//        PosterResponse posterResponse = PosterResponse.toDto(poster);
-        PosterResponse posterResponse = null;
-
         String posterRequestString = objectMapper.writeValueAsString(posterRequestDto);
-
         MockMultipartFile posterRequest = new MockMultipartFile("posterRequest", null, MediaType.APPLICATION_JSON_VALUE, posterRequestString.getBytes(StandardCharsets.UTF_8));
 
-        List<MultipartFile> addFiles = new ArrayList<>();
+        List<MultipartFile> addFilesList = new ArrayList<>();
         MockMultipartFile addFiles1 = new MockMultipartFile("addFiles", null, MediaType.IMAGE_PNG_VALUE, "".getBytes());
         MockMultipartFile addFiles2 = new MockMultipartFile("addFiles", null, MediaType.IMAGE_PNG_VALUE, "".getBytes());
-        addFiles.add(addFiles1);
-        addFiles.add(addFiles2);
+        addFilesList.add(addFiles1);
+        addFilesList.add(addFiles2);
 
-        List<Long> deleteFilesId = new ArrayList<>();
-        deleteFilesId.add(1L);
-        deleteFilesId.add(2L);
-        String deleteFilesIdString = objectMapper.writeValueAsString(deleteFilesId);
-        MockMultipartFile deleteFilesIdMock = new MockMultipartFile("deleteFilesId", null, MediaType.APPLICATION_JSON_VALUE, deleteFilesIdString.getBytes());
+        List<Long> deleteFilesIdList = new ArrayList<>();
+        deleteFilesIdList.add(1L);
+        deleteFilesIdList.add(2L);
+        String deleteFilesIdString = objectMapper.writeValueAsString(deleteFilesIdList);
+        MockMultipartFile deleteFilesId = new MockMultipartFile("deleteFilesId", null, MediaType.APPLICATION_JSON_VALUE, deleteFilesIdString.getBytes());
 
+        doNothing()
+                .when(posterService)
+                .updatePoster(posterId, posterRequestDto, addFilesList, deleteFilesIdList, member.getId());
 
-//        given(posterService.updatePoster(poster.getId(), posterRequestDto, addFiles, deleteFilesId, member))
-//                .willReturn(posterResponse);
-
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .multipart(HttpMethod.PUT, "/posters/" + poster.getId())
+                .multipart(HttpMethod.PUT, "/posters/" + posterId)
                 .file(posterRequest)
                 .file(addFiles1)
                 .file(addFiles2)
-                .file(deleteFilesIdMock)
+                .file(deleteFilesId)
                 .characterEncoding("utf-8")
                 .with(csrf()));
 
+        //then
         verify(posterService, times(1))
-                .updatePoster(poster.getId(), posterRequestDto, addFiles, deleteFilesId, null);
-
+                .updatePoster(posterId, posterRequestDto, addFilesList, deleteFilesIdList, member.getId());
         resultActions
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.posterId").value(poster.getId()),
-                        jsonPath("$.writerId").value(member.getId()),
-                        jsonPath("$.title").value(posterRequestDto.getTitle()),
-                        jsonPath("$.content").value(posterRequestDto.getContent()),
-                        jsonPath("$.regDate").value(poster.getRegDate().toString()))
+                        jsonPath("$.posterId").value(posterId))
                 .andDo(print());
 
     }
 
-//    @Test
+    @Test
     @DisplayName("게시글 삭제")
     void deletePoster() throws Exception {
 
@@ -260,13 +239,13 @@ class PosterControllerTest {
 
         doNothing()
                 .when(posterService)
-                .deletePoster(poster.getId(), member);
+                .deletePoster(poster.getId(), member.getId());
 
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
                 .request(HttpMethod.DELETE, "/posters/" + poster.getId()));
 
         verify(posterService, times(1))
-                .deletePoster(poster.getId(), member);
+                .deletePoster(poster.getId(), member.getId());
 
         resultActions
                 .andExpectAll(
@@ -274,50 +253,78 @@ class PosterControllerTest {
                 .andDo(print());
     }
 
-//    @Test
+    @Test
     @DisplayName("좋아요 등록")
     void addLike() throws Exception {
 
-        Poster poster = new Poster();
-        poster.setId(1L);
-
+        //given
+        Long posterId = 2L;
 
         doNothing()
                 .when(posterService)
-                .addLike(poster.getId(), null);
+                .addLike(posterId, member.getId());
 
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.POST, "/posters/" + poster.getId() + "/likes"));
+                .request(HttpMethod.POST, "/posters/" + posterId + "/likes"));
 
+        //then
         verify(posterService, times(1))
-                .addLike(poster.getId(), null);
-
+                .addLike(posterId, member.getId());
         resultActions
                 .andExpectAll(
                         status().is(HttpStatus.CREATED.value()))
                 .andDo(print());
     }
 
-//    @Test
+    @Test
     @DisplayName("좋아요 삭제")
     void deleteLike() throws Exception {
 
-        Poster poster = new Poster();
-        poster.setId(1L);
+        //given
+        Long posterId = 2L;
 
         doNothing()
                 .when(posterService)
-                .deleteLike(poster.getId(), null);
+                .deleteLike(posterId, member.getId());
 
+        //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.DELETE, "/posters/" + poster.getId() + "/likes"));
+                .request(HttpMethod.DELETE, "/posters/" + posterId + "/likes"));
 
+        //then
         verify(posterService, times(1))
-                .deleteLike(poster.getId(), null);
-
+                .deleteLike(posterId, member.getId());
         resultActions
                 .andExpectAll(
                         status().is(HttpStatus.NO_CONTENT.value()))
+                .andDo(print());
+
+    }
+
+    @Test
+    @DisplayName("좋아요 개수 조회")
+    void getLikes() throws Exception {
+
+        //given
+        Long posterId = 2L;
+        Long likeCnt = 4L;
+
+        Map m = new HashMap<>();
+        m.put("likeCnt", likeCnt);
+        given(posterService.getLikes(posterId))
+                .willReturn(m);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.GET, "/posters/" + posterId + "/likes"));
+
+        //then
+        verify(posterService, times(1))
+                .getLikes(posterId);
+        resultActions
+                .andExpectAll(
+                        jsonPath("$.likeCnt").value(likeCnt))
                 .andDo(print());
 
     }

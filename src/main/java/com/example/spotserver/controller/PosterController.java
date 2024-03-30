@@ -41,10 +41,10 @@ public class PosterController {
                                          @AuthenticationPrincipal(expression = "member") Member member) throws IOException {
 
         Poster poster = PosterRequest.toEntity(posterRequest);
-        posterService.addPoster(poster, files, locationId, member.getId());
+        Long posterId = posterService.addPoster(poster, files, locationId, member.getId());
 
         Map<String, Object> response = new HashMap<>();
-        response.put("posterId", poster.getId());
+        response.put("posterId", posterId);
 
         return ResponseEntity
                 .status(HttpStatus.CREATED)
@@ -53,7 +53,7 @@ public class PosterController {
 
     @GetMapping("/locations/{locationId}/posters")
     public ResponseEntity<PageResponse<PosterResponse>> getLocationPosters(@PathVariable Long locationId,
-                                                                                 @Valid @ModelAttribute PosterPageRequest posterPageRequest) {
+                                                                           @Valid @ModelAttribute PosterPageRequest posterPageRequest) {
 
 
         PageResponse<PosterResponse> posters = posterService.getLocationPosters(locationId, posterPageRequest);
@@ -93,7 +93,7 @@ public class PosterController {
     public ResponseEntity deletePoster(@PathVariable Long posterId,
                                        @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
 
-        posterService.deletePoster(posterId, member);
+        posterService.deletePoster(posterId, member.getId());
 
         return ResponseEntity
                 .status(HttpStatus.NO_CONTENT)
