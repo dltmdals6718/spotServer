@@ -1,6 +1,7 @@
 package com.example.spotserver.Integration;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.PosterConditionRequest;
 import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
@@ -248,7 +249,7 @@ public class PosterTest {
         Assertions
                 .assertThat(posterLikeRepository.findByPosterAndMember(poster, member))
                 .isNotPresent();
-        
+
     }
 
     @Test
@@ -287,4 +288,226 @@ public class PosterTest {
                 .assertThat(results.size())
                 .isEqualTo(2);
     }
+
+    @Test
+    @DisplayName("게시글 최신순 조회")
+    void getPostersByRecent() {
+
+        //given
+        Member writer = new Member();
+        writer.setName("홍길동");
+        memberRepository.save(writer);
+
+        Location newLocation = new Location();
+        locationRepository.save(newLocation);
+
+        Long posterCnt = 7L;
+        for (int i = 1; i <= posterCnt; i++) {
+            Poster newPoster = new Poster();
+            newPoster.setLocation(newLocation);
+            newPoster.setWriter(writer);
+            newPoster.setLocation(newLocation);
+            newPoster.setTitle(i + "번째 제목");
+            posterRepository.save(newPoster);
+        }
+
+        PosterConditionRequest conditionRequest = new PosterConditionRequest();
+        Integer page = 1;
+        Integer size = posterCnt.intValue();
+        conditionRequest.setPage(page);
+        conditionRequest.setSize(size);
+        conditionRequest.setSort("recent");
+
+        //when
+        em.flush();
+        PageResponse<PosterResponse> pageResponse = posterService.getLocationPosters(newLocation.getId(), conditionRequest);
+        PageInfo pageInfo = pageResponse.getPageInfo();
+        List<PosterResponse> posters = pageResponse.getResults();
+
+        //then
+        Assertions
+                .assertThat(posters.size())
+                .isEqualTo(size);
+        Assertions
+                .assertThat(pageInfo.getSize())
+                .isEqualTo(size);
+        Assertions
+                .assertThat(pageInfo.getPage())
+                .isEqualTo(page);
+
+        for (int i = 0; i < posters.size(); i++) {
+            Assertions
+                    .assertThat(posters.get(i).getTitle())
+                    .isEqualTo((posterCnt-i) + "번째 제목");
+        }
+    }
+
+    @Test
+    @DisplayName("게시글 좋아요순 조회")
+    void getPostersByLike() {
+
+        //given
+        Member writer = new Member();
+        writer.setName("홍길동");
+        memberRepository.save(writer);
+
+        Location newLocation = new Location();
+        locationRepository.save(newLocation);
+
+        Long posterCnt = 7L;
+        for (int i = 1; i <= posterCnt; i++) {
+            Poster newPoster = new Poster();
+            newPoster.setLocation(newLocation);
+            newPoster.setWriter(writer);
+            newPoster.setLocation(newLocation);
+            newPoster.setTitle(i + "번째 제목");
+            posterRepository.save(newPoster);
+
+            for(int j=1; j<=i; j++) {
+                Member liker = new Member();
+                memberRepository.save(liker);
+
+                PosterLike posterLike = new PosterLike();
+                posterLike.setMember(liker);
+                posterLike.setPoster(newPoster);
+                posterLikeRepository.save(posterLike);
+            }
+
+        }
+
+        PosterConditionRequest conditionRequest = new PosterConditionRequest();
+        Integer page = 1;
+        Integer size = posterCnt.intValue();
+        conditionRequest.setPage(page);
+        conditionRequest.setSize(size);
+        conditionRequest.setSort("like");
+
+        //when
+        em.flush();
+        PageResponse<PosterResponse> pageResponse = posterService.getLocationPosters(newLocation.getId(), conditionRequest);
+        PageInfo pageInfo = pageResponse.getPageInfo();
+        List<PosterResponse> posters = pageResponse.getResults();
+
+        //then
+        Assertions
+                .assertThat(posters.size())
+                .isEqualTo(size);
+        Assertions
+                .assertThat(pageInfo.getSize())
+                .isEqualTo(size);
+        Assertions
+                .assertThat(pageInfo.getPage())
+                .isEqualTo(page);
+
+        for (int i = 0; i < posters.size(); i++) {
+            Assertions
+                    .assertThat(posters.get(i).getLikeCnt())
+                    .isEqualTo((posterCnt-i));
+        }
+
+    }
+
+    @Test
+    @DisplayName("게시글 제목 검색")
+    void getPostersBySearchTitle() {
+
+        //given
+        Member writer = new Member();
+        writer.setName("홍길동");
+        memberRepository.save(writer);
+
+        Location newLocation = new Location();
+        locationRepository.save(newLocation);
+
+        Long posterCnt = 7L;
+        for (int i = 1; i <= posterCnt; i++) {
+            Poster newPoster = new Poster();
+            newPoster.setLocation(newLocation);
+            newPoster.setWriter(writer);
+            newPoster.setLocation(newLocation);
+            newPoster.setTitle(i + "번째 제목");
+            posterRepository.save(newPoster);
+        }
+
+        PosterConditionRequest conditionRequest = new PosterConditionRequest();
+        Integer page = 1;
+        Integer size = posterCnt.intValue();
+        String search = posterCnt.toString();
+        conditionRequest.setPage(page);
+        conditionRequest.setSize(size);
+        conditionRequest.setSearch(search);
+
+        //when
+        em.flush();
+        PageResponse<PosterResponse> pageResponse = posterService.getLocationPosters(newLocation.getId(), conditionRequest);
+        PageInfo pageInfo = pageResponse.getPageInfo();
+        List<PosterResponse> posters = pageResponse.getResults();
+
+        //then
+        Assertions
+                .assertThat(posters.size())
+                .isEqualTo(1);
+        Assertions
+                .assertThat(pageInfo.getSize())
+                .isEqualTo(size);
+        Assertions
+                .assertThat(pageInfo.getPage())
+                .isEqualTo(page);
+        Assertions
+                .assertThat(posters.get(0).getTitle())
+                .isEqualTo(search + "번째 제목");
+    }
+
+    @Test
+    @DisplayName("게시글 내용 검색")
+    void getPostersBySearchContent() {
+
+        //given
+        Member writer = new Member();
+        writer.setName("홍길동");
+        memberRepository.save(writer);
+
+        Location newLocation = new Location();
+        locationRepository.save(newLocation);
+
+        Long posterCnt = 7L;
+        for (int i = 1; i <= posterCnt; i++) {
+            Poster newPoster = new Poster();
+            newPoster.setLocation(newLocation);
+            newPoster.setWriter(writer);
+            newPoster.setLocation(newLocation);
+            newPoster.setContent(i + "번째 내용");
+            posterRepository.save(newPoster);
+        }
+
+        PosterConditionRequest conditionRequest = new PosterConditionRequest();
+        Integer page = 1;
+        Integer size = posterCnt.intValue();
+        String search = posterCnt.toString();
+        conditionRequest.setPage(page);
+        conditionRequest.setSize(size);
+        conditionRequest.setSearch(search);
+
+        //when
+        em.flush();
+        PageResponse<PosterResponse> pageResponse = posterService.getLocationPosters(newLocation.getId(), conditionRequest);
+        PageInfo pageInfo = pageResponse.getPageInfo();
+        List<PosterResponse> posters = pageResponse.getResults();
+
+        //then
+        Assertions
+                .assertThat(posters.size())
+                .isEqualTo(1);
+        Assertions
+                .assertThat(pageInfo.getSize())
+                .isEqualTo(size);
+        Assertions
+                .assertThat(pageInfo.getPage())
+                .isEqualTo(page);
+        Assertions
+                .assertThat(posters.get(0).getContent())
+                .isEqualTo(search + "번째 내용");
+    }
+
+
 }

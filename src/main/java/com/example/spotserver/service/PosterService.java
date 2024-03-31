@@ -1,7 +1,7 @@
 package com.example.spotserver.service;
 
 import com.example.spotserver.domain.*;
-import com.example.spotserver.dto.request.PosterPageRequest;
+import com.example.spotserver.dto.request.PosterConditionRequest;
 import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
@@ -9,7 +9,6 @@ import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.repository.*;
-import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -71,21 +70,9 @@ public class PosterService {
         return savePoster.getId();
     }
 
-    public PageResponse<PosterResponse> getLocationPosters(Long locationId, PosterPageRequest posterPageRequest) {
+    public PageResponse<PosterResponse> getLocationPosters(Long locationId, PosterConditionRequest conditionRequest) {
 
-
-        PageRequest pageRequest = posterPageRequest.makePageRequest();
-
-        String sort = posterPageRequest.getSort();
-        Page<PosterResponse> posters = null;
-        if (sort.equals("recent")) {
-            posters = posterRepository.searchPostersByRecent(locationId, pageRequest);
-        } else if (sort.equals("like")) {
-            posters = posterRepository.searchPostersByLike(locationId, pageRequest);
-        } else {
-            posters = posterRepository.searchPostersByRecent(locationId, pageRequest);
-        }
-
+        Page<PosterResponse> posters = posterRepository.searchPosters(locationId, conditionRequest);
         PageResponse<PosterResponse> pageResponse = new PageResponse<>(posters);
         return pageResponse;
     }

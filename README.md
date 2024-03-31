@@ -851,7 +851,7 @@ Content-Type : multipart/form-data <br>
 
   <tr>
     <td>GET</td>
-    <td>/locations/{locationId}/posters<br>?page={페이지번호}<br>&size={페이지크기}<br>&sort={정렬방법}</td>
+    <td>/locations/{locationId}/posters<br>?page={페이지번호}<br>&size={페이지크기}<br>&sort={정렬방법}<br>&search={제목 또는 내용}</td>
 <td>
 </td>
 <td>
@@ -1065,6 +1065,12 @@ Content-Type : multipart/form-data <br>
             <td>sort</td>
             <td>String</td>
             <td>데이터 정렬 방식으로 다음중 하나를 값으로 갖는다.<br>recent: 최신순, like: 좋아요순<br>(기본값: recent)</td>
+            <td>X</td>
+        </tr>
+        <tr>
+            <td>search</td>
+            <td>String</td>
+            <td>게시글의 제목, 내용에 포함된 키워드를 검색</td>
             <td>X</td>
         </tr>
     </tbody>

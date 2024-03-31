@@ -1,7 +1,7 @@
 package com.example.spotserver.controller;
 
 import com.example.spotserver.domain.*;
-import com.example.spotserver.dto.request.PosterPageRequest;
+import com.example.spotserver.dto.request.PosterConditionRequest;
 import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
@@ -10,7 +10,6 @@ import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.service.PosterService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -53,10 +52,10 @@ public class PosterController {
 
     @GetMapping("/locations/{locationId}/posters")
     public ResponseEntity<PageResponse<PosterResponse>> getLocationPosters(@PathVariable Long locationId,
-                                                                           @Valid @ModelAttribute PosterPageRequest posterPageRequest) {
+                                                                           @Valid @ModelAttribute PosterConditionRequest conditionRequest) {
 
 
-        PageResponse<PosterResponse> posters = posterService.getLocationPosters(locationId, posterPageRequest);
+        PageResponse<PosterResponse> posters = posterService.getLocationPosters(locationId, conditionRequest);
 
         return ResponseEntity
                 .status(HttpStatus.OK)

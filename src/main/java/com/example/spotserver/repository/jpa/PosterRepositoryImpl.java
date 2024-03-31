@@ -1,6 +1,7 @@
 package com.example.spotserver.repository.jpa;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.PosterConditionRequest;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.dto.response.QPosterResponse;
 import com.example.spotserver.repository.PosterRepositoryCustom;
@@ -14,6 +15,7 @@ import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.support.PageableExecutionUtils;
 import org.springframework.stereotype.Repository;
@@ -36,47 +38,7 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
     }
 
     @Override
-    public Page<PosterResponse> searchPostersByRecent(Long locationId, Pageable pageable) {
-        QPoster poster = QPoster.poster;
-        QComment comment = QComment.comment;
-        QPosterLike posterLike = QPosterLike.posterLike;
-
-        List<PosterResponse> posters = jpaQueryFactory
-                .select(new QPosterResponse(
-                        poster.id,
-                        poster.writer.id,
-                        poster.writer.name,
-                        poster.title,
-                        poster.content,
-                        poster.regDate,
-                        JPAExpressions
-                                .select(posterLike.count())
-                                .from(posterLike)
-                                .where(posterLike.poster.id.eq(poster.id)),
-                        JPAExpressions
-                                .select(comment.count())
-                                .from(comment)
-                                .where(comment.poster.id.eq(poster.id))
-                ))
-                .from(poster)
-                .where(poster.location.id.eq(locationId))
-                .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(poster.regDate.desc())
-                .fetch();
-
-        // COUNT 쿼리를 따로 날려서 조인을 탈 필요가 없는 경우 성능 이점.
-        JPAQuery<Long> countQuery = jpaQueryFactory
-                .select(poster.count())
-                .from(poster)
-                .where(poster.location.id.eq(locationId));
-
-        // new PageImpl<>()와 달리 CountQuery 최적화 가능.
-        return PageableExecutionUtils.getPage(posters, pageable, countQuery::fetchOne);
-    }
-
-    @Override
-    public Page<PosterResponse> searchPostersByLike(Long locationId, Pageable pageable) {
+    public Page<PosterResponse> searchPosters(Long locationId, PosterConditionRequest conditionRequest) {
 
         QPoster poster = QPoster.poster;
         QComment comment = QComment.comment;
@@ -84,7 +46,16 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
 
         StringPath likeCount = Expressions.stringPath("like_count");
 
-        List<PosterResponse> posters = jpaQueryFactory
+        Integer page = conditionRequest.getPage();
+        if (page == null)
+            page = 1;
+        Integer size = conditionRequest.getSize();
+        if (size == null)
+            size = 5;
+
+        Pageable pageable = PageRequest.of(page - 1, size);
+
+        JPAQuery<PosterResponse> searchQuery = jpaQueryFactory
                 .select(new QPosterResponse(
                         poster.id,
                         poster.writer.id,
@@ -106,15 +77,32 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                 .from(poster)
                 .where(poster.location.id.eq(locationId))
                 .offset(pageable.getOffset())
-                .limit(pageable.getPageSize())
-                .orderBy(likeCount.desc())
-                .fetch();
+                .limit(pageable.getPageSize());
 
         JPAQuery<Long> countQuery = jpaQueryFactory
                 .select(poster.count())
                 .from(poster)
                 .where(poster.location.id.eq(locationId));
 
+        String sort = conditionRequest.getSort();
+        if (sort.equals("recent"))
+            searchQuery.orderBy(poster.regDate.desc());
+        else if (sort.equals("like"))
+            searchQuery.orderBy(likeCount.desc());
+        else
+            searchQuery.orderBy(poster.regDate.desc());
+
+        String search = conditionRequest.getSearch();
+        if (search != null) {
+            searchQuery
+                    .where(poster.title.contains(search)
+                            .or(poster.content.contains(search)));
+            countQuery
+                    .where(poster.title.contains(search)
+                            .or(poster.content.contains(search)));
+        }
+
+        List<PosterResponse> posters = searchQuery.fetch();
         return PageableExecutionUtils.getPage(posters, pageable, countQuery::fetchOne);
     }
 
