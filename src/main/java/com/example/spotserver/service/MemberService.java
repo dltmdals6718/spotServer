@@ -15,6 +15,8 @@ import com.example.spotserver.repository.MemberImageRepository;
 import com.example.spotserver.repository.MemberRepository;
 import jakarta.transaction.Transactional;
 import org.json.JSONObject;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
@@ -43,6 +45,7 @@ public class MemberService {
     private MailCertificationRepository mailCertificationRepository;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private ImageStore imageStore;
+    private Logger loginLogger = LoggerFactory.getLogger("login");
 
     @Autowired
     public MemberService(MemberRepository memberRepository, MemberImageRepository memberImageRepository, BCryptPasswordEncoder bCryptPasswordEncoder, ImageStore imageStore, MailCertificationRepository mailCertificationRepository) {
@@ -188,15 +191,18 @@ public class MemberService {
     }
 
 
-    public Member login(String loginId, String loginPwd) throws LoginFailException {
+    public Member login(String loginId, String loginPwd, String ip) throws LoginFailException {
 
 
         Member findMember = memberRepository.findByLoginId(loginId)
                 .orElseThrow(() -> new LoginFailException(ErrorCode.FAIL_LOGIN));
 
-        if (!bCryptPasswordEncoder.matches(loginPwd, findMember.getLoginPwd()))
+        if (!bCryptPasswordEncoder.matches(loginPwd, findMember.getLoginPwd())) {
+            loginLogger.info("[로그인 실패] ip : {}, id : {}, member.name : {}", ip, findMember.getLoginId(), findMember.getName());
             throw new LoginFailException(ErrorCode.FAIL_LOGIN);
+        }
 
+        loginLogger.info("[로그인 성공] ip : {}, id : {}, member.name : {}", ip, findMember.getLoginId(), findMember.getName());
         return findMember;
     }
 

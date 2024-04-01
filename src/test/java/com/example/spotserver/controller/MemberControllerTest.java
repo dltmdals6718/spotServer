@@ -18,6 +18,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
@@ -126,7 +127,9 @@ class MemberControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(signInMember);
 
-        given(memberService.login(signInMember.getLoginId(), signInMember.getLoginPwd()))
+        MockHttpServletRequest request = new MockHttpServletRequest();
+
+        given(memberService.login(signInMember.getLoginId(), signInMember.getLoginPwd(), request.getRemoteAddr()))
                 .willReturn(member);
         given(memberService.createToken(member.getId()))
                 .willReturn(token);
@@ -147,7 +150,7 @@ class MemberControllerTest {
                         jsonPath("$.token").value(token))
                 .andDo(print());
         verify(memberService, times(1))
-                .login(signInMember.getLoginId(), signInMember.getLoginPwd());
+                .login(signInMember.getLoginId(), signInMember.getLoginPwd(), request.getRemoteAddr());
         verify(memberService, times(1))
                 .createToken(member.getId());
 
@@ -273,8 +276,9 @@ class MemberControllerTest {
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(signInMember);
 
+        MockHttpServletRequest request = new MockHttpServletRequest();
 
-        given(memberService.login(signInMember.getLoginId(), signInMember.getLoginPwd()))
+        given(memberService.login(signInMember.getLoginId(), signInMember.getLoginPwd(), request.getRemoteAddr()))
                 .willThrow(new LoginFailException(ErrorCode.FAIL_LOGIN));
 
         //when
@@ -287,7 +291,7 @@ class MemberControllerTest {
 
         //then
         verify(memberService, times(1))
-                .login(signInMember.getLoginId(), signInMember.getLoginPwd());
+                .login(signInMember.getLoginId(), signInMember.getLoginPwd(), request.getRemoteAddr());
         resultActions
                 .andExpectAll(
                         status().is(ErrorCode.FAIL_LOGIN.getHttpStatus().value()),

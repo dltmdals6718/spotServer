@@ -23,6 +23,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
@@ -189,7 +190,10 @@ public class MemberTest {
     @Test
     @DisplayName("로그인")
     void signin() throws LoginFailException {
-        Member loginMember = memberService.login(loginId, loginPwd);
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+
+        Member loginMember = memberService.login(loginId, loginPwd, request.getRemoteAddr());
         Assertions
                 .assertThat(member.getId())
                 .isEqualTo(loginMember.getId());
@@ -198,8 +202,11 @@ public class MemberTest {
     @Test
     @DisplayName("로그인 실패")
     void failSignin() throws LoginFailException {
+
+        MockHttpServletRequest request = new MockHttpServletRequest();
+
         Assertions
-                .assertThatThrownBy(() -> memberService.login(loginId, loginPwd + "haha"))
+                .assertThatThrownBy(() -> memberService.login(loginId, loginPwd + "haha", request.getRemoteAddr()))
                 .isInstanceOf(LoginFailException.class)
                 .hasMessage(ErrorCode.FAIL_LOGIN.getMessage());
     }

@@ -44,7 +44,6 @@ public class MemberController {
     private MemberService memberService;
     private PosterService posterService;
     private LocationService locationService;
-    private Logger loginLogger = LoggerFactory.getLogger("login");
 
 
     @Autowired
@@ -72,12 +71,10 @@ public class MemberController {
 
         String loginId = signInMember.getLoginId();
         String loginPwd = signInMember.getLoginPwd();
-        Member member = memberService.login(loginId, loginPwd);
+        Member member = memberService.login(loginId, loginPwd, request.getRemoteAddr());
 
         Map<String, Object> tokenInfo = new HashMap<>();
         String token = memberService.createToken(member.getId());
-
-        loginLogger.info("로그인 ip : {}, member.Id : {}", request.getRemoteAddr(), member.getId());
 
         tokenInfo.put("token", token);
         tokenInfo.put("expire_in", JwtProperties.EXPIRE_TIME / 1000);
