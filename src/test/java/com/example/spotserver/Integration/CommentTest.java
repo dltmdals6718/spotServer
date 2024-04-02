@@ -1,7 +1,10 @@
 package com.example.spotserver.Integration;
 
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.CommentConditionRequest;
 import com.example.spotserver.dto.request.CommentRequest;
+import com.example.spotserver.dto.response.CommentResponse;
+import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.PermissionException;
@@ -16,6 +19,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 
+import java.util.List;
 import java.util.NoSuchElementException;
 
 @SpringBootTest
@@ -110,6 +114,36 @@ public class CommentTest {
     }
 
     @Test
+    @DisplayName("댓글 수정")
+    void updateComment() throws PermissionException {
+
+        //given
+        Member writer = new Member();
+        memberRepository.save(writer);
+
+        Comment beforeComment = new Comment();
+        beforeComment.setWriter(writer);
+        beforeComment.setContent("수정전");
+        commentRepository.save(beforeComment);
+
+        CommentRequest commentRequest = new CommentRequest();
+        commentRequest.setContent("수정후");
+
+        //when
+        commentService.updateComment(beforeComment.getId(), commentRequest, writer.getId());
+
+        //then
+        em.flush();
+        em.clear();
+
+        Comment afterComment = commentRepository.findById(beforeComment.getId())
+                .orElseThrow(() -> new NoSuchElementException());
+        Assertions
+                .assertThat(afterComment.getContent())
+                .isEqualTo(commentRequest.getContent());
+    }
+
+    @Test
     @DisplayName("댓글 삭제")
     void deleteComment() throws PermissionException {
 
@@ -169,7 +203,7 @@ public class CommentTest {
 
     @Test
     @DisplayName("존재하지 않는 좋아요 취소")
-    void test() {
+    void NoExistLikeDelete() {
 
         //given
         Member testMember = new Member();
@@ -182,4 +216,59 @@ public class CommentTest {
                 .isInstanceOf(NoSuchElementException.class);
     }
 
+    @Test
+    @DisplayName("댓글 최신순 조회")
+    void getComments() {
+
+        //given
+        Member writer = new Member();
+        writer.setName("홍길동");
+        memberRepository.save(writer);
+
+        Poster locationPoster = new Poster();
+        locationPoster.setWriter(writer);
+        posterRepository.save(locationPoster);
+
+        Long commentCnt = 6L;
+
+        for(int i=1; i<=commentCnt; i++) {
+            Comment posterComment = new Comment();
+            posterComment.setPoster(locationPoster);
+            posterComment.setWriter(writer);
+            posterComment.setContent(i + "번째 댓글");
+            commentRepository.save(posterComment);
+        }
+
+        Integer page = 2;
+        Integer size = 5;
+        CommentConditionRequest commentConditionRequest = new CommentConditionRequest();
+        commentConditionRequest.setPage(page);
+        commentConditionRequest.setSize(size);
+        commentConditionRequest.setSort("recent");
+
+        em.flush();
+
+        //when
+        PageResponse<CommentResponse> pageResponse = commentService.getComments(locationPoster.getId(), commentConditionRequest);
+        List<CommentResponse> comments = pageResponse.getResults();
+        PageInfo pageInfo = pageResponse.getPageInfo();
+
+        //then
+        Assertions
+                .assertThat(pageInfo.getNumberOfElements())
+                .isEqualTo(comments.size());
+        Assertions
+                .assertThat(pageInfo.getTotalElements())
+                .isEqualTo(commentCnt);
+        Assertions
+                .assertThat(pageInfo.getPage())
+                .isEqualTo(page);
+        Assertions
+                .assertThat(pageInfo.getSize())
+                .isEqualTo(size);
+
+        Assertions
+                .assertThat(comments.get(0).getContent())
+                .isEqualTo(commentCnt + "번째 댓글");
+    }
 }

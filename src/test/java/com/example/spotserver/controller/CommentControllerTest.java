@@ -58,19 +58,13 @@ class CommentControllerTest {
                 .addFilter(new CharacterEncodingFilter("utf-8", true))
                 .build();
 
-        SecurityContext context = SecurityContextHolder.getContext();
-
-        member = mock(Member.class);
+        member = new Member();
+        member.setId(1L);
+        member.setName("닉네임");
         principalDetails = mock(PrincipalDetails.class);
-        when(member.getId())
-                .thenReturn(1L);
-        when(member.getName())
-                .thenReturn("name");
+
         when(principalDetails.getMember())
                 .thenReturn(member);
-
-        Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
-        context.setAuthentication(authentication);
 
     }
 
@@ -90,9 +84,7 @@ class CommentControllerTest {
 
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("테스트 댓글 내용");
-
         Comment comment = CommentRequest.toEntity(commentRequest);
-
 
         given(commentService.addComment(posterId, comment, member.getId()))
                 .willReturn(1L);
@@ -110,13 +102,12 @@ class CommentControllerTest {
 
         //then
         verify(commentService, times(1))
-                .addComment(posterId, comment, 1L);
+                .addComment(posterId, comment, member.getId());
         resultActions
                 .andExpectAll(
                         status().is(HttpStatus.CREATED.value()),
                         jsonPath("$.commentId").value(1L))
                 .andDo(print());
-
 
     }
 
@@ -125,27 +116,30 @@ class CommentControllerTest {
     void getComment() throws Exception {
 
         //given
+        Long commentId = 2L;
+        Long likeCnt = 3L;
+        Long writerId = 5L;
         CommentResponse commentResponse = new CommentResponse();
-        commentResponse.setCommentId(1L);
-        commentResponse.setWriterId(2L);
+        commentResponse.setCommentId(commentId);
+        commentResponse.setWriterId(writerId);
         commentResponse.setWriterName("작성자");
         commentResponse.setRegDate(LocalDateTime.now());
         commentResponse.setContent("댓글 내용");
-        commentResponse.setLikeCnt(0L);
+        commentResponse.setLikeCnt(likeCnt);
         commentResponse.setMemberImg("");
 
-        given(commentService.getComment(1L))
+        given(commentService.getComment(commentId))
                 .willReturn(commentResponse);
 
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
-                .request(HttpMethod.GET, "/comments/" + 1L)
+                .request(HttpMethod.GET, "/comments/" + commentId)
                 .characterEncoding("utf-8")
                 .with(csrf()));
 
         //then
         verify(commentService, times(1))
-                .getComment(1L);
+                .getComment(commentId);
         resultActions
                 .andExpectAll(
                         status().isOk(),

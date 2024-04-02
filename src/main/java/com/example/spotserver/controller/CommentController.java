@@ -4,7 +4,6 @@ import com.example.spotserver.domain.Comment;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.Poster;
 import com.example.spotserver.dto.request.CommentConditionRequest;
-import com.example.spotserver.dto.request.CommentPageRequest;
 import com.example.spotserver.dto.request.CommentRequest;
 import com.example.spotserver.dto.response.CommentResponse;
 import com.example.spotserver.dto.response.PageResponse;
