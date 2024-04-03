@@ -138,7 +138,7 @@ public class MemberService {
         return memberResponse;
     }
 
-    public Resource getMemberImage(Long memberId, String storeFileName) throws PermissionException, MalformedURLException {
+    public String getMemberImageUrl(Long memberId, String storeFileName) throws PermissionException, MalformedURLException {
 
         MemberImage memberImage = memberImageRepository.findByStoreFileName(storeFileName)
                 .orElseThrow(() -> new NoSuchElementException());
@@ -146,11 +146,8 @@ public class MemberService {
         if (!memberId.equals(memberImage.getMember().getId()))
             throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
 
-        UrlResource resource = new UrlResource("file:" + imageStore.getMemberImgFullPath(storeFileName));
-        if (!resource.exists())
-            throw new NoSuchElementException();
-
-        return resource;
+        String memberImageUrl = imageStore.getMemberImgFullPath(storeFileName);
+        return memberImageUrl;
     }
 
     @Transactional
@@ -173,12 +170,9 @@ public class MemberService {
         if (memberImg != null) {
             MemberImage beforeImg = member.getMemberImg();
             if (beforeImg != null) {
+                imageStore.deleteMemberImage(beforeImg);
                 member.setMemberImg(null);
                 memberImageRepository.deleteById(beforeImg.getId());
-                String fullPath = imageStore.getMemberImgFullPath(beforeImg.getStoreFileName());
-                File file = new File(fullPath);
-                if (file.exists())
-                    file.delete();
             }
 
             MemberImage memberImage = imageStore.storeMemberImage(memberImg);

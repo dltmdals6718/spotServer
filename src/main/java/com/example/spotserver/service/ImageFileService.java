@@ -1,11 +1,13 @@
 package com.example.spotserver.service;
 
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.example.spotserver.domain.ImageStore;
 import com.example.spotserver.domain.PosterImage;
 import com.example.spotserver.domain.LocationImage;
 import com.example.spotserver.repository.PosterImageRepository;
 import com.example.spotserver.repository.LocationImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.Resource;
 import org.springframework.core.io.UrlResource;
 import org.springframework.stereotype.Service;
@@ -22,12 +24,17 @@ public class ImageFileService {
     private PosterImageRepository posterImageRepository;
     private LocationImageRepository locationImageRepository;
     private ImageStore imageStore;
+    private AmazonS3Client amazonS3Client;
+
+    @Value("${cloud.aws.s3.bucket}")
+    private String bucket;
 
     @Autowired
-    public ImageFileService(PosterImageRepository posterImageRepository, LocationImageRepository locationImageRepository, ImageStore imageStore) {
+    public ImageFileService(PosterImageRepository posterImageRepository, LocationImageRepository locationImageRepository, ImageStore imageStore, AmazonS3Client amazonS3Client) {
         this.posterImageRepository = posterImageRepository;
         this.locationImageRepository = locationImageRepository;
         this.imageStore = imageStore;
+        this.amazonS3Client = amazonS3Client;
     }
 
     public List<PosterImage> getPosterImageList(Long posterId) {
@@ -40,34 +47,20 @@ public class ImageFileService {
         return locationImages;
     }
 
-    public Resource getLocationImage(Long locationImageId) throws MalformedURLException {
+    public String getLocationImageUrl(Long locationImageId) {
         LocationImage locationImage = locationImageRepository.findById(locationImageId)
                 .orElseThrow(() -> new NoSuchElementException());
         String imagefileName = locationImage.getStoreFileName();
-        UrlResource resource = new UrlResource("file:" + imageStore.getLocationImgFullPath(imagefileName));
-        return resource;
+        String imageUrl = amazonS3Client.getResourceUrl(bucket, "locationImg/" + imagefileName);
+        return imageUrl;
     }
 
-    public Resource getPosterImage(Long posterImageId) throws MalformedURLException {
+    public String getPosterImageUrl(Long posterImageId) {
         PosterImage posterImage = posterImageRepository.findById(posterImageId)
                 .orElseThrow(() -> new NoSuchElementException());
-
         String imagefileName = posterImage.getStoreFileName();
-
-        UrlResource resource = new UrlResource("file:" + imageStore.getPosterImgFullPath(imagefileName));
-
-        return resource;
+        String imageUrl = amazonS3Client.getResourceUrl(bucket, "posterImg/" + imagefileName);
+        return imageUrl;
     }
 
-    public void deletePosterImage(Long posterImageId) {
-        PosterImage posterImage = posterImageRepository.findById(posterImageId)
-                .orElseThrow(() -> new NoSuchElementException());
-
-        String fullPath = imageStore.getPosterImgFullPath(posterImage.getStoreFileName());
-        File file =  new File(fullPath);
-        if(file.exists())
-            file.delete();
-
-        posterImageRepository.deleteById(posterImageId);
-    }
 }

@@ -9,6 +9,7 @@ import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.repository.*;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -83,6 +84,7 @@ public class PosterService {
         return posterResponse;
     }
 
+    @Transactional
     public void updatePoster(Long posterId,
                              PosterRequest posterRequest,
                              List<MultipartFile> addFiles,
@@ -107,10 +109,7 @@ public class PosterService {
                         .orElseThrow(() -> new NoSuchElementException());
 
                 if (poster.getId().equals(posterImage.getPoster().getId())) {
-                    String fullPath = imageStore.getPosterImgFullPath(posterImage.getStoreFileName());
-                    File file = new File(fullPath);
-                    if (file.exists())
-                        file.delete();
+                    imageStore.deletePosterImage(posterImage);
                     posterImageRepository.deleteById(fileId);
                     poster.getPosterImages().remove(posterImage);
                 }
@@ -148,10 +147,7 @@ public class PosterService {
         List<PosterImage> posterImages = poster.getPosterImages();
         if (posterImages != null) {
             for (PosterImage posterImage : posterImages) {
-                String fullPath = imageStore.getPosterImgFullPath(posterImage.getStoreFileName());
-                File file = new File(fullPath);
-                if (file.exists())
-                    file.delete();
+                imageStore.deletePosterImage(posterImage);
             }
 
         }

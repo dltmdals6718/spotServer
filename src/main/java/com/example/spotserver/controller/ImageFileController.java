@@ -2,23 +2,18 @@ package com.example.spotserver.controller;
 
 import com.example.spotserver.domain.LocationImage;
 import com.example.spotserver.domain.PosterImage;
-import com.example.spotserver.domain.ImageStore;
 import com.example.spotserver.dto.response.LocationImageResponse;
 import com.example.spotserver.dto.response.PosterImageResponse;
 import com.example.spotserver.service.ImageFileService;
+import jakarta.servlet.http.HttpServletResponse;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.Resource;
-import org.springframework.core.io.UrlResource;
-import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -50,14 +45,9 @@ public class ImageFileController {
     }
 
     @GetMapping("/posters/images/{posterImageId}")
-    public ResponseEntity<Resource> getPosterImagefile(@PathVariable Long posterImageId) throws IOException {
-
-        Resource posterImage = imageFileService.getPosterImage(posterImageId);
-
-        return ResponseEntity
-                .ok()
-                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(posterImage.getFile().toPath()))
-                .body(posterImage);
+    public void getPosterImagefile(@PathVariable Long posterImageId, HttpServletResponse response) throws IOException {
+        String posterImageUrl = imageFileService.getPosterImageUrl(posterImageId);
+        response.sendRedirect(posterImageUrl);
     }
 
     @GetMapping("/locations/{locationId}/images")
@@ -76,13 +66,9 @@ public class ImageFileController {
     }
 
     @GetMapping("/locations/images/{locationImageId}")
-    public ResponseEntity<Resource> getLocationImagefile(@PathVariable Long locationImageId) throws IOException {
-
-        Resource locationImage = imageFileService.getLocationImage(locationImageId);
-        return ResponseEntity
-                .ok()
-                .header(HttpHeaders.CONTENT_TYPE, Files.probeContentType(locationImage.getFile().toPath()))
-                .body(locationImage);
+    public void getLocationImagefile(@PathVariable Long locationImageId, HttpServletResponse response) throws IOException {
+        String locationImageUrl = imageFileService.getLocationImageUrl(locationImageId);
+        response.sendRedirect(locationImageUrl);
     }
 
 

@@ -15,6 +15,7 @@ import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.MemberService;
 import com.example.spotserver.service.PosterService;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.Logger;
@@ -102,24 +103,9 @@ public class MemberController {
     }
 
     @GetMapping("/{memberId}/images/{storeFileName}")
-    public ResponseEntity<Resource> getMemberImg(@PathVariable Long memberId, @PathVariable String storeFileName) throws PermissionException, IOException {
-        Resource memberImage = memberService.getMemberImage(memberId, storeFileName);
-
-        String fileName = memberImage.getFilename();
-        String extension = fileName.substring(fileName.indexOf('.') + 1).toLowerCase();
-
-        String contentType;
-        if (extension.equals("jpeg") || extension.equals("jpg"))
-            contentType = MediaType.IMAGE_JPEG_VALUE;
-        else if (extension.equals("png"))
-            contentType = MediaType.IMAGE_PNG_VALUE;
-        else
-            contentType = MediaType.IMAGE_JPEG_VALUE;
-
-        return ResponseEntity
-                .status(HttpStatus.OK)
-                .header(HttpHeaders.CONTENT_TYPE, contentType)
-                .body(memberImage);
+    public void getMemberImgUrl(@PathVariable Long memberId, @PathVariable String storeFileName, HttpServletResponse response) throws PermissionException, IOException {
+        String memberImageUrl = memberService.getMemberImageUrl(memberId, storeFileName);
+        response.sendRedirect(memberImageUrl);
     }
 
     @PutMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
