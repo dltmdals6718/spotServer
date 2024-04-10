@@ -384,6 +384,70 @@ Content-Type : multipart/form-data <br>
 </td>
             <td>좋아요 게시글 조회</td>
         </tr>
+        <tr>
+            <td>GET</td>
+            <td>/members/{memberId}/posters<br>?page={페이지번호}</td>
+            <td></td>
+<td>
+
+```json
+{
+    "results": [
+        {
+            "posterId": 46,
+            "writerId": 7,
+            "writerName": "이승민임",
+            "title": "용지호수",
+            "content": "공원 날씨 조오타.",
+            "regDate": "2024-04-04T19:40:07",
+            "likeCnt": 0,
+            "commentCnt": 0
+        }
+    ],
+    "pageInfo": {
+        "page": 1,
+        "size": 5,
+        "numberOfElements": 1,
+        "totalElements": 1,
+        "totalPage": 1
+    }
+}
+```
+</td>
+            <td>작성한 게시글 조회</td>
+        </tr>
+        <tr>
+            <td>GET</td>
+            <td>/members/{memberId}/comments/posters<br>?page={페이지번호}</td>
+            <td></td>
+<td>
+
+```json
+{
+    "results": [
+        {
+            "posterId": 208,
+            "writerId": 109,
+            "writerName": "LSM",
+            "title": "HAHA",
+            "content": "HOHO",
+            "regDate": "2024-03-22T15:19:59",
+            "likeCnt": 0,
+            "commentCnt": 3
+        }
+    ],
+    "pageInfo": {
+        "page": 1,
+        "size": 5,
+        "numberOfElements": 1,
+        "totalElements": 1,
+        "totalPage": 1
+    }
+}
+```
+</td>
+            <td>댓글 단 게시글 조회(최근 댓글을 기준 게시글 정렬 출력)</td>
+        </tr>
     </tbody>
 </table>
 

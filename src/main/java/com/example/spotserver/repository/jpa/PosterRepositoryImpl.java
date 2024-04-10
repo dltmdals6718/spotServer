@@ -22,6 +22,7 @@ import org.springframework.stereotype.Repository;
 
 import java.util.List;
 import java.util.Optional;
+import static com.querydsl.jpa.JPAExpressions.select;
 
 
 @Repository
@@ -64,13 +65,11 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                         poster.content,
                         poster.regDate,
                         ExpressionUtils.as(
-                                JPAExpressions
-                                        .select(posterLike.count())
+                                select(posterLike.count())
                                         .from(posterLike)
                                         .where(posterLike.poster.id.eq(poster.id)), "like_count"),
                         ExpressionUtils.as(
-                                JPAExpressions
-                                        .select(comment.count())
+                                select(comment.count())
                                         .from(comment)
                                         .where(comment.poster.id.eq(poster.id)), "comment_count")
                 ))
@@ -121,12 +120,10 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                         poster.title,
                         poster.content,
                         poster.regDate,
-                        JPAExpressions
-                                .select(posterLike.count())
+                        select(posterLike.count())
                                 .from(posterLike)
                                 .where(posterLike.poster.id.eq(posterId)),
-                        JPAExpressions
-                                .select(comment.count())
+                        select(comment.count())
                                 .from(comment)
                                 .where(comment.poster.id.eq(posterId))
                 ))
@@ -155,13 +152,11 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                         poster.content,
                         poster.regDate,
                         ExpressionUtils.as(
-                                JPAExpressions
-                                        .select(posterLike.count())
+                                select(posterLike.count())
                                         .from(posterLike)
                                         .where(posterLike.poster.id.eq(poster.id)), "like_count"),
                         ExpressionUtils.as(
-                                JPAExpressions
-                                        .select(comment.count())
+                                select(comment.count())
                                         .from(comment)
                                         .where(comment.poster.id.eq(poster.id)), "comment_count")
                 ))
@@ -189,13 +184,11 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                         poster.content,
                         poster.regDate,
                         ExpressionUtils.as(
-                                JPAExpressions
-                                        .select(posterLike.count())
+                                select(posterLike.count())
                                         .from(posterLike)
                                         .where(posterLike.poster.id.eq(poster.id)), "like_count"),
                         ExpressionUtils.as(
-                                JPAExpressions
-                                        .select(comment.count())
+                                select(comment.count())
                                         .from(comment)
                                         .where(comment.poster.id.eq(poster.id)), "comment_count")
                 ))
@@ -212,6 +205,87 @@ public class PosterRepositoryImpl implements PosterRepositoryCustom {
                 .from(posterLike)
                 .leftJoin(poster).on(poster.id.eq(posterLike.poster.id))
                 .where(posterLike.member.id.eq(memberId));
+
+        return PageableExecutionUtils.getPage(posters, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<PosterResponse> getWritePosters(Long memberId, Pageable pageable) {
+
+        QPoster poster = QPoster.poster;
+        QPosterLike posterLike = QPosterLike.posterLike;
+        QComment comment = QComment.comment;
+
+        List<PosterResponse> posters = jpaQueryFactory
+                .select(new QPosterResponse(
+                        poster.id,
+                        poster.writer.id,
+                        poster.writer.name,
+                        poster.title,
+                        poster.content,
+                        poster.regDate,
+                        ExpressionUtils.as(
+                                select(posterLike.count())
+                                        .from(posterLike)
+                                        .where(posterLike.poster.id.eq(poster.id)), "like_count"),
+                        ExpressionUtils.as(
+                                select(comment.count())
+                                        .from(comment)
+                                        .where(comment.poster.id.eq(poster.id)), "comment_count")
+                ))
+                .from(poster)
+                .where(poster.writer.id.eq(memberId))
+                .orderBy(poster.regDate.desc())
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetch();
+
+        JPAQuery<Long> countQuery = jpaQueryFactory
+                .select(poster.count())
+                .from(poster)
+                .where(poster.writer.id.eq(memberId));
+
+        return PageableExecutionUtils.getPage(posters, pageable, countQuery::fetchOne);
+    }
+
+    @Override
+    public Page<PosterResponse> getPostersByWriteComments(Long memberId, Pageable pageable) {
+
+        QPoster poster = QPoster.poster;
+        QPosterLike posterLike = QPosterLike.posterLike;
+        QComment comment = QComment.comment;
+
+        // DISTINCT -> ORDER BY -> OFFSET, LIMIT
+        // GROUP BY -> ORDER BY -> LIMIT
+        List<PosterResponse> posters = jpaQueryFactory
+                .select(new QPosterResponse(
+                        poster.id,
+                        poster.writer.id,
+                        poster.writer.name,
+                        poster.title,
+                        poster.content,
+                        poster.regDate,
+                        ExpressionUtils.as(
+                                select(posterLike.count())
+                                        .from(posterLike)
+                                        .where(posterLike.poster.id.eq(poster.id)), "like_count"),
+                        ExpressionUtils.as(
+                                select(comment.count())
+                                        .from(comment)
+                                        .where(comment.poster.id.eq(poster.id)), "comment_count")))
+                .from(poster)
+                .leftJoin(comment).on(comment.poster.id.eq(poster.id))
+                .where(comment.writer.id.eq(memberId))
+                .groupBy(poster.id)
+                .orderBy(comment.regDate.max().desc())
+                .limit(pageable.getPageSize())
+                .offset(pageable.getOffset())
+                .fetch();
+
+        JPAQuery<Long> countQuery = jpaQueryFactory
+                .select(comment.poster.id.countDistinct())
+                .from(comment)
+                .where(comment.writer.id.eq(memberId));
 
         return PageableExecutionUtils.getPage(posters, pageable, countQuery::fetchOne);
     }

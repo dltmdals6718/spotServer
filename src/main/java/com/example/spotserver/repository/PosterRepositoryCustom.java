@@ -14,4 +14,6 @@ public interface PosterRepositoryCustom {
     Page<PosterResponse> getLikePosters(Long memberId, Pageable pageable);
     Optional<PosterResponse> getPosterById(Long posterId);
     List<PosterResponse> getBestPosters();
+    Page<PosterResponse> getWritePosters(Long memberId, Pageable pageable);
+    Page<PosterResponse> getPostersByWriteComments(Long memberId, Pageable pageable);
 }

@@ -215,4 +215,19 @@ public class PosterService {
         return bestPosters;
     }
 
+    public PageResponse<PosterResponse> getWritePosters(Integer page, Long memberId) {
+        PageRequest pageRequest = PageRequest.of(page - 1, 5);
+        Page<PosterResponse> writePosters = posterRepository.getWritePosters(memberId, pageRequest);
+        PageResponse<PosterResponse> pageResponse = new PageResponse<>(writePosters);
+        return pageResponse;
+    }
+
+    public PageResponse<PosterResponse> getPostersByWriteComments(Integer page, Long memberId) {
+        PageRequest pageRequest = PageRequest.of(page - 1, 5);
+        Page<PosterResponse> posters = posterRepository.getPostersByWriteComments(memberId, pageRequest);
+        PageResponse<PosterResponse> pageResponse = new PageResponse<>(posters);
+        return pageResponse;
+    }
+
+
 }

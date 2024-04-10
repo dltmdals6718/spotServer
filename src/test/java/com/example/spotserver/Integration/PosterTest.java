@@ -24,6 +24,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
@@ -50,6 +51,9 @@ public class PosterTest {
 
     @Autowired
     private PosterLikeRepository posterLikeRepository;
+
+    @Autowired
+    private CommentRepository commentRepository;
 
     @Autowired
     private ImageStore imageStore;
@@ -309,6 +313,7 @@ public class PosterTest {
             newPoster.setLocation(newLocation);
             newPoster.setTitle(i + "번째 제목");
             posterRepository.save(newPoster);
+            newPoster.setRegDate(newPoster.getRegDate().plusHours(i));
         }
 
         PosterConditionRequest conditionRequest = new PosterConditionRequest();
@@ -507,6 +512,113 @@ public class PosterTest {
         Assertions
                 .assertThat(posters.get(0).getContent())
                 .isEqualTo(search + "번째 내용");
+    }
+
+    @Test
+    @DisplayName("내가 작성한 게시글들 조회")
+    void getWritePosters() {
+
+        //given
+        Member writer1 = new Member();
+        memberRepository.save(writer1);
+
+        Poster writePoster1 = new Poster();
+        writePoster1.setTitle("1번째 게시글");
+        writePoster1.setWriter(writer1);
+        writePoster1.setLocation(location);
+        posterRepository.save(writePoster1);
+        writePoster1.setRegDate(writePoster1.getRegDate().plusHours(2));
+
+        Poster writePoster2 = new Poster();
+        writePoster2.setTitle("2번째 게시글");
+        writePoster2.setWriter(writer1);
+        writePoster2.setLocation(location);
+        posterRepository.save(writePoster2);
+        writePoster2.setRegDate(writePoster2.getRegDate().plusHours(1));
+
+        //when
+        PageResponse<PosterResponse> writePosters = posterService.getWritePosters(1, writer1.getId());
+        List<PosterResponse> results = writePosters.getResults();
+        PageInfo pageInfo = writePosters.getPageInfo();
+
+        //then
+        Assertions
+                .assertThat(pageInfo.getTotalElements())
+                .isEqualTo(2);
+
+        for(int i=0; i< results.size(); i++) {
+            Assertions
+                    .assertThat(results.get(i).getTitle())
+                    .isEqualTo((i+1) + "번째 게시글");
+        }
+    }
+
+    @Test
+    @DisplayName("댓글 단 게시글 조회")
+    void getPostersByWriteComments() {
+
+        //given
+        Member commentWriter = new Member();
+        memberRepository.save(commentWriter);
+
+        Poster poster1 = new Poster();
+        poster1.setWriter(member);
+        poster1.setLocation(location);
+        poster1.setTitle("1번째 게시글");
+        posterRepository.save(poster1);
+
+        Comment comment1 = new Comment();
+        comment1.setContent("첫번째 댓글");
+        comment1.setWriter(commentWriter);
+        comment1.setPoster(poster1);
+        commentRepository.save(comment1);
+        comment1.setRegDate(comment1.getRegDate().plusHours(15));
+
+        Comment comment2 = new Comment();
+        comment2.setContent("두번째 댓글");
+        comment2.setWriter(commentWriter);
+        comment2.setPoster(poster1);
+        commentRepository.save(comment2);
+        comment2.setRegDate(comment2.getRegDate().plusHours(1));
+
+        Poster poster2 = new Poster();
+        poster2.setTitle("2번째 게시글");
+        poster2.setWriter(member);
+        poster2.setLocation(location);
+        posterRepository.save(poster2);
+
+        Comment comment3 = new Comment();
+        comment3.setContent("세번째 댓글");
+        comment3.setWriter(commentWriter);
+        comment3.setPoster(poster2);
+        commentRepository.save(comment3);
+        comment3.setRegDate(comment3.getRegDate().plusHours(10));
+
+        Comment comment4 = new Comment();
+        comment4.setContent("네번째 댓글");
+        comment4.setWriter(commentWriter);
+        comment4.setPoster(poster2);
+        commentRepository.save(comment4);
+        comment3.setRegDate(comment4.getRegDate().plusHours(10));
+
+
+        //when
+        PageResponse<PosterResponse> postersByWriteComments = posterService.getPostersByWriteComments(1, commentWriter.getId());
+        List<PosterResponse> results = postersByWriteComments.getResults();
+
+        //then
+        //중복 없이 게시글 출력
+        Assertions
+                .assertThat(results.size())
+                .isEqualTo(2);
+
+        // 최근에 작성한 댓글의 게시글이 최상단
+        for(int i=0; i<results.size(); i++) {
+            Assertions
+                    .assertThat(results.get(i).getTitle())
+                    .isEqualTo((i+1) + "번째 게시글");
+        }
+
     }
 
 
