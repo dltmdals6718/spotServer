@@ -66,17 +66,12 @@ public class MemberTest {
         member.setName("테스트 닉네임");
         member.setLoginId(loginId);
         member.setLoginPwd(new BCryptPasswordEncoder().encode(loginPwd));
-
-        MemberImage memberImage = new MemberImage();
-        memberImage.setMember(member);
-        String storeFileName = UUID.randomUUID() + ".jpg";
-        memberImage.setStoreFileName(storeFileName);
-        member.setMemberImg(memberImage);
-
         memberRepository.save(member);
 
-        File file = new File(imageStore.getMemberImgFullPath(storeFileName));
-        file.createNewFile();
+        MockMultipartFile profile = new MockMultipartFile("profile", "test.jpg", MediaType.IMAGE_JPEG_VALUE, "".getBytes());
+        MemberImage memberImage = imageStore.storeMemberImage(profile);
+        memberImage.setMember(member);
+        member.setMemberImg(memberImage);
     }
 
     @AfterEach
@@ -85,10 +80,7 @@ public class MemberTest {
         em.clear();
 
         MemberImage memberImg = member.getMemberImg();
-        String storeFileName = memberImg.getStoreFileName();
-        File file = new File(imageStore.getMemberImgFullPath(storeFileName));
-        if(file.exists())
-            file.delete();
+        imageStore.deleteMemberImage(memberImg);
     }
 
     @Test
@@ -127,14 +119,7 @@ public class MemberTest {
                 .assertThat(member.getMail())
                 .isEqualTo(mail);
 
-        String storeFileName = member.getMemberImg().getStoreFileName();
-        File file = new File(imageStore.getMemberImgFullPath(storeFileName));
-        Assertions
-                .assertThat(file.exists())
-                .isTrue();
-
-        if(file.exists())
-            file.delete();
+        imageStore.deleteMemberImage(member.getMemberImg());
     }
 
     @Test
