@@ -4,7 +4,6 @@ import com.example.spotserver.config.jwt.JwtAccessDenyHandler;
 import com.example.spotserver.config.jwt.JwtAuthenticationEntryPoint;
 import com.example.spotserver.config.jwt.JwtAuthenticationFilter;
 import com.example.spotserver.config.jwt.JwtAuthorizationFilter;
-import com.example.spotserver.filter.MyFilter3;
 import com.example.spotserver.repository.MemberRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
