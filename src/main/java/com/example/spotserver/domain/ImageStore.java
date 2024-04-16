@@ -117,4 +117,20 @@ public class ImageStore {
     public static String getFileExtension(String fileName) {
         return fileName.substring(fileName.lastIndexOf('.')+1);
     }
+
+    public String getPosterImgDir() {
+        return posterImgDir;
+    }
+
+    public String getLocationImgDir() {
+        return locationImgDir;
+    }
+
+    public String getMemberImgDir() {
+        return memberImgDir;
+    }
+
+    public String getBucket() {
+        return bucket;
+    }
 }

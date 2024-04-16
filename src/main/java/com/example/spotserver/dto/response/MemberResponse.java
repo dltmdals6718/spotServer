@@ -18,7 +18,7 @@ public class MemberResponse {
     private Role role;
     private String memberImg;
 
-    public static MemberResponse toDto(Member member) {
+    public static MemberResponse toDto(Member member, ImageStore imageStore) {
         MemberResponse memberResponse = new MemberResponse();
         memberResponse.memberId = member.getId();
         memberResponse.name = member.getName();
@@ -29,10 +29,7 @@ public class MemberResponse {
         String fileName;
         if (member.getMemberImg() != null) {
             fileName = member.getMemberImg().getStoreFileName();
-            uri = ServletUriComponentsBuilder.fromCurrentContextPath()
-                    .path("/members/" + member.getId())
-                    .path("/images/" + fileName)
-                    .toUriString();
+            uri = imageStore.getMemberImgFullPath(fileName);
         } else // 기본 이미지 경로
             uri = "...";
 

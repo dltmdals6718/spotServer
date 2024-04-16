@@ -51,7 +51,7 @@ public class ImageFileService {
         LocationImage locationImage = locationImageRepository.findById(locationImageId)
                 .orElseThrow(() -> new NoSuchElementException());
         String imagefileName = locationImage.getStoreFileName();
-        String imageUrl = amazonS3Client.getResourceUrl(bucket, "locationImg/" + imagefileName);
+        String imageUrl = amazonS3Client.getResourceUrl(bucket, imageStore.getLocationImgDir() + imagefileName);
         return imageUrl;
     }
 
@@ -59,7 +59,7 @@ public class ImageFileService {
         PosterImage posterImage = posterImageRepository.findById(posterImageId)
                 .orElseThrow(() -> new NoSuchElementException());
         String imagefileName = posterImage.getStoreFileName();
-        String imageUrl = amazonS3Client.getResourceUrl(bucket, "posterImg/" + imagefileName);
+        String imageUrl = amazonS3Client.getResourceUrl(bucket, imageStore.getPosterImgDir() + imagefileName);
         return imageUrl;
     }
 

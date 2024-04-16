@@ -110,7 +110,7 @@ public class MemberService {
 
         Member resultMember = memberRepository.save(member);
 
-        MemberResponse memberResponse = MemberResponse.toDto(resultMember);
+        MemberResponse memberResponse = MemberResponse.toDto(resultMember, imageStore);
         return memberResponse;
     }
 
@@ -127,20 +127,8 @@ public class MemberService {
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
 
-        MemberResponse memberResponse = MemberResponse.toDto(member);
+        MemberResponse memberResponse = MemberResponse.toDto(member, imageStore);
         return memberResponse;
-    }
-
-    public String getMemberImageUrl(Long memberId, String storeFileName) throws PermissionException, MalformedURLException {
-
-        MemberImage memberImage = memberImageRepository.findByStoreFileName(storeFileName)
-                .orElseThrow(() -> new NoSuchElementException());
-
-        if (!memberId.equals(memberImage.getMember().getId()))
-            throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
-
-        String memberImageUrl = imageStore.getMemberImgFullPath(storeFileName);
-        return memberImageUrl;
     }
 
     @Transactional
@@ -174,7 +162,7 @@ public class MemberService {
             memberImageRepository.save(memberImage);
         }
 
-        return MemberResponse.toDto(member);
+        return MemberResponse.toDto(member, imageStore);
     }
 
 

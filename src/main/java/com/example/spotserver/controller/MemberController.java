@@ -95,12 +95,6 @@ public class MemberController {
                 .body(memberResponse);
     }
 
-    @GetMapping("/{memberId}/images/{storeFileName}")
-    public void getMemberImgUrl(@PathVariable Long memberId, @PathVariable String storeFileName, HttpServletResponse response) throws PermissionException, IOException {
-        String memberImageUrl = memberService.getMemberImageUrl(memberId, storeFileName);
-        response.sendRedirect(memberImageUrl);
-    }
-
     @PutMapping(value = "/{memberId}", consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<MemberResponse> updateMember(@PathVariable Long memberId,
                                                        @Valid @RequestPart(required = false) MemberUpdateRequest memberUpdateRequest,

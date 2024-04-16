@@ -195,7 +195,7 @@ Content-Type : multipart/form-data <br>
   "memberId": 150,
   "name": "닉네임",
   "role": "USER",
-  "memberImg": "http://localhost:8080/members/150/images/805a1742-6e12-4dac-81c3-c2e424e91ac3.png"
+  "memberImg": "https://example.amazonaws.com/memberImg/773f6ff1-c816-442a-a2ce-6e0a9f29fe12.jpg"
 }
 ```
 
@@ -275,7 +275,7 @@ Content-Type : multipart/form-data <br>
   "memberId": 189,
   "name": "a b",
   "role": "USER",
-  "memberImg": "http://localhost:8080/members/189/images/exmaple.jpeg"
+  "memberImg": "https://example.amazonaws.com/memberImg/773f6ff1-c816-442a-a2ce-6e0a9f29fe12.jpg"
 }
 ```
 
@@ -294,7 +294,7 @@ Content-Type : multipart/form-data <br>
   "memberId": 150,
   "name": "닉네임",
   "role": "USER",
-  "memberImg": "http://localhost:8080/members/150/images/805a1742-6e12-4dac-81c3-c2e424e91ac3.png"
+  "memberImg": "https://example.amazonaws.com/memberImg/773f6ff1-c816-442a-a2ce-6e0a9f29fe12.jpg"
 }
 ```
 
@@ -313,7 +313,7 @@ Content-Type : multipart/form-data <br>
   "memberId": 109,
   "name": "LSM",
   "role": "USER",
-  "memberImg": "http://localhost:8080/members/109/images/d65d8d3d-19ac-4bf0-9860-d62fbdd76286.png"
+  "memberImg": "https://example.amazonaws.com/memberImg/773f6ff1-c816-442a-a2ce-6e0a9f29fe12.jpg"
 }
 ```
 
@@ -1399,7 +1399,7 @@ Results
       "commentId": 34,
       "writerId": 191,
       "writerName": "닉네임",
-      "memberImg": "http://localhost:8080/members/191/images/d9b22089-0d9a-49ca-aa8f-bd7b1f898bc6.jpeg",
+      "memberImg": "https://example.amazonaws.com/memberImg/773f6ff1-c816-442a-a2ce-6e0a9f29fe12.jpg",
       "content": "히히",
       "regDate": "2024-02-25T21:53:44",
       "likeCnt": 2
@@ -1447,7 +1447,7 @@ Results
   "commentId": 30,
   "writerId": 109,
   "writerName": "LSM",
-  "memberImg": "http://localhost:8080/members/109/images/d65d8d3d-19ac-4bf0-9860-d62fbdd76286.png",
+  "memberImg": "https://example.amazonaws.com/memberImg/773f6ff1-c816-442a-a2ce-6e0a9f29fe12.jpg",
   "content": "댓글내용",
   "regDate": "2024-03-22T15:20:07",
   "likeCnt": 0
@@ -1548,7 +1548,7 @@ Results
             <td>GET</td>
             <td>/posters/images/{posterImageId}</td>
             <td></td>
-            <td>(body에 이미지파일. 아니면 파일 자체 링크로도 좋을듯)</td>
+            <td>AWS S3 이미지 경로로 리다이렉트</td>
             <td>특정 이미지 조회</td>
         </tr>
         <tr>
@@ -1577,7 +1577,7 @@ Results
             <td>GET</td>
             <td>/locations/images/{locationImageId}</td>
             <td></td>
-            <td>(body에 이미지파일. 아니면 파일 자체 링크도 좋을듯)</td>
+            <td>AWS S3 이미지 경로로 리다이렉트</td>
             <td>특정 이미지 조회</td>
         </tr>
     </tbody>
