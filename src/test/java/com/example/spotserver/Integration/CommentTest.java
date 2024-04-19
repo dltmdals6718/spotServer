@@ -21,14 +21,14 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.util.List;
 import java.util.NoSuchElementException;
+import java.util.Optional;
 
 @SpringBootTest
 @Transactional
 public class CommentTest {
 
     @Autowired
-    CommentService commentService;
-
+    private CommentService commentService;
 
     @Autowired
     private MemberRepository memberRepository;
@@ -48,49 +48,25 @@ public class CommentTest {
     @Autowired
     private EntityManager em;
 
-    Member member;
-    Location location;
-    Poster poster;
-    Comment comment;
-
-
-    @BeforeEach
-    void init() {
-
-        member = new Member();
-        member.setName("테스터");
-        member.setRole(Role.USER);
-        memberRepository.save(member);
-
-        location = new Location();
-        location.setTitle("테스트 장소");
-        locationRepository.save(location);
-
-        poster = new Poster();
-        poster.setTitle("테스트 게시글");
-        poster.setWriter(member);
-        poster.setLocation(location);
-        posterRepository.save(poster);
-
-        comment = new Comment();
-        comment.setContent("테스트 댓글");
-        comment.setPoster(poster);
-        comment.setWriter(member);
-        commentRepository.save(comment);
-
-        CommentLike commentLike = new CommentLike();
-        commentLike.setComment(comment);
-        commentLike.setMember(member);
-        commentLikeRepository.save(commentLike);
-
-    }
-
-
     @Test
     @DisplayName("댓글 작성")
     void addComment() {
 
         //given
+        Location location = new Location();
+        location.setTitle("장소명");
+        locationRepository.save(location);
+
+        Member member = new Member();
+        member.setName("회원A");
+        memberRepository.save(member);
+
+        Poster poster = new Poster();
+        poster.setTitle("게시글 제목");
+        poster.setLocation(location);
+        poster.setWriter(member);
+        posterRepository.save(poster);
+
         CommentRequest commentRequest = new CommentRequest();
         commentRequest.setContent("댓글 내용");
         Comment comment = CommentRequest.toEntity(commentRequest);
@@ -118,11 +94,12 @@ public class CommentTest {
     void updateComment() throws PermissionException {
 
         //given
-        Member writer = new Member();
-        memberRepository.save(writer);
+        Member member = new Member();
+        member.setName("회원A");
+        memberRepository.save(member);
 
         Comment beforeComment = new Comment();
-        beforeComment.setWriter(writer);
+        beforeComment.setWriter(member);
         beforeComment.setContent("수정전");
         commentRepository.save(beforeComment);
 
@@ -130,12 +107,11 @@ public class CommentTest {
         commentRequest.setContent("수정후");
 
         //when
-        commentService.updateComment(beforeComment.getId(), commentRequest, writer.getId());
-
-        //then
+        commentService.updateComment(beforeComment.getId(), commentRequest, member.getId());
         em.flush();
         em.clear();
 
+        //then
         Comment afterComment = commentRepository.findById(beforeComment.getId())
                 .orElseThrow(() -> new NoSuchElementException());
         Assertions
@@ -147,14 +123,34 @@ public class CommentTest {
     @DisplayName("댓글 삭제")
     void deleteComment() throws PermissionException {
 
-        //given & when
+        //given
+        Location location = new Location();
+        location.setTitle("장소명");
+        locationRepository.save(location);
+
+        Member member = new Member();
+        member.setName("회원A");
+        memberRepository.save(member);
+
+        Poster poster = new Poster();
+        poster.setTitle("게시글 제목");
+        poster.setLocation(location);
+        poster.setWriter(member);
+        posterRepository.save(poster);
+
+        Comment comment = new Comment();
+        comment.setPoster(poster);
+        comment.setWriter(member);
+        commentRepository.save(comment);
+
+        //when
         em.clear();
         commentService.deleteComment(comment.getId(), member.getId());
 
         //then
-        em.flush();
+        Optional<Comment> findComment = commentRepository.findById(comment.getId());
         Assertions
-                .assertThat(commentRepository.findById(comment.getId()))
+                .assertThat(findComment)
                 .isNotPresent();
     }
 
@@ -163,23 +159,65 @@ public class CommentTest {
     void addLike() throws DuplicateException {
 
         //given
-        Member testMember = new Member();
-        testMember.setName("좋아요 누를 예정인 사람");
-        memberRepository.save(testMember);
+        Location location = new Location();
+        location.setTitle("장소명");
+        locationRepository.save(location);
+
+        Member member = new Member();
+        member.setName("회원A");
+        memberRepository.save(member);
+
+        Poster poster = new Poster();
+        poster.setTitle("게시글 제목");
+        poster.setLocation(location);
+        poster.setWriter(member);
+        posterRepository.save(poster);
+
+        Comment comment = new Comment();
+        comment.setPoster(poster);
+        comment.setWriter(member);
+        commentRepository.save(comment);
 
         //when
-        commentService.addLike(comment.getId(), testMember.getId());
+        commentService.addLike(comment.getId(), member.getId());
 
         //then
+        Optional<CommentLike> commentLike = commentLikeRepository.findByCommentAndMember(comment, member);
         Assertions
-                .assertThat(commentLikeRepository.findByCommentAndMember(comment, testMember))
+                .assertThat(commentLike)
                 .isPresent();
 
     }
 
     @Test
     @DisplayName("중복된 좋아요 등록")
-    void addDuplicateLike() throws DuplicateException {
+    void addDuplicateLike() {
+        //given
+        Location location = new Location();
+        location.setTitle("장소명");
+        locationRepository.save(location);
+
+        Member member = new Member();
+        member.setName("회원A");
+        memberRepository.save(member);
+
+        Poster poster = new Poster();
+        poster.setTitle("게시글 제목");
+        poster.setLocation(location);
+        poster.setWriter(member);
+        posterRepository.save(poster);
+
+        Comment comment = new Comment();
+        comment.setPoster(poster);
+        comment.setWriter(member);
+        commentRepository.save(comment);
+
+        CommentLike commentLike = new CommentLike();
+        commentLike.setMember(member);
+        commentLike.setComment(comment);
+        commentLikeRepository.save(commentLike);
+
+        //when & then
         Assertions
                 .assertThatThrownBy(() -> commentService.addLike(comment.getId(), member.getId()))
                 .isInstanceOf(DuplicateException.class)
@@ -191,12 +229,38 @@ public class CommentTest {
     @DisplayName("좋아요 취소")
     void deleteLike() {
 
-        //given & when
+        //given
+        Location location = new Location();
+        location.setTitle("장소명");
+        locationRepository.save(location);
+
+        Member member = new Member();
+        member.setName("회원A");
+        memberRepository.save(member);
+
+        Poster poster = new Poster();
+        poster.setTitle("게시글 제목");
+        poster.setLocation(location);
+        poster.setWriter(member);
+        posterRepository.save(poster);
+
+        Comment comment = new Comment();
+        comment.setPoster(poster);
+        comment.setWriter(member);
+        commentRepository.save(comment);
+
+        CommentLike commentLike = new CommentLike();
+        commentLike.setComment(comment);
+        commentLike.setMember(member);
+        commentLikeRepository.save(commentLike);
+
+        //when
         commentService.deleteLike(comment.getId(), member.getId());
 
         //then
+        Optional<CommentLike> findCommentLike = commentLikeRepository.findByCommentAndMember(comment, member);
         Assertions
-                .assertThat(commentLikeRepository.findByCommentAndMember(comment, member))
+                .assertThat(findCommentLike)
                 .isNotPresent();
 
     }
@@ -206,13 +270,28 @@ public class CommentTest {
     void NoExistLikeDelete() {
 
         //given
-        Member testMember = new Member();
-        testMember.setName("좋아요 누른적 없는 사람");
-        memberRepository.save(testMember);
+        Location location = new Location();
+        location.setTitle("장소명");
+        locationRepository.save(location);
+
+        Member member = new Member();
+        member.setName("회원A");
+        memberRepository.save(member);
+
+        Poster poster = new Poster();
+        poster.setTitle("게시글 제목");
+        poster.setLocation(location);
+        poster.setWriter(member);
+        posterRepository.save(poster);
+
+        Comment comment = new Comment();
+        comment.setPoster(poster);
+        comment.setWriter(member);
+        commentRepository.save(comment);
 
         //when & then
         Assertions
-                .assertThatThrownBy(() -> commentService.deleteLike(comment.getId(), testMember.getId()))
+                .assertThatThrownBy(() -> commentService.deleteLike(comment.getId(), member.getId()))
                 .isInstanceOf(NoSuchElementException.class);
     }
 
