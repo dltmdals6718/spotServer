@@ -12,5 +12,5 @@ import java.util.List;
 
 @Repository
 public interface CommentRepository extends JpaRepository<Comment, Long>, CommentRepositoryCustom {
-
+    List<Comment> findByPoster(Poster poster);
 }

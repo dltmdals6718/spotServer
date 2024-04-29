@@ -1,6 +1,7 @@
 package com.example.spotserver.Integration;
 
 
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.ApproveRequest;
 import com.example.spotserver.dto.response.LocationResponse;
@@ -45,6 +46,9 @@ public class LocationTest {
     private PosterImageRepository posterImageRepository;
 
     @Autowired
+    private PosterLikeRepository posterLikeRepository;
+
+    @Autowired
     private LocationImageRepository locationImageRepository;
 
     @Autowired
@@ -54,80 +58,19 @@ public class LocationTest {
     private MemberRepository memberRepository;
 
     @Autowired
+    private CommentRepository commentRepository;
+
+    @Autowired
+    private CommentLikeRepository commentLikeRepository;
+
+    @Autowired
     private ImageStore imageStore;
 
     @Autowired
+    private AmazonS3Client amazonS3Client;
+
+    @Autowired
     private EntityManager em;
-
-    private Member member;
-    private Location location;
-
-    @BeforeEach
-    void init() throws IOException {
-        member = new Member();
-        member.setName("테스터");
-        member.setRole(Role.USER);
-        memberRepository.save(member);
-
-        location = new Location();
-        location.setTitle("테스트 장소");
-        locationRepository.save(location);
-
-        LocationImage locationImage = new LocationImage();
-        locationImage.setLocation(location);
-        String locationImgStoreName = "a-b-c.jpg";
-        String locationImgUploadName = "abc.jpg";
-        locationImage.setStoreFileName(locationImgStoreName);
-        locationImage.setUploadFileName(locationImgUploadName);
-        locationImageRepository.save(locationImage);
-
-        File locationImgFile = new File(imageStore.getLocationImgFullPath(locationImgStoreName));
-        locationImgFile.createNewFile();
-
-        Poster poster = new Poster();
-        poster.setTitle("게시글1");
-        poster.setLocation(location);
-        posterRepository.save(poster);
-
-        PosterImage posterImage = new PosterImage();
-        posterImage.setPoster(poster);
-        String posterImgStoreName = "d-e-f.jpg";
-        String posterImgUploadName = "def.jpg";
-        posterImage.setStoreFileName(posterImgStoreName);
-        posterImage.setUploadFileName(posterImgUploadName);
-        posterImageRepository.save(posterImage);
-
-        File posterImgFIle = new File(imageStore.getPosterImgFullPath(posterImgStoreName));
-        posterImgFIle.createNewFile();
-    }
-
-    @AfterEach
-    void clearFile() {
-
-        em.clear();
-
-        Optional<Location> optionalLocation = locationRepository.findById(location.getId());
-
-        if(optionalLocation.isPresent()) {
-
-            Location findLocation = optionalLocation.get();
-
-            List<Poster> posters = findLocation.getPosters();
-            for (Poster poster : posters) {
-                List<PosterImage> posterImages = poster.getPosterImages();
-                for (PosterImage posterImage : posterImages) {
-                    imageStore.deletePosterImage(posterImage);
-                }
-            }
-
-            List<LocationImage> locationImages = findLocation.getLocationImages();
-            for (LocationImage locationImage : locationImages) {
-                imageStore.deleteLocationImage(locationImage);
-            }
-        }
-
-    }
-
 
     @Test
     @DisplayName("Location 등록")
@@ -185,12 +128,7 @@ public class LocationTest {
                 .isEqualTo(2);
 
         for (LocationImage locationImage : locationImages) {
-            File file = new File(imageStore.getLocationImgFullPath(locationImage.getStoreFileName()));
-
-            if(file.exists())
-                file.delete();
-            else
-                throw new FileNotFoundException();
+            imageStore.deleteLocationImage(locationImage);
         }
 
     }
@@ -200,44 +138,92 @@ public class LocationTest {
     void deleteLocation() throws IOException {
 
         //given
-        em.clear();
-        Location findLocation = locationRepository.findById(location.getId())
-                .orElseThrow(() -> new NoSuchElementException());
+        Location location = new Location();
+        location.setTitle("장소명");
+        locationRepository.save(location);
 
-        List<LocationImage> locationImages = findLocation.getLocationImages();
-        List<Poster> posters = findLocation.getPosters();
+        MockMultipartFile locationFile = new MockMultipartFile("locationImg", "locationImg.jpg", MediaType.IMAGE_JPEG_VALUE, "".getBytes());
+        List<MultipartFile> locationFiles = new ArrayList<>();
+        locationFiles.add(locationFile);
+        List<LocationImage> locationImages = imageStore.storeLocationImages(locationFiles);
+        for (LocationImage locationImage : locationImages) {
+            locationImage.setLocation(location);
+            locationImageRepository.save(locationImage);
+        }
+
+        Member member = new Member();
+        memberRepository.save(member);
+
+        LocationLike locationLike = new LocationLike();
+        locationLike.setMember(member);
+        locationLike.setLocation(location);
+        locationLikeRepository.save(locationLike);
+
+        Poster poster = new Poster();
+        poster.setLocation(location);
+        poster.setWriter(member);
+        posterRepository.save(poster);
+
+        MockMultipartFile posterFile = new MockMultipartFile("posterImg", "posterImg.jpg", MediaType.IMAGE_JPEG_VALUE, "".getBytes());
+        List<MultipartFile> posterFiles = new ArrayList<>();
+        posterFiles.add(posterFile);
+        List<PosterImage> posterImages = imageStore.storePosterImages(posterFiles);
+        for (PosterImage posterImage : posterImages) {
+            posterImage.setPoster(poster);
+            posterImageRepository.save(posterImage);
+        }
+
+        PosterLike posterLike = new PosterLike();
+        posterLike.setMember(member);
+        posterLike.setPoster(poster);
+        posterLikeRepository.save(posterLike);
+
+        Comment comment = new Comment();
+        comment.setWriter(member);
+        comment.setPoster(poster);
+        commentRepository.save(comment);
+
+        CommentLike commentLike = new CommentLike();
+        commentLike.setMember(member);
+        commentLikeRepository.save(commentLike);
 
         //when
-        locationService.deleteLocation(findLocation.getId());
+        em.flush();
+        em.clear();
+        Long deleteLocationId = location.getId();
+        locationService.deleteLocation(deleteLocationId);
 
         //then
         Assertions
-                .assertThat(locationRepository.findById(findLocation.getId()))
+                .assertThat(locationRepository.findById(deleteLocationId))
                 .isNotPresent();
         Assertions
-                .assertThat(locationImageRepository.findByLocationId(findLocation.getId()))
+                .assertThat(locationImageRepository.findByLocationId(deleteLocationId))
                 .isEmpty();
-
-        for (LocationImage locationImage : locationImages) {
-            File locationImgFile = new File(imageStore.getLocationImgFullPath(locationImage.getStoreFileName()));
-            Assertions
-                    .assertThat(locationImgFile.exists())
-                    .isFalse();
-        }
+        Assertions
+                .assertThat(locationLikeRepository.findByLocationAndMember(location, member))
+                .isNotPresent();
 
         Assertions
-                .assertThat(posterRepository.findByLocation(findLocation))
+                .assertThat(posterRepository.findByLocation(location))
                 .isEmpty();
+        Assertions
+                .assertThat(posterLikeRepository.findByPosterAndMember(poster, member))
+                .isNotPresent();
 
-        for (Poster poster : posters) {
-            List<PosterImage> posterImages = poster.getPosterImages();
-            for (PosterImage posterImage : posterImages) {
-                File posterImgFile = new File(imageStore.getPosterImgFullPath(posterImage.getStoreFileName()));
-                Assertions
-                        .assertThat(posterImgFile.exists())
-                        .isFalse();
-            }
-        }
+        Assertions
+                .assertThat(commentRepository.findByPoster(poster))
+                .isEmpty();
+        Assertions
+                .assertThat(commentLikeRepository.findByCommentAndMember(comment, member))
+                .isNotPresent();
+
+        Assertions
+                .assertThat(amazonS3Client.doesObjectExist(imageStore.getBucket(), imageStore.getLocationImgDir() + locationImages.get(0).getStoreFileName()))
+                .isFalse();
+        Assertions
+                .assertThat(amazonS3Client.doesObjectExist(imageStore.getBucket(), imageStore.getPosterImgDir() + posterImages.get(0).getStoreFileName()))
+                .isFalse();
 
     }
 
@@ -248,7 +234,6 @@ public class LocationTest {
         //given
         Location location = new Location();
         location.setTitle("테스트 장소");
-
         locationRepository.save(location);
 
         ApproveRequest approveRequest = new ApproveRequest();
@@ -256,10 +241,14 @@ public class LocationTest {
 
         //when
         locationService.updateApprove(location.getId(), approveRequest);
+        em.flush();
+        em.clear();
 
         //then
+        Location updateLocation = locationRepository.findById(location.getId())
+                .orElseThrow(() -> new NoSuchElementException());
         Assertions
-                .assertThat(location.getApprove())
+                .assertThat(updateLocation.getApprove())
                 .isTrue();
     }
 
@@ -271,7 +260,6 @@ public class LocationTest {
         Location location = new Location();
         location.setTitle("테스트 장소");
         location.setApprove(true);
-
         locationRepository.save(location);
 
         ApproveRequest approveRequest = new ApproveRequest();
@@ -279,10 +267,14 @@ public class LocationTest {
 
         //when
         locationService.updateApprove(location.getId(), approveRequest);
+        em.flush();
+        em.clear();
 
         //then
+        Location updateLocation = locationRepository.findById(location.getId())
+                .orElseThrow(() -> new NoSuchElementException());
         Assertions
-                .assertThat(location.getApprove())
+                .assertThat(updateLocation.getApprove())
                 .isFalse();
     }
 
@@ -295,9 +287,13 @@ public class LocationTest {
         location.setTitle("테스트 장소");
         locationRepository.save(location);
 
+        Member member = new Member();
+        member.setName("회원");
+        memberRepository.save(member);
+
         //when
         locationService.addLike(location.getId(), member.getId());
-
+        em.flush();
         em.clear();
 
         //then
@@ -318,6 +314,10 @@ public class LocationTest {
         location.setTitle("테스트 장소");
         locationRepository.save(location);
 
+        Member member = new Member();
+        member.setName("회원");
+        memberRepository.save(member);
+
         //when
         locationService.addLike(location.getId(), member.getId());
 
@@ -337,16 +337,20 @@ public class LocationTest {
         location.setTitle("테스트 장소");
         locationRepository.save(location);
 
+        Member member = new Member();
+        member.setName("회원");
+        memberRepository.save(member);
+
         //when
-        LocationLike locationLike1 = new LocationLike();
-        locationLike1.setLocation(location);
-        locationLike1.setMember(member);
-        locationLikeRepository.save(locationLike1);
+        LocationLike locationLike = new LocationLike();
+        locationLike.setLocation(location);
+        locationLike.setMember(member);
+        locationLikeRepository.save(locationLike);
 
         em.clear();
-
         locationService.deleteLike(location.getId(), member.getId());
-
+        em.flush();
+        em.clear();
 
         //then
         Location findLocation = locationRepository.findById(location.getId())
@@ -354,7 +358,7 @@ public class LocationTest {
 
         Assertions
                 .assertThat(findLocation.getLocationLikes().size())
-                .isEqualTo(1);
+                .isEqualTo(0);
 
     }
 
@@ -367,6 +371,10 @@ public class LocationTest {
         location.setTitle("테스트 장소");
         locationRepository.save(location);
 
+        Member member = new Member();
+        member.setName("회원");
+        memberRepository.save(member);
+
         Assertions
                 .assertThatThrownBy(() -> locationService.deleteLike(location.getId(), member.getId()))
                 .isInstanceOf(NoSuchElementException.class);
@@ -378,8 +386,9 @@ public class LocationTest {
     void getLikeLocations() {
 
         //given
-        Member locationLiker = new Member();
-        memberRepository.save(locationLiker);
+        Member member = new Member();
+        member.setName("회원");
+        memberRepository.save(member);
 
         Location location1 = new Location();
         Location location2 = new Location();
@@ -388,29 +397,24 @@ public class LocationTest {
 
         LocationLike locationLike1 = new LocationLike();
         locationLike1.setLocation(location1);
-        locationLike1.setMember(locationLiker);
+        locationLike1.setMember(member);
         locationLikeRepository.save(locationLike1);
 
         LocationLike locationLike2 = new LocationLike();
         locationLike2.setLocation(location2);
-        locationLike2.setMember(locationLiker);
+        locationLike2.setMember(member);
         locationLikeRepository.save(locationLike2);
-
-        LocationLike locationLike3 = new LocationLike();
-        locationLike3.setLocation(location);
-        locationLike3.setMember(locationLiker);
-        locationLikeRepository.save(locationLike3);
 
         //when
         em.flush();
         em.clear();
-        PageResponse<LocationResponse> likeLocations = locationService.getLikeLocations(1, locationLiker.getId());
+        PageResponse<LocationResponse> likeLocations = locationService.getLikeLocations(1, member.getId());
 
         //then
         List<LocationResponse> results = likeLocations.getResults();
         Assertions
                 .assertThat(results.size())
-                .isEqualTo(3);
+                .isEqualTo(2);
     }
 
 }
