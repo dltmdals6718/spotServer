@@ -1,5 +1,6 @@
 package com.example.spotserver.Integration;
 
+import com.amazonaws.services.s3.AmazonS3Client;
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.PosterConditionRequest;
 import com.example.spotserver.dto.request.PosterRequest;
@@ -61,63 +62,23 @@ public class PosterTest {
     @Autowired
     private EntityManager em;
 
-    private Member member;
-    private Location location;
-    private Poster poster;
+    @Autowired
+    private AmazonS3Client amazonS3Client;
 
-    @BeforeEach
-    void init() {
-        member = new Member();
-        member.setName("테스터");
-        member.setRole(Role.USER);
-        memberRepository.save(member);
-
-        location = new Location();
-        location.setTitle("테스트 장소");
-        locationRepository.save(location);
-
-        poster = new Poster();
-        poster.setWriter(member);
-        poster.setLocation(location);
-
-        PosterImage posterImage = new PosterImage();
-        String storeFileName = UUID.randomUUID() + ".jpg";
-        posterImage.setPoster(poster);
-        posterImage.setStoreFileName(storeFileName);
-
-        List<PosterImage> posterImages = new ArrayList<>();
-        posterImages.add(posterImage);
-        poster.setPosterImages(posterImages);
-        posterRepository.save(poster);
-
-        PosterLike posterLike = new PosterLike();
-        posterLike.setMember(member);
-        posterLike.setPoster(poster);
-        posterLikeRepository.save(posterLike);
-
-    }
-
-    @AfterEach
-    void clearFile() {
-
-        Poster findPoster = posterRepository.findById(poster.getId())
-                .orElseThrow(() -> new NoSuchElementException());
-
-        List<PosterImage> posterImages = findPoster.getPosterImages();
-
-        for (PosterImage posterImage : posterImages) {
-            String posterImgFullPath = imageStore.getPosterImgFullPath(posterImage.getStoreFileName());
-            File file = new File(posterImgFullPath);
-            if (file.exists())
-                file.delete();
-        }
-    }
 
     @Test
     @DisplayName("게시글 작성")
     void addPoster() throws IOException {
 
         //given
+        Location location = new Location();
+        location.setTitle("테스트 장소");
+        locationRepository.save(location);
+
+        Member member = new Member();
+        member.setName("회원");
+        memberRepository.save(member);
+
         PosterRequest posterRequest = new PosterRequest();
         posterRequest.setTitle("게시글 제목");
         posterRequest.setContent("게시글 내용");
@@ -133,11 +94,13 @@ public class PosterTest {
 
         //when
         posterService.addPoster(poster, files, location.getId(), member.getId());
+        em.flush();
         em.clear();
 
         //then
         Poster findPoster = posterRepository.findById(poster.getId())
                 .orElseThrow(() -> new NoSuchElementException());
+        List<PosterImage> posterImages = findPoster.getPosterImages();
 
         Assertions
                 .assertThat(findPoster.getTitle())
@@ -149,20 +112,17 @@ public class PosterTest {
                 .assertThat(findPoster.getWriter().getId())
                 .isEqualTo(member.getId());
         Assertions
-                .assertThat(findPoster.getPosterImages().size())
+                .assertThat(posterImages.size())
                 .isEqualTo(2);
 
-        List<PosterImage> posterImages = posterImageRepository.findByPosterId(poster.getId());
         for (PosterImage posterImage : posterImages) {
-            File file = new File(imageStore.getPosterImgFullPath(posterImage.getStoreFileName()));
-
             Assertions
-                    .assertThat(file.exists())
+                    .assertThat(amazonS3Client.doesObjectExist(imageStore.getBucket(), imageStore.getPosterImgDir() + posterImage.getStoreFileName()))
                     .isTrue();
+        }
 
-            if (file.exists())
-                file.delete();
-
+        for (PosterImage posterImage : posterImages) {
+            imageStore.deletePosterImage(posterImage);
         }
 
     }
@@ -172,80 +132,121 @@ public class PosterTest {
     void updatePoster() throws PermissionException, IOException {
 
         //given
+        // 1. 기존 게시글 생성
+        Location location = new Location();
+        location.setTitle("장소");
+        locationRepository.save(location);
+
+        Member member = new Member();
+        member.setName("회원");
+        memberRepository.save(member);
+
+        Poster poster = new Poster();
+        poster.setWriter(member);
+        poster.setLocation(location);
+        poster.setTitle("제목");
+        poster.setContent("내용");
+        posterRepository.save(poster);
+
+        MockMultipartFile file1 = new MockMultipartFile("img1", "img1.jpg", MediaType.IMAGE_JPEG_VALUE, "img".getBytes());
+        MockMultipartFile file2 = new MockMultipartFile("img2", "img2.jpg", MediaType.IMAGE_JPEG_VALUE, "img".getBytes());
+        List<MultipartFile> files = new ArrayList<>();
+        files.add(file1);
+        files.add(file2);
+        List<PosterImage> posterImages = imageStore.storePosterImages(files);
+        for (PosterImage posterImage : posterImages) {
+            posterImage.setPoster(poster);
+            posterImageRepository.save(posterImage);
+        }
+
+        // 2. 수정될 게시글 정보들
         PosterRequest posterRequest = new PosterRequest();
         posterRequest.setTitle("수정된 제목");
         posterRequest.setContent("수정된 내용");
 
-        MockMultipartFile file1 = new MockMultipartFile("img1", "img1.jpg", MediaType.IMAGE_JPEG_VALUE, "img".getBytes());
-        MockMultipartFile file2 = new MockMultipartFile("img2", "img2.jpg", MediaType.IMAGE_JPEG_VALUE, "img".getBytes());
+        MockMultipartFile updateFile1 = new MockMultipartFile("img1", "img1.jpg", MediaType.IMAGE_JPEG_VALUE, "img".getBytes());
+        MockMultipartFile updateFile2 = new MockMultipartFile("img2", "img2.jpg", MediaType.IMAGE_JPEG_VALUE, "img".getBytes());
         List<MultipartFile> addFiles = new ArrayList<>();
-        addFiles.add(file1);
-        addFiles.add(file2);
+        addFiles.add(updateFile1);
+        addFiles.add(updateFile2);
 
         List<Long> deleteFilesId = new ArrayList<>();
-        List<PosterImage> posterImages = poster.getPosterImages();
-        for (PosterImage posterImage : posterImages) {
-            deleteFilesId.add(posterImage.getId());
-        }
+        deleteFilesId.add(posterImages.get(0).getId());
 
         //when
+        em.clear();
         posterService.updatePoster(poster.getId(), posterRequest, addFiles, deleteFilesId, member.getId());
+        em.flush();
+        em.clear();
 
         //then
         Poster findPoster = posterRepository.findById(poster.getId())
                 .orElseThrow(() -> new NoSuchElementException());
+        List<PosterImage> findPosterImages = findPoster.getPosterImages();
 
         Assertions
-                .assertThat(findPoster.getPosterImages().size())
-                .isEqualTo(2);
+                .assertThat(findPosterImages.size())
+                .isEqualTo(3);
+        Assertions
+                .assertThat(findPosterImages.contains(posterImages.get(0)))
+                .isFalse();
+        Assertions
+                .assertThat(amazonS3Client.doesObjectExist(imageStore.getBucket(), imageStore.getPosterImgDir() + posterImages.get(0).getStoreFileName()))
+                .isFalse();
 
         Assertions
                 .assertThat(findPoster.getTitle())
                 .isEqualTo(posterRequest.getTitle());
-
         Assertions
                 .assertThat(findPoster.getContent())
                 .isEqualTo(posterRequest.getContent());
+
+        for (PosterImage findPosterImage : findPosterImages) {
+            imageStore.deletePosterImage(findPosterImage);
+        }
     }
 
     @Test
     @DisplayName("게시글 좋아요 등록")
     void addLike() throws DuplicateException {
 
-        Member testMember = new Member();
-        testMember.setName("좋아요 누를 예정인 사람");
-        memberRepository.save(testMember);
+        //given
+        Member member = new Member();
+        member.setName("회원");
+        memberRepository.save(member);
 
-        //given & when
-        posterService.addLike(poster.getId(), testMember.getId());
+        Poster poster = new Poster();
+        posterRepository.save(poster);
 
+        //when
+        posterService.addLike(poster.getId(), member.getId());
         em.flush();
         em.clear();
 
-
         //then
-        Poster findPoster = posterRepository.findById(poster.getId())
-                .orElseThrow(() -> new NoSuchElementException());
-
-        List<PosterLike> posterLikes = findPoster.getPosterLikes();
-
         Assertions
-                .assertThat(posterLikes.size())
-                .isEqualTo(2);
-
-        Assertions
-                .assertThat(posterLikes.get(1).getMember().getId())
-                .isEqualTo(testMember.getId());
-
+                .assertThat(posterLikeRepository.findByPosterAndMember(poster, member))
+                .isPresent();
     }
 
     @Test
     @DisplayName("게시글 좋아요 취소")
     void deleteLike() {
 
-        //given & when
-        posterService.deleteLike(poster.getId(), member.getId());
+        //given
+        Member member = new Member();
+        memberRepository.save(member);
 
+        Poster poster = new Poster();
+        posterRepository.save(poster);
+
+        PosterLike posterLike = new PosterLike();
+        posterLike.setPoster(poster);
+        posterLike.setMember(member);
+        posterLikeRepository.save(posterLike);
+
+        //when
+        posterService.deleteLike(poster.getId(), member.getId());
         em.flush();
         em.clear();
 
@@ -261,30 +262,31 @@ public class PosterTest {
     void getLikePosters() {
 
         //given
-        Member posterLiker = new Member();
-        memberRepository.save(posterLiker);
+        Member member = new Member();
+        memberRepository.save(member);
 
         Poster poster1 = new Poster();
         poster1.setWriter(member);
+        posterRepository.save(poster1);
+
         Poster poster2 = new Poster();
         poster2.setWriter(member);
-        posterRepository.save(poster1);
         posterRepository.save(poster2);
 
         PosterLike posterLike1 = new PosterLike();
         posterLike1.setPoster(poster1);
-        posterLike1.setMember(posterLiker);
+        posterLike1.setMember(member);
         posterLikeRepository.save(posterLike1);
 
         PosterLike posterLike2 = new PosterLike();
         posterLike2.setPoster(poster2);
-        posterLike2.setMember(posterLiker);
+        posterLike2.setMember(member);
         posterLikeRepository.save(posterLike2);
 
         //when
         em.flush();
         em.clear();
-        PageResponse<PosterResponse> likePosters = posterService.getLikePosters(1, posterLiker.getId());
+        PageResponse<PosterResponse> likePosters = posterService.getLikePosters(1, member.getId());
 
         //then
         List<PosterResponse> results = likePosters.getResults();
@@ -519,25 +521,28 @@ public class PosterTest {
     void getWritePosters() {
 
         //given
-        Member writer1 = new Member();
-        memberRepository.save(writer1);
+        Member member = new Member();
+        memberRepository.save(member);
+
+        Location location = new Location();
+        locationRepository.save(location);
 
         Poster writePoster1 = new Poster();
         writePoster1.setTitle("1번째 게시글");
-        writePoster1.setWriter(writer1);
+        writePoster1.setWriter(member);
         writePoster1.setLocation(location);
         posterRepository.save(writePoster1);
         writePoster1.setRegDate(writePoster1.getRegDate().plusHours(2));
 
         Poster writePoster2 = new Poster();
         writePoster2.setTitle("2번째 게시글");
-        writePoster2.setWriter(writer1);
+        writePoster2.setWriter(member);
         writePoster2.setLocation(location);
         posterRepository.save(writePoster2);
         writePoster2.setRegDate(writePoster2.getRegDate().plusHours(1));
 
         //when
-        PageResponse<PosterResponse> writePosters = posterService.getWritePosters(1, writer1.getId());
+        PageResponse<PosterResponse> writePosters = posterService.getWritePosters(1, member.getId());
         List<PosterResponse> results = writePosters.getResults();
         PageInfo pageInfo = writePosters.getPageInfo();
 
@@ -558,8 +563,11 @@ public class PosterTest {
     void getPostersByWriteComments() {
 
         //given
-        Member commentWriter = new Member();
-        memberRepository.save(commentWriter);
+        Member member = new Member();
+        memberRepository.save(member);
+
+        Location location = new Location();
+        locationRepository.save(location);
 
         Poster poster1 = new Poster();
         poster1.setWriter(member);
@@ -569,14 +577,14 @@ public class PosterTest {
 
         Comment comment1 = new Comment();
         comment1.setContent("첫번째 댓글");
-        comment1.setWriter(commentWriter);
+        comment1.setWriter(member);
         comment1.setPoster(poster1);
         commentRepository.save(comment1);
         comment1.setRegDate(comment1.getRegDate().plusHours(15));
 
         Comment comment2 = new Comment();
         comment2.setContent("두번째 댓글");
-        comment2.setWriter(commentWriter);
+        comment2.setWriter(member);
         comment2.setPoster(poster1);
         commentRepository.save(comment2);
         comment2.setRegDate(comment2.getRegDate().plusHours(1));
@@ -589,21 +597,21 @@ public class PosterTest {
 
         Comment comment3 = new Comment();
         comment3.setContent("세번째 댓글");
-        comment3.setWriter(commentWriter);
+        comment3.setWriter(member);
         comment3.setPoster(poster2);
         commentRepository.save(comment3);
         comment3.setRegDate(comment3.getRegDate().plusHours(10));
 
         Comment comment4 = new Comment();
         comment4.setContent("네번째 댓글");
-        comment4.setWriter(commentWriter);
+        comment4.setWriter(member);
         comment4.setPoster(poster2);
         commentRepository.save(comment4);
         comment3.setRegDate(comment4.getRegDate().plusHours(10));
 
 
         //when
-        PageResponse<PosterResponse> postersByWriteComments = posterService.getPostersByWriteComments(1, commentWriter.getId());
+        PageResponse<PosterResponse> postersByWriteComments = posterService.getPostersByWriteComments(1, member.getId());
         List<PosterResponse> results = postersByWriteComments.getResults();
 
         //then
