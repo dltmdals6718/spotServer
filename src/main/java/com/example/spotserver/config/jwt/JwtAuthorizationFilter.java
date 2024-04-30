@@ -1,8 +1,5 @@
 package com.example.spotserver.config.jwt;
 
-// 시큐리티 필터중 BasicAuthenticationFilter가 있다.
-// 권한 또는 인증이 필요한 요청을 했을때 이 필터를 탄다.
-// 권한 또는 인증이 필요없다면 안탄다.
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
@@ -60,11 +57,8 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
                     .getClaim("id")
                     .asLong();
 
-            System.out.println("서명 실행");
-
             // 서명이 정상적으로 됨
             if (id != null) {
-                System.out.println("서명 통과");
                 Member member = memberRepository.findById(id).get();
 
                 PrincipalDetails principalDetails = new PrincipalDetails(member);
@@ -93,7 +87,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
 
             response.setStatus(HttpStatus.UNAUTHORIZED.value());
             response.setCharacterEncoding("utf-8");
-            response.setContentType(MediaType.APPLICATION_JSON_VALUE); // application/json
+            response.setContentType(MediaType.APPLICATION_JSON_VALUE);
             response.getWriter().write(jsonErrorResponse);
 
         }
