@@ -102,14 +102,6 @@ public class ImageStore {
         amazonS3Client.deleteObject(bucket, memberImgDir + storeFileName);
     }
 
-    public String getLocationImgFullPath(String imageStoreFileName) {
-        return locationImgDir+imageStoreFileName;
-    }
-
-    public String getPosterImgFullPath(String imageStoreFileName) {
-        return posterImgDir+imageStoreFileName;
-    }
-
     public String getMemberImgFullPath(String imageStoreFileName) {
         return amazonS3Client.getResourceUrl(bucket, memberImgDir + imageStoreFileName);
     }
