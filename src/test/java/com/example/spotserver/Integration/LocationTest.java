@@ -8,6 +8,7 @@ import com.example.spotserver.dto.response.LocationResponse;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
+import com.example.spotserver.exception.FileException;
 import com.example.spotserver.exception.MailException;
 import com.example.spotserver.repository.*;
 import com.example.spotserver.service.LocationService;
@@ -74,7 +75,7 @@ public class LocationTest {
 
     @Test
     @DisplayName("Location 등록")
-    void addLocation() throws IOException {
+    void addLocation() throws IOException, FileException {
 
         //given
         String title = "테스트 장소";

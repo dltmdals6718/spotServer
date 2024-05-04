@@ -9,6 +9,7 @@ import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
+import com.example.spotserver.exception.FileException;
 import com.example.spotserver.repository.LocationLikeRepository;
 import com.example.spotserver.repository.LocationRepository;
 import com.example.spotserver.repository.MemberRepository;
@@ -21,10 +22,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 public class LocationService {
@@ -51,10 +49,18 @@ public class LocationService {
         return pageResponse;
     }
 
-    public Long addLocation(Location location, List<MultipartFile> files) throws IOException {
+    public Long addLocation(Location location, List<MultipartFile> files) throws IOException, FileException {
 
 
         if (files != null) {
+
+            for (MultipartFile file : files) {
+                String extension = ImageStore.getFileExtension(file.getOriginalFilename());
+                List<String> supportFile = new ArrayList<>(Arrays.asList("jpeg", "jpg", "png"));
+                if(!supportFile.contains(extension))
+                    throw new FileException(ErrorCode.NOT_SUPPORT_FILE);
+            }
+
             List<LocationImage> imgFiles = imageStore.storeLocationImages(files);
             location.setLocationImages(imgFiles);
 

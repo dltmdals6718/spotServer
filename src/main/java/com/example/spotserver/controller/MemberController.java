@@ -99,7 +99,7 @@ public class MemberController {
     public ResponseEntity<MemberResponse> updateMember(@PathVariable Long memberId,
                                                        @Valid @RequestPart(required = false) MemberUpdateRequest memberUpdateRequest,
                                                        @RequestPart(required = false) MultipartFile memberImg,
-                                                       @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException, DuplicateException, IOException {
+                                                       @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException, DuplicateException, IOException, FileException {
 
         if (!member.getId().equals(memberId))
             throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);

@@ -1,5 +1,2 @@
 - MERGE, REBASE, PULL, FETCH 알기
-- ImageStore에 확장자 검사 필요
 - ImageFileController 단에서 변환이 이뤄지고 있음
-- 어드민은 CRUD 다 가능하게
-- 테스트 코드 검증시 필드 하나하나 비교하지말고 isEqualTo 쓰면 좋을듯

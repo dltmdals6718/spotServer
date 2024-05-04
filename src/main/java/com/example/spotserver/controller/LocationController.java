@@ -9,6 +9,7 @@ import com.example.spotserver.dto.response.LocationResponse;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
+import com.example.spotserver.exception.FileException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.service.ImageFileService;
 import com.example.spotserver.service.LocationService;
@@ -64,7 +65,7 @@ public class LocationController {
 
     @PostMapping(consumes = MediaType.MULTIPART_FORM_DATA_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<Map> addLocation(@Valid @RequestPart LocationRequest locationRequest,
-                                           @RequestPart(required = false) List<MultipartFile> files) throws IOException {
+                                           @RequestPart(required = false) List<MultipartFile> files) throws IOException, FileException {
 
         Location location = LocationRequest.toEntity(locationRequest);
         Long locationId = locationService.addLocation(location, files);

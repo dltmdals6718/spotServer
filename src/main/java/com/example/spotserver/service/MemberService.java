@@ -132,7 +132,7 @@ public class MemberService {
     }
 
     @Transactional
-    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest, MultipartFile memberImg, Long memberId) throws DuplicateException, IOException {
+    public MemberResponse updateMember(MemberUpdateRequest memberUpdateRequest, MultipartFile memberImg, Long memberId) throws DuplicateException, IOException, FileException {
 
         Member member = memberRepository.findById(memberId)
                 .orElseThrow(() -> new NoSuchElementException());
@@ -149,6 +149,11 @@ public class MemberService {
         }
 
         if (memberImg != null) {
+            String extension = ImageStore.getFileExtension(memberImg.getOriginalFilename());
+            List<String> supportFile = new ArrayList<>(Arrays.asList("jpeg", "jpg", "png"));
+            if(!supportFile.contains(extension))
+                throw new FileException(ErrorCode.NOT_SUPPORT_FILE);
+
             MemberImage beforeImg = member.getMemberImg();
             if (beforeImg != null) {
                 imageStore.deleteMemberImage(beforeImg);

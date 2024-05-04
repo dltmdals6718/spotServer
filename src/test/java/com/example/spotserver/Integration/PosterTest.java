@@ -7,6 +7,7 @@ import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.DuplicateException;
+import com.example.spotserver.exception.FileException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.repository.*;
 import com.example.spotserver.service.PosterService;
@@ -68,7 +69,7 @@ public class PosterTest {
 
     @Test
     @DisplayName("게시글 작성")
-    void addPoster() throws IOException {
+    void addPoster() throws IOException, FileException {
 
         //given
         Location location = new Location();
@@ -129,7 +130,7 @@ public class PosterTest {
 
     @Test
     @DisplayName("게시글 수정")
-    void updatePoster() throws PermissionException, IOException {
+    void updatePoster() throws PermissionException, IOException, FileException {
 
         //given
         // 1. 기존 게시글 생성

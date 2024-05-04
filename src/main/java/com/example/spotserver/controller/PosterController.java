@@ -6,6 +6,7 @@ import com.example.spotserver.dto.request.PosterRequest;
 import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.DuplicateException;
+import com.example.spotserver.exception.FileException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.service.PosterService;
 import jakarta.validation.Valid;
@@ -37,7 +38,7 @@ public class PosterController {
     public ResponseEntity<Map> addPoster(@Valid @RequestPart PosterRequest posterRequest,
                                          @RequestPart(required = false) List<MultipartFile> files,
                                          @PathVariable Long locationId,
-                                         @AuthenticationPrincipal(expression = "member") Member member) throws IOException {
+                                         @AuthenticationPrincipal(expression = "member") Member member) throws IOException, FileException {
 
         Poster poster = PosterRequest.toEntity(posterRequest);
         Long posterId = posterService.addPoster(poster, files, locationId, member.getId());
@@ -76,7 +77,7 @@ public class PosterController {
                                             @Valid @RequestPart PosterRequest posterRequest,
                                             @RequestPart(required = false) List<MultipartFile> addFiles,
                                             @RequestPart(required = false) List<Long> deleteFilesId,
-                                            @AuthenticationPrincipal(expression = "member") Member member) throws IOException, PermissionException {
+                                            @AuthenticationPrincipal(expression = "member") Member member) throws IOException, PermissionException, FileException {
 
         posterService.updatePoster(posterId, posterRequest, addFiles, deleteFilesId, member.getId());
 

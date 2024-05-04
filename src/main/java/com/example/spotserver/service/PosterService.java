@@ -7,6 +7,7 @@ import com.example.spotserver.dto.response.PageResponse;
 import com.example.spotserver.dto.response.PosterResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
+import com.example.spotserver.exception.FileException;
 import com.example.spotserver.exception.PermissionException;
 import com.example.spotserver.repository.*;
 import jakarta.transaction.Transactional;
@@ -18,10 +19,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.NoSuchElementException;
+import java.util.*;
 
 @Service
 public class PosterService {
@@ -47,7 +45,7 @@ public class PosterService {
     public Long addPoster(Poster poster,
                           List<MultipartFile> files,
                           Long locationId,
-                          Long memberId) throws IOException {
+                          Long memberId) throws IOException, FileException {
         Location location = locationRepository.findById(locationId)
                 .orElseThrow(() -> new NoSuchElementException());
 
@@ -59,6 +57,14 @@ public class PosterService {
 
 
         if (files != null) {
+
+            for (MultipartFile file : files) {
+                String extension = ImageStore.getFileExtension(file.getOriginalFilename());
+                List<String> supportFile = new ArrayList<>(Arrays.asList("jpeg", "jpg", "png"));
+                if(!supportFile.contains(extension))
+                    throw new FileException(ErrorCode.NOT_SUPPORT_FILE);
+            }
+
             List<PosterImage> imgFiles = imageStore.storePosterImages(files);
             poster.setPosterImages(imgFiles);
             for (PosterImage imgFile : imgFiles) {
@@ -89,7 +95,7 @@ public class PosterService {
                              PosterRequest posterRequest,
                              List<MultipartFile> addFiles,
                              List<Long> deleteFilesId,
-                             Long memberId) throws IOException, PermissionException {
+                             Long memberId) throws IOException, PermissionException, FileException {
 
         Poster poster = posterRepository.findById(posterId)
                 .orElseThrow(() -> new NoSuchElementException());
@@ -100,6 +106,14 @@ public class PosterService {
         if (!poster.getWriter().getId().equals(member.getId())) {
             throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
         }
+
+        for (MultipartFile file : addFiles) {
+            String extension = ImageStore.getFileExtension(file.getOriginalFilename());
+            List<String> supportFile = new ArrayList<>(Arrays.asList("jpeg", "jpg", "png"));
+            if(!supportFile.contains(extension))
+                throw new FileException(ErrorCode.NOT_SUPPORT_FILE);
+        }
+
 
         if (deleteFilesId != null) {
 

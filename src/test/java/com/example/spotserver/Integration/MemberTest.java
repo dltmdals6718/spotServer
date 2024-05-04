@@ -197,7 +197,7 @@ public class MemberTest {
 
     @Test
     @DisplayName("회원 정보 및 프로필 사진 변경")
-    void updateMember() throws DuplicateException, IOException {
+    void updateMember() throws DuplicateException, IOException, FileException {
 
         //given
         Member member = new Member();
