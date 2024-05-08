@@ -1,2 +1,2 @@
 - MERGE, REBASE, PULL, FETCH 알기
-- ImageFileController 단에서 변환이 이뤄지고 있음
+- 로그파일도 볼륨 설정해보기

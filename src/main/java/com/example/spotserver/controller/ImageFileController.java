@@ -1,7 +1,5 @@
 package com.example.spotserver.controller;
 
-import com.example.spotserver.domain.LocationImage;
-import com.example.spotserver.domain.PosterImage;
 import com.example.spotserver.dto.response.LocationImageResponse;
 import com.example.spotserver.dto.response.PosterImageResponse;
 import com.example.spotserver.service.ImageFileService;
@@ -14,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.List;
 
 @RestController
@@ -32,12 +29,7 @@ public class ImageFileController {
     @GetMapping("/posters/{posterId}/images")
     public ResponseEntity<List<PosterImageResponse>> getPosterImageFilesInfo(@PathVariable Long posterId) {
 
-        List<PosterImage> posterImageList = imageFileService.getPosterImageList(posterId);
-
-        List<PosterImageResponse> posterImageResponseList = new ArrayList<>();
-        for (PosterImage posterImage : posterImageList) {
-            posterImageResponseList.add(PosterImageResponse.toDto(posterImage));
-        }
+        List<PosterImageResponse> posterImageResponseList = imageFileService.getPosterImageList(posterId);
 
         return ResponseEntity
                 .status(HttpStatus.OK)
@@ -53,12 +45,7 @@ public class ImageFileController {
     @GetMapping("/locations/{locationId}/images")
     public ResponseEntity<List<LocationImageResponse>> getLocationImageFilesInfo(@PathVariable Long locationId) {
 
-        List<LocationImage> locationImageList = imageFileService.getLocationImageList(locationId);
-
-        List<LocationImageResponse> locationImageResponseList = new ArrayList<>();
-        for (LocationImage locationImage : locationImageList) {
-            locationImageResponseList.add(LocationImageResponse.toDto(locationImage));
-        }
+        List<LocationImageResponse> locationImageResponseList = imageFileService.getLocationImageList(locationId);
 
         return ResponseEntity
                 .ok()

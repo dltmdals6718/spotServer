@@ -4,6 +4,8 @@ import com.amazonaws.services.s3.AmazonS3Client;
 import com.example.spotserver.domain.ImageStore;
 import com.example.spotserver.domain.PosterImage;
 import com.example.spotserver.domain.LocationImage;
+import com.example.spotserver.dto.response.LocationImageResponse;
+import com.example.spotserver.dto.response.PosterImageResponse;
 import com.example.spotserver.repository.PosterImageRepository;
 import com.example.spotserver.repository.LocationImageRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,6 +16,7 @@ import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.net.MalformedURLException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
@@ -37,14 +40,24 @@ public class ImageFileService {
         this.amazonS3Client = amazonS3Client;
     }
 
-    public List<PosterImage> getPosterImageList(Long posterId) {
+    public List<PosterImageResponse> getPosterImageList(Long posterId) {
         List<PosterImage> posterImages = posterImageRepository.findByPosterId(posterId);
-        return posterImages;
+
+        List<PosterImageResponse> posterImageResponseList = new ArrayList<>();
+        for (PosterImage posterImage : posterImages) {
+            posterImageResponseList.add(PosterImageResponse.toDto(posterImage));
+        }
+        return posterImageResponseList;
     }
 
-    public List<LocationImage> getLocationImageList(Long locationId) {
+    public List<LocationImageResponse> getLocationImageList(Long locationId) {
         List<LocationImage> locationImages = locationImageRepository.findByLocationId(locationId);
-        return locationImages;
+
+        List<LocationImageResponse> locationImageResponseList = new ArrayList<>();
+        for (LocationImage locationImage : locationImages) {
+            locationImageResponseList.add(LocationImageResponse.toDto(locationImage));
+        }
+        return locationImageResponseList;
     }
 
     public String getLocationImageUrl(Long locationImageId) {
