@@ -1,3 +1,6 @@
+# 프로젝트 아키텍처
+<img width="500" alt="아키텍처" src="https://github.com/dltmdals6718/spotServer/assets/100751716/88486028-4357-4bc9-8483-6c98b097b81e">
+
 # API 명세서
 
 <hr>
