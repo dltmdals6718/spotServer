@@ -16,7 +16,7 @@ services:
       - ./mysql/db:/var/lib/mysql
       - ./mysql-init-files/:/docker-entrypoint-initdb.d
   server:
-    image: dltmdals6718/spot-server:1.0.0
+    image: dltmdals6718/spot-server
     container_name: spot-server
     ports:
       - "8080:8080"
