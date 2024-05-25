@@ -1,5 +1,9 @@
 # 프로젝트 아키텍처
 <img width="500" alt="아키텍처" src="https://github.com/dltmdals6718/spotServer/assets/100751716/88486028-4357-4bc9-8483-6c98b097b81e">
+<br>
+
+# 프로젝트 ERD
+<img width="500" alt="ERD" src="https://github.com/dltmdals6718/spotServer/assets/100751716/a48611b1-6def-42aa-a13d-b7962089db6c">
 
 # API 명세서
 
