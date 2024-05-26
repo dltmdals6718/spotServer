@@ -1,2 +1,0 @@
-- MERGE, REBASE, PULL, FETCH 알기
-- 로그파일도 볼륨 설정해보기
