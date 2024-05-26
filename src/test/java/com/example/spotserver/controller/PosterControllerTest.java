@@ -144,7 +144,7 @@ class PosterControllerTest {
         posterResponse.setPosterId(posterId);
         posterResponse.setTitle("제목");
         posterResponse.setContent("내용");
-        posterResponse.setRegDate(LocalDateTime.now());
+        posterResponse.setRegDate(LocalDateTime.now().withNano(0));
         posterResponse.setWriterId(member.getId());
         posterResponse.setWriterName(member.getName());
         posterResponse.setLikeCnt(1L);

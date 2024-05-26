@@ -26,6 +26,7 @@ import org.springframework.web.context.WebApplicationContext;
 import org.springframework.web.filter.CharacterEncodingFilter;
 
 import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -123,7 +124,7 @@ class CommentControllerTest {
         commentResponse.setCommentId(commentId);
         commentResponse.setWriterId(writerId);
         commentResponse.setWriterName("작성자");
-        commentResponse.setRegDate(LocalDateTime.now());
+        commentResponse.setRegDate(LocalDateTime.now().withNano(0));
         commentResponse.setContent("댓글 내용");
         commentResponse.setLikeCnt(likeCnt);
         commentResponse.setMemberImg("");
@@ -148,7 +149,7 @@ class CommentControllerTest {
                         jsonPath("$.writerName").value(commentResponse.getWriterName()),
                         jsonPath("$.memberImg").value(commentResponse.getMemberImg()),
                         jsonPath("$.content").value(commentResponse.getContent()),
-                        jsonPath("$.regDate").value(commentResponse.getRegDate().toString()),
+                        jsonPath("$.regDate").value(commentResponse.getRegDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd'T'HH:mm:ss"))),
                         jsonPath("$.likeCnt").value(commentResponse.getLikeCnt()))
                 .andDo(print());
     }

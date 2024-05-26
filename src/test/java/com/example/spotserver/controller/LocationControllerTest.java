@@ -138,7 +138,7 @@ public class LocationControllerTest {
         locationResponse.setTitle("제목");
         locationResponse.setAddress("주소");
         locationResponse.setDescription("설명");
-        locationResponse.setRegDate(LocalDateTime.now());
+        locationResponse.setRegDate(LocalDateTime.now().withNano(0));
         locationResponse.setLikeCnt(2L);
 
         given(locationService.getLocation(locationId))
