@@ -11,9 +11,7 @@ import com.example.spotserver.exception.*;
 import com.example.spotserver.repository.MailCertificationRepository;
 import com.example.spotserver.repository.MemberImageRepository;
 import com.example.spotserver.repository.MemberRepository;
-import com.example.spotserver.service.ImageFileService;
-import com.example.spotserver.service.MailSerivce;
-import com.example.spotserver.service.MemberService;
+import com.example.spotserver.service.*;
 import jakarta.mail.MessagingException;
 import jakarta.persistence.EntityManager;
 import jakarta.transaction.Transactional;
@@ -21,7 +19,6 @@ import org.assertj.core.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
@@ -31,7 +28,6 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.NoSuchElementException;
-import java.util.UUID;
 
 @SpringBootTest
 @Transactional
@@ -236,6 +232,38 @@ public class MemberTest {
                 .isTrue();
 
         imageStore.deleteMemberImage(updateMember.getMemberImg());
+    }
+
+    @Test
+    @DisplayName("회원 탈퇴")
+    void deleteMember() throws IOException {
+
+        //given
+        Member member = new Member();
+        member.setLoginId("loginId");
+        member.setLoginPwd(new BCryptPasswordEncoder().encode("loginPwd"));
+
+        MockMultipartFile profileImg = new MockMultipartFile("profileImg", "myProfile.jpg", MediaType.IMAGE_JPEG_VALUE, "".getBytes());
+        MemberImage memberImage = imageStore.storeMemberImage(profileImg);
+        memberImage.setMember(member);
+        member.setMemberImg(memberImage);
+        memberRepository.save(member);
+        em.flush();
+
+        //when
+        em.clear();
+        memberService.deleteMember(member.getId());
+
+        //then
+        Assertions
+                .assertThat(memberRepository.findById(member.getId()))
+                .isNotPresent();
+        Assertions
+                .assertThat(memberImageRepository.findById(memberImage.getId()))
+                .isNotPresent();
+        Assertions
+                .assertThat(amazonS3Client.doesObjectExist(imageStore.getBucket(), imageStore.getMemberImgDir() + memberImage.getStoreFileName()))
+                .isFalse();
     }
 
     @Test

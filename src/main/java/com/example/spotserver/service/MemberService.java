@@ -114,6 +114,27 @@ public class MemberService {
         return memberResponse;
     }
 
+    @Transactional
+    public void deleteMember(Long memberId) {
+
+        Member member = memberRepository.findById(memberId)
+                .orElseThrow(() -> new NoSuchElementException());
+
+        // 프로필 이미지 삭제
+        MemberImage memberImg = member.getMemberImg();
+        imageStore.deleteMemberImage(memberImg);
+
+        // 작성한 게시글 이미지 삭제
+        List<Poster> posters = member.getPosters();
+        for (Poster poster : posters) {
+            for (PosterImage posterImage : poster.getPosterImages()) {
+                imageStore.deletePosterImage(posterImage);
+            }
+        }
+
+        memberRepository.deleteById(memberId);
+    }
+
     public String createToken(Long memberId) {
         String jwtToken = JWT.create()
                 .withSubject("톡톡토큰")

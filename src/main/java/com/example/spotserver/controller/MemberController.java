@@ -15,7 +15,6 @@ import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.MemberService;
 import com.example.spotserver.service.PosterService;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.validation.Valid;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -108,6 +107,21 @@ public class MemberController {
 
         return ResponseEntity
                 .ok(memberResponse);
+    }
+
+    @DeleteMapping(value = "/{memberId}")
+    public ResponseEntity deleteMember(@PathVariable Long memberId,
+                                       @AuthenticationPrincipal(expression = "member") Member member) throws PermissionException {
+
+        if(!memberId.equals(member.getId())) {
+            throw new PermissionException(ErrorCode.FORBIDDEN_CLIENT);
+        }
+
+        memberService.deleteMember(memberId);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
     @PostMapping(value = "/signin-kakao", produces = MediaType.APPLICATION_JSON_VALUE)

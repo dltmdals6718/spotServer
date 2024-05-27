@@ -1,5 +1,6 @@
 package com.example.spotserver.controller;
 
+import com.example.spotserver.config.auth.PrincipalDetails;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.Role;
 import com.example.spotserver.dto.request.SignInMember;
@@ -20,6 +21,9 @@ import org.springframework.http.HttpMethod;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.test.web.servlet.*;
 import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -229,6 +233,39 @@ class MemberControllerTest {
                         jsonPath("$.errorCode").value(ErrorCode.DUPLICATE_NAME.name()),
                         jsonPath("$.message").value(ErrorCode.DUPLICATE_NAME.getMessage()))
                 .andDo(print());
+
+    }
+
+    @Test
+    @DisplayName("회원탈퇴")
+    void deleteMember() throws Exception {
+
+        //given
+        Long memberId = 5L;
+        Member member = new Member();
+        member.setId(memberId);
+        member.setName("홍길동");
+
+        PrincipalDetails principalDetails = mock(PrincipalDetails.class);
+        when(principalDetails.getMember())
+                .thenReturn(member);
+
+        Authentication authentication = new UsernamePasswordAuthenticationToken(principalDetails, null, principalDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+        doNothing()
+                .when(memberService)
+                .deleteMember(memberId);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.DELETE, "/members/" + memberId));
+
+        //then
+        verify(memberService, times(1))
+                .deleteMember(memberId);
+        resultActions
+                .andExpectAll(status().isNoContent());
 
     }
 
