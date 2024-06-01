@@ -7,6 +7,7 @@ import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.SignUpMember;
 import com.example.spotserver.dto.response.MemberResponse;
+import com.example.spotserver.dto.response.TokenResponse;
 import com.example.spotserver.exception.*;
 import com.example.spotserver.repository.MailCertificationRepository;
 import com.example.spotserver.repository.MemberImageRepository;
@@ -16,6 +17,8 @@ import org.json.JSONObject;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -26,9 +29,9 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
-import java.net.MalformedURLException;
 import java.time.LocalDateTime;
 import java.util.*;
+import java.util.concurrent.TimeUnit;
 
 @Service
 public class MemberService {
@@ -36,15 +39,17 @@ public class MemberService {
     private MemberRepository memberRepository;
     private MemberImageRepository memberImageRepository;
     private MailCertificationRepository mailCertificationRepository;
+    private RedisTemplate<String, Long> redisTemplate;
     private BCryptPasswordEncoder bCryptPasswordEncoder;
     private ImageStore imageStore;
     private Logger loginLogger = LoggerFactory.getLogger("login");
 
     @Autowired
-    public MemberService(MemberRepository memberRepository, MemberImageRepository memberImageRepository, BCryptPasswordEncoder bCryptPasswordEncoder, ImageStore imageStore, MailCertificationRepository mailCertificationRepository) {
+    public MemberService(MemberRepository memberRepository, MemberImageRepository memberImageRepository, MailCertificationRepository mailCertificationRepository, RedisTemplate redisTemplate, BCryptPasswordEncoder bCryptPasswordEncoder, ImageStore imageStore) {
         this.memberRepository = memberRepository;
         this.memberImageRepository = memberImageRepository;
         this.mailCertificationRepository = mailCertificationRepository;
+        this.redisTemplate = redisTemplate;
         this.bCryptPasswordEncoder = bCryptPasswordEncoder;
         this.imageStore = imageStore;
     }
@@ -135,13 +140,29 @@ public class MemberService {
         memberRepository.deleteById(memberId);
     }
 
-    public String createToken(Long memberId) {
-        String jwtToken = JWT.create()
-                .withSubject("톡톡토큰")
-                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.EXPIRE_TIME))
+    public TokenResponse createToken(Long memberId) {
+
+        TokenResponse tokenResponse = new TokenResponse();
+
+        String accessToken = JWT.create()
+                .withSubject("AccessToken")
+                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.ACCESS_TOKEN_EXPIRE_TIME * 1000))
                 .withClaim("id", memberId)
                 .sign(Algorithm.HMAC256(JwtProperties.SECRET_KEY));
-        return jwtToken;
+
+        String refreshToken = UUID.randomUUID().toString();
+
+        tokenResponse.setToken(accessToken);
+        tokenResponse.setExpire_in(JwtProperties.ACCESS_TOKEN_EXPIRE_TIME);
+
+        tokenResponse.setRefreshToken(refreshToken);
+        tokenResponse.setRefreshExpireIn(JwtProperties.REFRESH_TOKEN_EXPIRE_TIME);
+
+        ValueOperations<String, Long> valueOperations = redisTemplate.opsForValue();
+        valueOperations.set(refreshToken, memberId);
+        redisTemplate.expire(refreshToken, JwtProperties.REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.SECONDS);
+
+        return tokenResponse;
     }
 
     public MemberResponse getMemberInfo(Long memberId) {

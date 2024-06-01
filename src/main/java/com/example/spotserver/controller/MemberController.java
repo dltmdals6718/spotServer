@@ -6,10 +6,7 @@ import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.SignInMember;
 import com.example.spotserver.dto.request.SignUpMember;
-import com.example.spotserver.dto.response.LocationResponse;
-import com.example.spotserver.dto.response.MemberResponse;
-import com.example.spotserver.dto.response.PageResponse;
-import com.example.spotserver.dto.response.PosterResponse;
+import com.example.spotserver.dto.response.*;
 import com.example.spotserver.exception.*;
 import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.MemberService;
@@ -59,21 +56,18 @@ public class MemberController {
     }
 
     @PostMapping(value = "/signin", consumes = MediaType.APPLICATION_JSON_VALUE, produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map> signinMember(@Valid @RequestBody SignInMember signInMember,
+    public ResponseEntity<TokenResponse> signinMember(@Valid @RequestBody SignInMember signInMember,
                                             HttpServletRequest request) throws LoginFailException {
 
         String loginId = signInMember.getLoginId();
         String loginPwd = signInMember.getLoginPwd();
         Member member = memberService.login(loginId, loginPwd, request.getRemoteAddr());
 
-        Map<String, Object> tokenInfo = new HashMap<>();
-        String token = memberService.createToken(member.getId());
+        TokenResponse tokenResponse = memberService.createToken(member.getId());
 
-        tokenInfo.put("token", token);
-        tokenInfo.put("expire_in", JwtProperties.EXPIRE_TIME / 1000);
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(tokenInfo);
+                .body(tokenResponse);
     }
 
     @GetMapping("/{memberId}")
@@ -125,16 +119,14 @@ public class MemberController {
     }
 
     @PostMapping(value = "/signin-kakao", produces = MediaType.APPLICATION_JSON_VALUE)
-    public ResponseEntity<Map> kakaoLogin(@RequestParam(name = "kakaoToken") String kakaoToken) {
+    public ResponseEntity<TokenResponse> kakaoLogin(@RequestParam(name = "kakaoToken") String kakaoToken) {
         Member member = memberService.loginWithKakaoAccessToken(kakaoToken);
 
-        Map<String, Object> tokenInfo = new HashMap<>();
-        String token = memberService.createToken(member.getId());
-        tokenInfo.put("token", token);
-        tokenInfo.put("expire_in", JwtProperties.EXPIRE_TIME / 1000);
+        TokenResponse tokenResponse = memberService.createToken(member.getId());
+
         return ResponseEntity
                 .status(HttpStatus.OK)
-                .body(tokenInfo);
+                .body(tokenResponse);
     }
 
     @GetMapping("/like-posters")
