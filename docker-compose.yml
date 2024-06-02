@@ -15,7 +15,13 @@ services:
     volumes:
       - ./mysql/db:/var/lib/mysql
       - ./mysql-init-files/:/docker-entrypoint-initdb.d
-  spot-server:
+  redis:
+    image: redis
+    container_name: spot-redis
+    ports:
+      - "6379:6379"
+    command: redis-server --requirepass ${SPRING_DATA_REDIS_PASSWORD}
+  server:
     image: dltmdals6718/spot-server
     container_name: spot-server
     ports:
@@ -24,6 +30,9 @@ services:
       SPRING_DATASOURCE_URL: jdbc:mysql://db:3306/spot
       SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME}
       SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD}
+      SPRING_DATA_REDIS_HOST: ${SPRING_DATA_REDIS_HOST}
+      SPRING_DATA_REDIS_PASSWORD: ${SPRING_DATA_REDIS_PASSWORD}
+      SPRING_DATA_REDIS_PORT: ${SPRING_DATA_REDIS_PORT}
     volumes:
       - /home/ubuntu/docker/logs:/logs
     depends_on:
