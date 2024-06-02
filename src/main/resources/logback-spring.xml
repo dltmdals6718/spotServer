@@ -24,7 +24,7 @@
     </springProfile>
 
     <appender name="LOGIN_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./logs/login.txt</file> <!-- 파일을 저장할 경로를 정한다 -->
+        <file>/logs/login.txt</file> <!-- 파일을 저장할 경로를 정한다 -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>INFO</level>
             <onMatch>ACCEPT</onMatch> <!-- 해당 레벨만 기록한다. -->
@@ -34,7 +34,7 @@
             <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative] %-5level - %msg%n</pattern> <!-- 해당 패턴 네이밍으로 현재 로그가 기록됨 -->
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>./logs/was-logs/login.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern> <!-- 해당 패턴 네이밍으로 이전 파일이 기록됨 -->
+            <fileNamePattern>/logs/was-logs/login.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern> <!-- 해당 패턴 네이밍으로 이전 파일이 기록됨 -->
             <maxFileSize>1MB</maxFileSize> <!-- 한 파일의 최대 용량 -->
             <maxHistory>2</maxHistory> <!-- 한 파일의 최대 저장 기한 -->
             <totalSizeCap>1GB</totalSizeCap>
@@ -42,7 +42,7 @@
     </appender>
 
     <appender name="WARN_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./logs/warn.txt</file> <!-- 파일을 저장할 경로를 정한다 -->
+        <file>/logs/warn.txt</file> <!-- 파일을 저장할 경로를 정한다 -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>WARN</level>
             <onMatch>ACCEPT</onMatch> <!-- 해당 레벨만 기록한다. -->
@@ -52,7 +52,7 @@
             <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern> <!-- 해당 패턴 네이밍으로 현재 로그가 기록됨 -->
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>./logs/was-logs/warn.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern> <!-- 해당 패턴 네이밍으로 이전 파일이 기록됨 -->
+            <fileNamePattern>/logs/was-logs/warn.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern> <!-- 해당 패턴 네이밍으로 이전 파일이 기록됨 -->
             <maxFileSize>1MB</maxFileSize> <!-- 한 파일의 최대 용량 -->
             <maxHistory>2</maxHistory> <!-- 한 파일의 최대 저장 기한 -->
             <totalSizeCap>1GB</totalSizeCap>
@@ -60,7 +60,7 @@
     </appender>
 
     <appender name="ERROR_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <file>./logs/error.txt</file> <!-- 파일을 저장할 경로를 정한다 -->
+        <file>/logs/error.txt</file> <!-- 파일을 저장할 경로를 정한다 -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>ERROR</level>
             <onMatch>ACCEPT</onMatch> <!-- 해당 레벨만 기록한다. -->
@@ -70,7 +70,7 @@
             <pattern>[%d{yyyy-MM-dd HH:mm:ss}:%-3relative][%thread] %-5level %logger{35} - %msg%n</pattern> <!-- 해당 패턴 네이밍으로 현재 로그가 기록됨 -->
         </encoder>
         <rollingPolicy class="ch.qos.logback.core.rolling.SizeAndTimeBasedRollingPolicy">
-            <fileNamePattern>./logs/was-logs/error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern> <!-- 해당 패턴 네이밍으로 이전 파일이 기록됨 -->
+            <fileNamePattern>/logs/was-logs/error.%d{yyyy-MM-dd}.%i.log.gz</fileNamePattern> <!-- 해당 패턴 네이밍으로 이전 파일이 기록됨 -->
             <maxFileSize>1MB</maxFileSize> <!-- 한 파일의 최대 용량 -->
             <totalSizeCap>1GB</totalSizeCap>
             <maxHistory>2</maxHistory> <!-- 한 파일의 최대 저장 기한 -->
