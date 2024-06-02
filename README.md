@@ -139,8 +139,10 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "expire_in": 1500,
-  "token": "tokenString"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImV4cCI6MTcxNzMxMzYzNSwiaWQiOjd9.qymZF57eZipAZqin53UooCys-64m1D0VT8dr829dJ4M",
+  "accessExpireIn": 900,
+  "refreshToken": "0f1f7038-2cd7-4281-9f81-ca55636ec0ec",
+  "refreshExpireIn": 172800
 }
 ```
 
