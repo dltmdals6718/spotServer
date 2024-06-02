@@ -6,6 +6,7 @@ import com.example.spotserver.domain.Role;
 import com.example.spotserver.dto.request.SignInMember;
 import com.example.spotserver.dto.request.SignUpMember;
 import com.example.spotserver.dto.response.MemberResponse;
+import com.example.spotserver.dto.response.TokenResponse;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.LoginFailException;
@@ -126,7 +127,13 @@ class MemberControllerTest {
         Member member = new Member();
         member.setId(1L);
 
-        String token = "tokenString";
+        TokenResponse tokenResponse = new TokenResponse();
+        String accessToken = "accessToken";
+        String refreshToken = "refreshToken";
+        tokenResponse.setToken(accessToken);
+        tokenResponse.setExpire_in(1L);
+        tokenResponse.setRefreshToken(refreshToken);
+        tokenResponse.setRefreshExpireIn(2L);
 
         ObjectMapper objectMapper = new ObjectMapper();
         String body = objectMapper.writeValueAsString(signInMember);
@@ -136,7 +143,7 @@ class MemberControllerTest {
         given(memberService.login(signInMember.getLoginId(), signInMember.getLoginPwd(), request.getRemoteAddr()))
                 .willReturn(member);
         given(memberService.createToken(member.getId()))
-                .willReturn(token);
+                .willReturn(tokenResponse);
 
         //when
         ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
@@ -150,8 +157,10 @@ class MemberControllerTest {
         resultActions
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.expire_in").exists(),
-                        jsonPath("$.token").value(token))
+                        jsonPath("$.expire_in").value(tokenResponse.getExpire_in()),
+                        jsonPath("$.token").value(accessToken),
+                        jsonPath("$.refreshToken").value(refreshToken),
+                        jsonPath("$.refreshExpireIn").value(tokenResponse.getRefreshExpireIn()))
                 .andDo(print());
         verify(memberService, times(1))
                 .login(signInMember.getLoginId(), signInMember.getLoginPwd(), request.getRemoteAddr());
