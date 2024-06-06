@@ -74,7 +74,7 @@ public class JwtAuthorizationFilter extends BasicAuthenticationFilter {
             ErrorResponse errorResponse = null;
 
             if (e instanceof TokenExpiredException) {
-                errorResponse = new ErrorResponse(ErrorCode.EXPIRED_TOKEN);
+                errorResponse = new ErrorResponse(ErrorCode.JWT_EXPIRED_TOKEN);
             } else if (e instanceof JWTDecodeException) {
                 errorResponse = new ErrorResponse(ErrorCode.JWT_DECODE_FAIL);
             } else if (e instanceof SignatureVerificationException) {

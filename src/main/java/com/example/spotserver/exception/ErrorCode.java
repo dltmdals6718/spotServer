@@ -22,7 +22,7 @@ public enum ErrorCode {
     NOT_SUPPORT_FILE(HttpStatus.BAD_REQUEST, "지원하지 않는 파일 확장자입니다."),
     UNAUTHORIZED_CLIENT(HttpStatus.UNAUTHORIZED, "접근 토큰이 없습니다."),
     FORBIDDEN_CLIENT(HttpStatus.FORBIDDEN, "접근 권한이 없습니다."),
-    EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
+    JWT_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     JWT_DECODE_FAIL(HttpStatus.UNAUTHORIZED, "올바른 토큰이 필요합니다."),
     JWT_SIGNATURE_FAIL(HttpStatus.UNAUTHORIZED, "올바른 토큰이 필요합니다."),
     NOT_SUPPORTED_CONTENT_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "올바른 Content-Type으로 요청해주세요."),
