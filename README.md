@@ -1,5 +1,5 @@
 # 프로젝트 아키텍처
-<img width="500" alt="아키텍처" src="https://github.com/dltmdals6718/spotServer/assets/100751716/88486028-4357-4bc9-8483-6c98b097b81e">
+<img width="548" alt="스크린샷 2024-06-06 오후 5 19 33" src="https://github.com/dltmdals6718/spotServer/assets/100751716/733fe3c4-ce48-47f3-88ab-cb6af7abea6b">
 <br>
 
 # 프로젝트 ERD
