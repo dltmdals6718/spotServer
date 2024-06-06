@@ -141,7 +141,7 @@ Content-Type : multipart/form-data <br>
 {
   "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImV4cCI6MTcxNzMxMzYzNSwiaWQiOjd9.qymZF57eZipAZqin53UooCys-64m1D0VT8dr829dJ4M",
   "accessExpireIn": 900,
-  "refreshToken": "0f1f7038-2cd7-4281-9f81-ca55636ec0ec",
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSZWZyZXNoVG9rZW4iLCJleHAiOjE3MTc0MDk3NDh9.65Vdr2HwvXBE46R10OzK-YyBJbbz1SvvjpXmWw9FBFg",
   "refreshExpireIn": 172800
 }
 ```
@@ -158,14 +158,39 @@ Content-Type : multipart/form-data <br>
 
 ```json
 {
-  "expire_in": 1500,
-  "token": "tokenString"
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImV4cCI6MTcxNzMxMzYzNSwiaWQiOjd9.qymZF57eZipAZqin53UooCys-64m1D0VT8dr829dJ4M",
+  "accessExpireIn": 900,
+  "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSZWZyZXNoVG9rZW4iLCJleHAiOjE3MTc0MDk3NDh9.65Vdr2HwvXBE46R10OzK-YyBJbbz1SvvjpXmWw9FBFg",
+  "refreshExpireIn": 172800
 }
 ```
 
 </td>
 <td>카카오 로그인</td>
+</tr>
 <tr>
+<td>POST</td>
+<td>/members/refresh</td>
+<td>
+
+```json
+{
+    "refreshToken" : "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJSZWZyZXNoVG9rZW4iLCJleHAiOjE3MTc0MTAzMzd9.vdq5X1cO69GmTCwqXvKKnsrnyC22_n6Jrx2uDTH6L6c"
+}
+```
+
+</td>
+<td>
+
+```json
+{
+  "accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJBY2Nlc3NUb2tlbiIsImV4cCI6MTcxNzQxMDIyNSwiaWQiOjEwOX0.nmevLoURS8F2mviDvG17ov0qaDJIpLJGLbagLwOePnU",
+  "accessExpireIn": 900
+}
+```
+
+</td>
+<td>Access Token 갱신</td>
 </tr>
 </tbody>
 </table>

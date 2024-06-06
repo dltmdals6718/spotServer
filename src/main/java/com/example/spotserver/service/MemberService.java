@@ -2,10 +2,15 @@ package com.example.spotserver.service;
 
 import com.auth0.jwt.JWT;
 import com.auth0.jwt.algorithms.Algorithm;
+import com.auth0.jwt.exceptions.JWTDecodeException;
+import com.auth0.jwt.exceptions.SignatureVerificationException;
+import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.example.spotserver.config.jwt.JwtProperties;
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
+import com.example.spotserver.dto.request.RefreshRequest;
 import com.example.spotserver.dto.request.SignUpMember;
+import com.example.spotserver.dto.response.AccessTokenResponse;
 import com.example.spotserver.dto.response.MemberResponse;
 import com.example.spotserver.dto.response.TokenResponse;
 import com.example.spotserver.exception.*;
@@ -150,10 +155,13 @@ public class MemberService {
                 .withClaim("id", memberId)
                 .sign(Algorithm.HMAC256(JwtProperties.SECRET_KEY));
 
-        String refreshToken = UUID.randomUUID().toString();
+        String refreshToken = JWT.create()
+                .withSubject("RefreshToken")
+                .withExpiresAt(new Date(System.currentTimeMillis() + JwtProperties.REFRESH_TOKEN_EXPIRE_TIME * 1000))
+                .sign(Algorithm.HMAC256(JwtProperties.SECRET_KEY));
 
-        tokenResponse.setToken(accessToken);
-        tokenResponse.setExpire_in(JwtProperties.ACCESS_TOKEN_EXPIRE_TIME);
+        tokenResponse.setAccessToken(accessToken);
+        tokenResponse.setAccessExpireIn(JwtProperties.ACCESS_TOKEN_EXPIRE_TIME);
 
         tokenResponse.setRefreshToken(refreshToken);
         tokenResponse.setRefreshExpireIn(JwtProperties.REFRESH_TOKEN_EXPIRE_TIME);
@@ -163,6 +171,40 @@ public class MemberService {
         redisTemplate.expire(refreshToken, JwtProperties.REFRESH_TOKEN_EXPIRE_TIME, TimeUnit.SECONDS);
 
         return tokenResponse;
+    }
+
+    public AccessTokenResponse refreshToken(RefreshRequest refreshRequest) throws AuthenticationException {
+
+        String refreshToken = refreshRequest.getRefreshToken();
+
+        try {
+            JWT.require(Algorithm.HMAC256(JwtProperties.SECRET_KEY))
+                    .build()
+                    .verify(refreshToken);
+        } catch (Exception e) {
+            if (e instanceof TokenExpiredException)
+                throw new AuthenticationException(ErrorCode.JWT_EXPIRED_TOKEN);
+            if (e instanceof JWTDecodeException)
+                throw new AuthenticationException(ErrorCode.JWT_DECODE_FAIL);
+            if (e instanceof SignatureVerificationException)
+                throw new AuthenticationException(ErrorCode.JWT_SIGNATURE_FAIL);
+        }
+
+        Long memberId = redisTemplate.opsForValue().get(refreshToken);
+        if(memberId == null) {
+            throw new AuthenticationException(ErrorCode.JWT_DECODE_FAIL);
+        }
+
+        String accessToken = JWT.create()
+                .withSubject("AccessToken")
+                .withExpiresAt(new Date(System.currentTimeMillis() + (JwtProperties.ACCESS_TOKEN_EXPIRE_TIME * 1000)))
+                .withClaim("id", memberId)
+                .sign(Algorithm.HMAC256(JwtProperties.SECRET_KEY));
+
+        AccessTokenResponse accessTokenResponse = new AccessTokenResponse();
+        accessTokenResponse.setAccessToken(accessToken);
+        accessTokenResponse.setAccessExpireIn(JwtProperties.ACCESS_TOKEN_EXPIRE_TIME);
+        return accessTokenResponse;
     }
 
     public MemberResponse getMemberInfo(Long memberId) {

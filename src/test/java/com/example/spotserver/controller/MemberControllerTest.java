@@ -1,18 +1,24 @@
 package com.example.spotserver.controller;
 
+import com.auth0.jwt.JWT;
 import com.example.spotserver.config.auth.PrincipalDetails;
+import com.example.spotserver.config.jwt.JwtProperties;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.Role;
+import com.example.spotserver.dto.request.RefreshRequest;
 import com.example.spotserver.dto.request.SignInMember;
 import com.example.spotserver.dto.request.SignUpMember;
+import com.example.spotserver.dto.response.AccessTokenResponse;
 import com.example.spotserver.dto.response.MemberResponse;
 import com.example.spotserver.dto.response.TokenResponse;
+import com.example.spotserver.exception.AuthenticationException;
 import com.example.spotserver.exception.DuplicateException;
 import com.example.spotserver.exception.ErrorCode;
 import com.example.spotserver.exception.LoginFailException;
 import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.MemberService;
 import com.example.spotserver.service.PosterService;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +39,7 @@ import org.springframework.web.filter.CharacterEncodingFilter;
 
 
 import java.nio.charset.StandardCharsets;
+import java.util.UUID;
 
 import static org.mockito.BDDMockito.given;
 import static org.mockito.Mockito.*;
@@ -130,8 +137,8 @@ class MemberControllerTest {
         TokenResponse tokenResponse = new TokenResponse();
         String accessToken = "accessToken";
         String refreshToken = "refreshToken";
-        tokenResponse.setToken(accessToken);
-        tokenResponse.setExpire_in(1L);
+        tokenResponse.setAccessToken(accessToken);
+        tokenResponse.setAccessExpireIn(1L);
         tokenResponse.setRefreshToken(refreshToken);
         tokenResponse.setRefreshExpireIn(2L);
 
@@ -157,8 +164,8 @@ class MemberControllerTest {
         resultActions
                 .andExpectAll(
                         status().isOk(),
-                        jsonPath("$.expire_in").value(tokenResponse.getExpire_in()),
-                        jsonPath("$.token").value(accessToken),
+                        jsonPath("$.accessToken").value(accessToken),
+                        jsonPath("$.accessExpireIn").value(tokenResponse.getAccessExpireIn()),
                         jsonPath("$.refreshToken").value(refreshToken),
                         jsonPath("$.refreshExpireIn").value(tokenResponse.getRefreshExpireIn()))
                 .andDo(print());
@@ -346,5 +353,72 @@ class MemberControllerTest {
                 .andDo(print());
 
 
+    }
+
+    @Test
+    @DisplayName("액세스 토큰 갱신")
+    void refreshToken() throws Exception {
+
+        //given
+        String resfreshToken = UUID.randomUUID().toString();
+        RefreshRequest refreshRequest = new RefreshRequest();
+        refreshRequest.setRefreshToken(resfreshToken);
+
+        String accessToken = UUID.randomUUID().toString();
+        Long expireTime = JwtProperties.ACCESS_TOKEN_EXPIRE_TIME;
+        AccessTokenResponse accessTokenResponse = new AccessTokenResponse();
+        accessTokenResponse.setAccessToken(accessToken);
+        accessTokenResponse.setAccessExpireIn(expireTime);
+
+        given(memberService.refreshToken(refreshRequest))
+                .willReturn(accessTokenResponse);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.POST, "/members/refresh")
+                .content(new ObjectMapper().writeValueAsString(refreshRequest))
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        verify(memberService, times(1))
+                .refreshToken(refreshRequest);
+
+        resultActions
+                .andExpectAll(
+                        status().isOk(),
+                        jsonPath("$.accessToken").value(accessToken),
+                        jsonPath("$.accessExpireIn").value(expireTime)
+                )
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("만료된 refreshToken으로 갱신 시도")
+    void expiredRefreshToken() throws Exception {
+
+        //given
+        RefreshRequest refreshRequest = new RefreshRequest();
+        refreshRequest.setRefreshToken(UUID.randomUUID().toString());
+
+        given(memberService.refreshToken(refreshRequest))
+                .willThrow(new AuthenticationException(ErrorCode.JWT_EXPIRED_TOKEN));
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.POST, "/members/refresh")
+                .content(new ObjectMapper().writeValueAsBytes(refreshRequest))
+                .contentType(MediaType.APPLICATION_JSON));
+
+        //then
+        verify(memberService, times(1))
+                .refreshToken(refreshRequest);
+
+        resultActions
+                .andExpectAll(
+                        status().is(ErrorCode.JWT_EXPIRED_TOKEN.getHttpStatus().value()),
+                        jsonPath("$.errorCode").value(ErrorCode.JWT_EXPIRED_TOKEN.name()),
+                        jsonPath("$.message").value(ErrorCode.JWT_EXPIRED_TOKEN.getMessage())
+                )
+                .andDo(print());
     }
 }

@@ -4,6 +4,7 @@ package com.example.spotserver.controller;
 import com.example.spotserver.config.jwt.JwtProperties;
 import com.example.spotserver.domain.*;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
+import com.example.spotserver.dto.request.RefreshRequest;
 import com.example.spotserver.dto.request.SignInMember;
 import com.example.spotserver.dto.request.SignUpMember;
 import com.example.spotserver.dto.response.*;
@@ -68,6 +69,16 @@ public class MemberController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(tokenResponse);
+    }
+
+    @PostMapping(value = "/refresh")
+    public ResponseEntity<AccessTokenResponse> refreshToken(@RequestBody RefreshRequest refreshRequest) throws AuthenticationException {
+
+        AccessTokenResponse accessTokenResponse = memberService.refreshToken(refreshRequest);
+
+        return ResponseEntity
+                .status(HttpStatus.OK)
+                .body(accessTokenResponse);
     }
 
     @GetMapping("/{memberId}")

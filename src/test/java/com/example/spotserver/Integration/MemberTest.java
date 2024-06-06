@@ -1,12 +1,18 @@
 package com.example.spotserver.Integration;
 
 import com.amazonaws.services.s3.AmazonS3Client;
+import com.auth0.jwt.JWT;
+import com.auth0.jwt.algorithms.Algorithm;
+import com.example.spotserver.config.jwt.JwtProperties;
 import com.example.spotserver.domain.ImageStore;
 import com.example.spotserver.domain.MailCertification;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.MemberImage;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
+import com.example.spotserver.dto.request.RefreshRequest;
 import com.example.spotserver.dto.request.SignUpMember;
+import com.example.spotserver.dto.response.AccessTokenResponse;
+import com.example.spotserver.dto.response.TokenResponse;
 import com.example.spotserver.exception.*;
 import com.example.spotserver.repository.MailCertificationRepository;
 import com.example.spotserver.repository.MemberImageRepository;
@@ -20,6 +26,7 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.MediaType;
 import org.springframework.mock.web.MockHttpServletRequest;
 import org.springframework.mock.web.MockMultipartFile;
@@ -27,7 +34,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
+import java.util.Date;
 import java.util.NoSuchElementException;
+import java.util.Random;
 
 @SpringBootTest
 @Transactional
@@ -53,6 +62,9 @@ public class MemberTest {
 
     @Autowired
     private AmazonS3Client amazonS3Client;
+
+    @Autowired
+    private RedisTemplate<String, Long> redisTemplate;
 
     @Autowired
     private EntityManager em;
@@ -362,6 +374,73 @@ public class MemberTest {
                 .assertThatThrownBy(() -> memberService.addMember(signUpMember, null))
                 .isInstanceOf(MailException.class)
                 .hasMessage(ErrorCode.FAIL_MAIL_TIMEOUT.getMessage());
+
+    }
+
+    @Test
+    @DisplayName("리프레쉬 토큰 발급")
+    void createRefreshToken() {
+
+        //given
+        Long memberId = new Random().nextLong();
+
+        //when
+        TokenResponse tokenResponse = memberService.createToken(memberId);
+
+        //then
+        String refreshToken = tokenResponse.getRefreshToken();
+        Assertions
+                .assertThat(redisTemplate.hasKey(refreshToken))
+                .isTrue();
+
+        //clear
+        redisTemplate.delete(refreshToken);
+    }
+
+    @Test
+    @DisplayName("액세스 토큰 갱신")
+    void refreshToken() throws AuthenticationException {
+
+        //given
+        Long memberId = new Random().nextLong();
+        TokenResponse tokenResponse = memberService.createToken(memberId);
+
+        RefreshRequest refreshRequest = new RefreshRequest();
+        refreshRequest.setRefreshToken(tokenResponse.getRefreshToken());
+
+        //when
+        AccessTokenResponse accessTokenResponse = memberService.refreshToken(refreshRequest);
+
+        //then
+        String accessToken = accessTokenResponse.getAccessToken();
+        Long id = JWT.require(Algorithm.HMAC256(JwtProperties.SECRET_KEY))
+                .build()
+                .verify(accessToken)
+                .getClaim("id")
+                .asLong();
+
+        Assertions
+                .assertThat(id)
+                .isEqualTo(memberId);
+    }
+
+    @Test
+    @DisplayName("만료된 리프레쉬 토큰으로 갱신 시도")
+    void expiredRefreshToken() {
+
+        //given
+        String refreshToken = JWT.create()
+                .withExpiresAt(new Date(System.currentTimeMillis() - 1))
+                .sign(Algorithm.HMAC256(JwtProperties.SECRET_KEY));
+
+        RefreshRequest refreshRequest = new RefreshRequest();
+        refreshRequest.setRefreshToken(refreshToken);
+
+        //when & then
+        Assertions
+                .assertThatThrownBy(() -> memberService.refreshToken(refreshRequest))
+                .isInstanceOf(AuthenticationException.class)
+                .hasMessage(ErrorCode.JWT_EXPIRED_TOKEN.getMessage());
 
     }
 
