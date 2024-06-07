@@ -42,7 +42,7 @@
     </appender>
 
     <appender name="WARN_LOG" class="ch.qos.logback.core.rolling.RollingFileAppender">
-        <fil/logs/warn.txt</file> <!-- 파일을 저장할 경로를 정한다 -->
+        <file>./logs/warn.txt</file> <!-- 파일을 저장할 경로를 정한다 -->
         <filter class="ch.qos.logback.classic.filter.LevelFilter">
             <level>WARN</level>
             <onMatch>ACCEPT</onMatch> <!-- 해당 레벨만 기록한다. -->
