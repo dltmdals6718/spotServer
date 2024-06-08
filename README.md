@@ -1,8 +1,28 @@
-# 프로젝트 아키텍처
+# Project Architecture
 <img width="548" alt="스크린샷 2024-06-06 오후 5 19 33" src="https://github.com/dltmdals6718/spotServer/assets/100751716/733fe3c4-ce48-47f3-88ab-cb6af7abea6b">
-<br>
 
-# 프로젝트 ERD
+# Tech stack
+- ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazonwebservices&logoColor=white)
+![AmazonS3](https://img.shields.io/badge/amazon%20s3-569A31?style=for-the-badge&logo=amazons3&logoColor=white)
+![Docker](https://img.shields.io/badge/docker-%230db7ed.svg?style=for-the-badge&logo=docker&logoColor=white)
+![Ubuntu](https://img.shields.io/badge/Ubuntu-E95420?style=for-the-badge&logo=ubuntu&logoColor=white)
+![Intellij](https://img.shields.io/badge/intellij-000000.svg?style=for-the-badge&logo=intellijidea&logoColor=white)
+![Java](https://img.shields.io/badge/java-007396?style=for-the-badge&logo=openjdk&logoColor=white)
+![Gradle](https://img.shields.io/badge/gradle-02303A?style=for-the-badge&logo=gradle&logoColor=white)
+
+- ![SpringBoot](https://img.shields.io/badge/Spring%20Boot-6DB33F?style=for-the-badge&logo=springboot&logoColor=white)
+![Spring Data Jpa](https://img.shields.io/badge/Spring%20Data%20Jpa-6DB33F?style=for-the-badge&logoColor=white)
+![SpringSecurity](https://img.shields.io/badge/spring%20security-6DB33F?style=for-the-badge&logo=springsecurity&logoColor=white)
+![QueryDSL](https://img.shields.io/badge/QueryDSL-4479A1?style=for-the-badge&logoColor=white)
+
+- ![MySQL](https://img.shields.io/badge/mysql-4479A1.svg?style=for-the-badge&logo=mysql&logoColor=white)
+![Redis](https://img.shields.io/badge/redis-%23DD0031.svg?style=for-the-badge&logo=redis&logoColor=white)
+
+- ![JUnit](https://img.shields.io/badge/Junit-25A162.svg?style=for-the-badge&logo=junit5&logoColor=white)
+![Assertj](https://img.shields.io/badge/AssertJ-4479A1?style=for-the-badge)
+![Mockito](https://img.shields.io/badge/Mockito-569A31?style=for-the-badge)
+
+# ERD
 <img width="500" alt="ERD" src="https://github.com/dltmdals6718/spotServer/assets/100751716/a48611b1-6def-42aa-a13d-b7962089db6c">
 
 # API 명세서
