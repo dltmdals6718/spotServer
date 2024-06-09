@@ -37,3 +37,4 @@ services:
       - /home/ubuntu/docker/logs:/logs
     depends_on:
       - db
+      - redis
