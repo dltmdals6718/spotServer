@@ -7,6 +7,7 @@ import com.auth0.jwt.exceptions.SignatureVerificationException;
 import com.auth0.jwt.exceptions.TokenExpiredException;
 import com.example.spotserver.config.jwt.JwtProperties;
 import com.example.spotserver.domain.*;
+import com.example.spotserver.dto.request.LogoutRequest;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.RefreshRequest;
 import com.example.spotserver.dto.request.SignUpMember;
@@ -192,7 +193,7 @@ public class MemberService {
 
         Long memberId = redisTemplate.opsForValue().get(refreshToken);
         if(memberId == null) {
-            throw new AuthenticationException(ErrorCode.JWT_DECODE_FAIL);
+            throw new AuthenticationException(ErrorCode.JWT_LOGOUT_TOKEN);
         }
 
         String accessToken = JWT.create()
@@ -205,6 +206,28 @@ public class MemberService {
         accessTokenResponse.setAccessToken(accessToken);
         accessTokenResponse.setAccessExpireIn(JwtProperties.ACCESS_TOKEN_EXPIRE_TIME);
         return accessTokenResponse;
+    }
+
+    public void logout(LogoutRequest logoutRequest) throws AuthenticationException {
+
+        String refreshToken = logoutRequest.getRefreshToken();
+
+        try {
+            JWT.require(Algorithm.HMAC256(JwtProperties.SECRET_KEY))
+                    .build()
+                    .verify(refreshToken);
+        } catch (Exception e) {
+            if (e instanceof TokenExpiredException)
+                throw new AuthenticationException(ErrorCode.JWT_EXPIRED_TOKEN);
+            if (e instanceof JWTDecodeException)
+                throw new AuthenticationException(ErrorCode.JWT_DECODE_FAIL);
+            if (e instanceof SignatureVerificationException)
+                throw new AuthenticationException(ErrorCode.JWT_SIGNATURE_FAIL);
+        }
+
+        Boolean isDeleted = redisTemplate.delete(refreshToken);
+        if(!isDeleted)
+            throw new AuthenticationException(ErrorCode.JWT_LOGOUT_TOKEN);
     }
 
     public MemberResponse getMemberInfo(Long memberId) {

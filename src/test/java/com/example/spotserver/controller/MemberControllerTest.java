@@ -1,10 +1,10 @@
 package com.example.spotserver.controller;
 
-import com.auth0.jwt.JWT;
 import com.example.spotserver.config.auth.PrincipalDetails;
 import com.example.spotserver.config.jwt.JwtProperties;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.Role;
+import com.example.spotserver.dto.request.LogoutRequest;
 import com.example.spotserver.dto.request.RefreshRequest;
 import com.example.spotserver.dto.request.SignInMember;
 import com.example.spotserver.dto.request.SignUpMember;
@@ -18,7 +18,6 @@ import com.example.spotserver.exception.LoginFailException;
 import com.example.spotserver.service.LocationService;
 import com.example.spotserver.service.MemberService;
 import com.example.spotserver.service.PosterService;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.*;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -421,4 +420,58 @@ class MemberControllerTest {
                 )
                 .andDo(print());
     }
+
+    @Test
+    @DisplayName("로그아웃")
+    void logout() throws Exception {
+
+        //given
+        LogoutRequest logoutRequest = new LogoutRequest();
+        logoutRequest.setRefreshToken("RefreshToken");
+
+        doNothing()
+                .when(memberService)
+                .logout(logoutRequest);
+
+        //when
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.POST, "/members/logout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsBytes(logoutRequest)));
+
+        //then
+        verify(memberService, times(1))
+                .logout(logoutRequest);
+
+        resultActions
+                .andExpectAll(
+                        status().isNoContent())
+                .andDo(print());
+    }
+
+    @Test
+    @DisplayName("중복된 로그아웃 시도")
+    void duplicateLogout() throws Exception {
+
+        //given
+        LogoutRequest logoutRequest = new LogoutRequest();
+        logoutRequest.setRefreshToken("RefreshToken");
+
+        doThrow(new AuthenticationException(ErrorCode.JWT_LOGOUT_TOKEN))
+                .when(memberService).logout(logoutRequest);
+
+        //when & then
+        ResultActions resultActions = mockMvc.perform(MockMvcRequestBuilders
+                .request(HttpMethod.POST, "/members/logout")
+                .contentType(MediaType.APPLICATION_JSON)
+                .content(new ObjectMapper().writeValueAsBytes(logoutRequest)));
+
+        resultActions
+                .andExpectAll(
+                        jsonPath("$.errorCode").value(ErrorCode.JWT_LOGOUT_TOKEN.name()),
+                        jsonPath("$.message").value(ErrorCode.JWT_LOGOUT_TOKEN.getMessage())
+                )
+                .andDo(print());
+    }
+
 }

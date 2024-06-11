@@ -55,18 +55,18 @@ public class SecurityConfig {
                         .requestMatchers(HttpMethod.GET, "/members").authenticated()
                         .requestMatchers(HttpMethod.GET).permitAll()
                         .requestMatchers(HttpMethod.POST, "/members/signup", "/members/signin", "/members/signin-kakao").permitAll()
-                        .requestMatchers("/members/refresh").permitAll()
+                        .requestMatchers("/members/refresh", "/members/logout").permitAll()
                         .requestMatchers("/mails/certification").permitAll()
                         .requestMatchers("/error").permitAll()
                         .anyRequest().authenticated());
 
         http.formLogin(formLogin ->
                 formLogin
-                        .disable()); // 폼 태그 로그인 안쓰겠다.
+                        .disable());
 
         http.httpBasic(httpBasic ->
                 httpBasic
-                        .disable()); // 기본적인 HTTP 로그인 안쓰겠다. (ID, PW를 항상 포함하여 요청함)
+                        .disable());
 
         http.apply(new MyCustomDsl());
 
@@ -79,7 +79,7 @@ public class SecurityConfig {
 
     public class MyCustomDsl extends AbstractHttpConfigurer<MyCustomDsl, HttpSecurity> {
         @Override
-        public void configure(HttpSecurity http) throws Exception {
+        public void configure(HttpSecurity http) {
 
             AuthenticationManager authenticationManager = http.getSharedObject(AuthenticationManager.class);
             http

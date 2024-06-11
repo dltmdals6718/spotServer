@@ -25,6 +25,7 @@ public enum ErrorCode {
     JWT_EXPIRED_TOKEN(HttpStatus.UNAUTHORIZED, "만료된 토큰입니다."),
     JWT_DECODE_FAIL(HttpStatus.UNAUTHORIZED, "올바른 토큰이 필요합니다."),
     JWT_SIGNATURE_FAIL(HttpStatus.UNAUTHORIZED, "올바른 토큰이 필요합니다."),
+    JWT_LOGOUT_TOKEN(HttpStatus.UNAUTHORIZED, "이미 로그아웃된 토큰입니다."),
     NOT_SUPPORTED_CONTENT_TYPE(HttpStatus.UNSUPPORTED_MEDIA_TYPE, "올바른 Content-Type으로 요청해주세요."),
     NO_SUCH_ELEMENT(HttpStatus.NOT_FOUND, "존재하지 않는 데이터입니다.");
 

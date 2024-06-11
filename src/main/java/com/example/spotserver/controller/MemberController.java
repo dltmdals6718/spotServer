@@ -3,10 +3,7 @@ package com.example.spotserver.controller;
 
 import com.example.spotserver.config.jwt.JwtProperties;
 import com.example.spotserver.domain.*;
-import com.example.spotserver.dto.request.MemberUpdateRequest;
-import com.example.spotserver.dto.request.RefreshRequest;
-import com.example.spotserver.dto.request.SignInMember;
-import com.example.spotserver.dto.request.SignUpMember;
+import com.example.spotserver.dto.request.*;
 import com.example.spotserver.dto.response.*;
 import com.example.spotserver.exception.*;
 import com.example.spotserver.service.LocationService;
@@ -79,6 +76,16 @@ public class MemberController {
         return ResponseEntity
                 .status(HttpStatus.OK)
                 .body(accessTokenResponse);
+    }
+
+    @PostMapping(value = "/logout")
+    public ResponseEntity logout(@RequestBody LogoutRequest logoutRequest) throws AuthenticationException {
+
+        memberService.logout(logoutRequest);
+
+        return ResponseEntity
+                .status(HttpStatus.NO_CONTENT)
+                .build();
     }
 
     @GetMapping("/{memberId}")

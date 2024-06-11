@@ -8,6 +8,7 @@ import com.example.spotserver.domain.ImageStore;
 import com.example.spotserver.domain.MailCertification;
 import com.example.spotserver.domain.Member;
 import com.example.spotserver.domain.MemberImage;
+import com.example.spotserver.dto.request.LogoutRequest;
 import com.example.spotserver.dto.request.MemberUpdateRequest;
 import com.example.spotserver.dto.request.RefreshRequest;
 import com.example.spotserver.dto.request.SignUpMember;
@@ -442,6 +443,47 @@ public class MemberTest {
                 .isInstanceOf(AuthenticationException.class)
                 .hasMessage(ErrorCode.JWT_EXPIRED_TOKEN.getMessage());
 
+    }
+
+    @Test
+    @DisplayName("로그아웃")
+    void logout() throws AuthenticationException {
+
+        //given
+        Long memberId = 1L;
+        TokenResponse tokenResponse = memberService.createToken(memberId);
+        String refreshToken = tokenResponse.getRefreshToken();
+
+        LogoutRequest logoutRequest = new LogoutRequest();
+        logoutRequest.setRefreshToken(refreshToken);
+
+        //when
+        memberService.logout(logoutRequest);
+
+        //then
+        Assertions
+                .assertThat(redisTemplate.hasKey(refreshToken))
+                .isFalse();
+    }
+
+    @Test
+    @DisplayName("중복된 로그아웃 시도")
+    void duplicateLogout() throws AuthenticationException {
+
+        //given
+        Long memberId = 1L;
+        TokenResponse tokenResponse = memberService.createToken(memberId);
+        String refreshToken = tokenResponse.getRefreshToken();
+
+        LogoutRequest logoutRequest = new LogoutRequest();
+        logoutRequest.setRefreshToken(refreshToken);
+
+        //when & then
+        memberService.logout(logoutRequest);
+        Assertions
+                .assertThatThrownBy(() -> memberService.logout(logoutRequest))
+                .isInstanceOf(AuthenticationException.class)
+                .hasMessage(ErrorCode.JWT_LOGOUT_TOKEN.getMessage());
     }
 
 }
