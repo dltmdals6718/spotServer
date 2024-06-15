@@ -1,5 +1,32 @@
+# PhotoSpot 프로젝트
+<img alt="signUp" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/4b7f0b66-7c04-469a-8113-533be822c540">
+<img alt="signUp" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/af5df1db-e04a-4a6f-ae9a-238082870600"> <br>
+포토 스팟 서비스는 좌표 기반으로 사진 촬영 장소 정보를 제공하는 서비스입니다.<br>
+현재 사용자의 좌표를 통해 서버와 통신하며 포토 스팟 관련 정보들을 제공 받습니다.<br>
+<br>
+<img alt="signUp" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/fdb30e2b-1516-46c2-9477-f5d91609f249"> <br>
+포토 스팟(장소)에 대한 정보와 해당 장소의 유저 게시글들을 제공합니다.
+
+# 주요 기능
+#### 1. 회원가입 & 로그인 & 로그아웃
+<img alt="signUp" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/17cfd588-5a65-4b22-8d8d-3cca54cb5fd0">
+<img alt="signIn" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/6ce726be-ae5d-4894-a2e1-f334916f6b61">
+
+#### 2. CRUD
+<img alt="Create" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/d9df5316-5913-4199-b43e-e10d27890e20">
+<img alt="Read" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/428505b6-2e8d-4ebe-b0b0-62ca16a023ea">
+
+#### 3. 페이징, 정렬 방법 선택(동적 쿼리)
+<img alt="Paging" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/708210a8-6cfa-467b-89fa-4680221d1801">
+<img alt="DynamicQuery" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/cd56a38e-e1d9-445c-9003-2ea479acb500">
+
+#### 4. 로그 기록
+<img alt="LogWrite" width="500" height="250" src="https://github.com/dltmdals6718/spotServer/assets/100751716/33ef4f2c-ee06-4305-b5d7-f87c507a5d38">
+
+##### 상세한 API 호출 방법은 API 명세서를 확인해주세요.
+
 # Project Architecture
-<img width="548" alt="스크린샷 2024-06-06 오후 5 19 33" src="https://github.com/dltmdals6718/spotServer/assets/100751716/733fe3c4-ce48-47f3-88ab-cb6af7abea6b">
+<img alt="projectArchitecture" width="548" src="https://github.com/dltmdals6718/spotServer/assets/100751716/733fe3c4-ce48-47f3-88ab-cb6af7abea6b">
 
 # Tech stack
 - ![AWS](https://img.shields.io/badge/AWS-%23FF9900.svg?style=for-the-badge&logo=amazonwebservices&logoColor=white)
