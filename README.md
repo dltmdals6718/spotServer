@@ -5,7 +5,8 @@
 현재 사용자의 좌표를 통해 서버와 통신하며 포토 스팟 관련 정보들을 제공 받습니다.<br>
 <br>
 <img alt="signUp" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/fdb30e2b-1516-46c2-9477-f5d91609f249"> <br>
-포토 스팟(장소)에 대한 정보와 해당 장소의 유저 게시글들을 제공합니다.
+포토 스팟(장소)에 대한 정보와 해당 장소의 유저 게시글들을 제공합니다. <br> <br>
+앱 시연 영상 : https://youtu.be/psUu8lI5_rs
 
 # 주요 기능
 #### 1. 회원가입 & 로그인 & 로그아웃
