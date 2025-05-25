@@ -1,4 +1,25 @@
 # PhotoSpot 프로젝트
+
+#### 주요 수행 내용
+ - CRUD 개발 - 게시글, 댓글, 좋아요 기능의 CRUD 및 다중 Join 조회 구현 </br>
+ - 페이징 처리 - QueryDSL 활용하여 요청의 쿼리 파라미터로 동적 쿼리 생성</br>
+ - REST API 문서 작성</br>
+ - 한국관광공사 API 활용 - 외부 API 호출과 데이터 파싱으로 기초 데이터 생성</br>
+ - AWS 사용 - AWS 서버 배포, S3 이미지 파일 저장 및 관리</br>
+ - Docker를 사용하여 서버 이미지 빌드, 컨테이너 관리 및 실행</br>
+ - JWT 토큰 기반 인증, 인가 구현</br>
+ - 로그 파일 생성 - 로그인 시도, 로그 중요도별 기록 및 관리</br>
+ - 앱 개발 보조 - 서버 통신 방법 및 Fragment 사용</br>
+
+#### 주요 성과
+ - 서버 개발 및 운영 과정에서 빌드, 배포, 테스트에 많은 시간 비용이 소요되는 문제를 인식하고, 이후 프로젝트에서 Github Actions를 활용하여 CI/CD 자동화를 구축 </br>
+ - 앱 개발자와 설계한 API 명세서를 통해 요구사항을 명확화</br>
+ - 앱에서 사용자 인증 및 인가를 위해 JWT 토큰 방식을 사용하여, 세션과 JWT의 특징과 장단점을 이해</br>
+
+ </br>
+
+
+
 <img alt="signUp" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/4b7f0b66-7c04-469a-8113-533be822c540">
 <img alt="signUp" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/af5df1db-e04a-4a6f-ae9a-238082870600"> <br>
 포토 스팟 서비스는 좌표 기반으로 사진 촬영 장소 정보를 제공하는 서비스입니다.<br>
