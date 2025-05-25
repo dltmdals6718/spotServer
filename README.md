@@ -18,7 +18,7 @@
 
  </br>
 
-
+### 프로젝트 소개
 
 <img alt="signUp" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/4b7f0b66-7c04-469a-8113-533be822c540">
 <img alt="signUp" width="200" height="400" src="https://github.com/dltmdals6718/spotServer/assets/100751716/af5df1db-e04a-4a6f-ae9a-238082870600"> <br>
